@@ -25,6 +25,7 @@ class Series(models.Model):
         default='ongoing',
         verbose_name="Statut"
     )
+    release_date = models.DateField(blank=True, null=True, verbose_name="Date de publication")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -59,6 +60,7 @@ class Chapter(models.Model):
         verbose_name="Numéro"
     )
     title = models.CharField(max_length=200, blank=True, verbose_name="Titre")
+    pdf_file = models.FileField(upload_to='mangas/pdfs/', blank=True, null=True, verbose_name="Fichier PDF")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -99,3 +101,7 @@ class Page(models.Model):
         verbose_name_plural = "Pages"
         ordering = ['chapter', 'page_number']
         unique_together = ['chapter', 'page_number']
+
+
+
+

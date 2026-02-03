@@ -111,3 +111,156 @@
     font-size: 0.9em;
     color: var(--color-purple-primary);
 }
+
+/* Scroll To Top Button */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: #1a202c;
+    /* Fallback dark */
+    background: var(--color-bg-primary, #1a202c);
+    color: #a78bfa;
+    /* Fallback purple */
+    color: var(--color-purple-primary, #a78bfa);
+    border: none;
+    border-radius: 50%;
+
+    /* Neumorphism Shadow (Dark Theme optimized) */
+    box-shadow:
+        5px 5px 15px rgba(0, 0, 0, 0.4),
+        -5px -5px 15px rgba(255, 255, 255, 0.05);
+
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+
+    /* Initial State handled by JS, but set hidden here to avoid flash */
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+}
+
+.scroll-top-btn:hover {
+    color: #fff;
+    box-shadow:
+        inset 5px 5px 10px rgba(0, 0, 0, 0.3),
+        inset -5px -5px 10px rgba(255, 255, 255, 0.05);
+}
+
+.scroll-top-btn svg {
+    stroke-width: 3px;
+    width: 24px;
+    height: 24px;
+}
+/* Chapter List - Neumorphic Style */
+.chapters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.chapter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: linear-gradient(145deg, #1c222f, #151a23);
+    border-radius: 12px;
+    box-shadow: 
+        5px 5px 10px rgba(0,0,0,0.2),
+        -5px -5px 10px rgba(255,255,255,0.03);
+    color: #cecfd1;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255,255,255,0.02);
+}
+
+.chapter-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        6px 6px 12px rgba(0,0,0,0.3),
+        -6px -6px 12px rgba(255,255,255,0.05);
+    color: var(--color-purple-primary);
+    border-color: rgba(167, 139, 250, 0.1);
+}
+
+.chapter-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.chapter-number {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #e2e8f0;
+}
+
+.chapter-name {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.chapter-date {
+    font-size: 0.75rem;
+    color: #64748b;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+
+
+/* PDF Viewer Styles */
+#pdf-render-container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #525659;
+    /* Standard PDF viewer bg color */
+    padding: 20px;
+    min-height: 80vh;
+}
+
+canvas.pdf-page {
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Chapter Navigation Styles */
+.chapter-nav {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.nav-btn {
+    padding: 10px 20px;
+    background: var(--color-purple-primary, #6b46c1);
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-btn.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    background: gray;
+}
+
+/* Back Button Container */
+.reader-back-container {
+    margin-top: 15px;
+}
+

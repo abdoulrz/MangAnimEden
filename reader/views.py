@@ -1,20 +1,51 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
-from catalog.models import Page
+from catalog.models import Chapter, Page
 
 
-def demo_view(request):
+def demo_view(request, chapter_id=None):
     """
     Vue de démonstration du lecteur de manga.
-    Affiche la première page disponible dans la base de données.
+    Peut afficher un chapitre spécifique ou le premier disponible.
     """
-    try:
-        # Récupère la première page disponible
-        page = Page.objects.select_related('chapter__series').first()
-    except Page.DoesNotExist:
-        page = None
+    if chapter_id:
+        chapter = get_object_or_404(Chapter.objects.select_related('series'), id=chapter_id)
+    else:
+        # Récupère le premier chapitre disponible
+        chapter = Chapter.objects.select_related('series').first()
+        if chapter:
+            return redirect('reader:demo_chapter', chapter_id=chapter.id)
+
+    if not chapter:
+        return render(request, 'reader/demo.html', {
+            'page': None,
+            'STATIC_VERSION': settings.STATIC_VERSION
+        })
     
-    return render(request, 'reader/demo.html', {
-        'page': page,
+    # Get pages if image-based
+    pages = chapter.pages.all().order_by('page_number')
+    first_page = pages.first() if pages.exists() else None
+    
+    # Navigation
+    prev_chapter = Chapter.objects.filter(series=chapter.series, number__lt=chapter.number).order_by('-number').first()
+    next_chapter = Chapter.objects.filter(series=chapter.series, number__gt=chapter.number).order_by('number').first()
+    
+    # Save Reading Progress
+    if request.user.is_authenticated:
+        from reader.models import ReadingProgress
+        ReadingProgress.objects.update_or_create(
+            user=request.user,
+            chapter=chapter
+        )
+    
+    # Context
+    context = {
+        'page': first_page, # For backward compatibility with existing template logic that expects 'page'
+        'chapter': chapter,
+        'pages': pages,
+        'prev_chapter': prev_chapter,
+        'next_chapter': next_chapter,
         'STATIC_VERSION': settings.STATIC_VERSION
-    })
+    }
+    
+    return render(request, 'reader/demo.html', context)

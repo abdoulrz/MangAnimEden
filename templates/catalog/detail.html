@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Eos enim irure itaquirure - MangAnimEDen{% endblock %}
+{% block title %}{{ series.title }} - MangAnimEDen{% endblock %}
 
 {% block content %}
 <div class="container detail-page-container">
@@ -23,18 +23,21 @@
         <!-- Left: Cover Image -->
         <div class="detail-cover-wrapper">
             <div class="detail-cover neumorphic-card">
+                {% if series.cover %}
+                <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="detail-image">
+                {% else %}
                 <div class="detail-image mock-cover-detail"></div>
+                {% endif %}
             </div>
         </div>
 
         <!-- Right: Info & Actions -->
         <div class="detail-info">
             <div class="detail-meta-top">
-                <span class="badge-status-pill">En cours</span>
+                <span class="badge-status-pill">{{ series.get_status_display|default:"En cours" }}</span>
             </div>
 
-
-            <h1 class="detail-title">Eos enim irure itaquirure</h1>
+            <h1 class="detail-title">{{ series.title }}</h1>
 
             <div class="detail-stats">
                 <span class="stat-item">
@@ -42,14 +45,14 @@
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                         <circle cx="12" cy="7" r="4"></circle>
                     </svg>
-                    Laudantium tempor v
+                    {{ series.author|default:"Auteur inconnu" }}
                 </span>
                 <span class="stat-item">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                     </svg>
-                    0 chapitres
+                    {{ chapters.count }} chapitres
                 </span>
                 <span class="stat-item">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -58,17 +61,28 @@
                         <line x1="8" y1="2" x2="8" y2="6"></line>
                         <line x1="3" y1="10" x2="21" y2="10"></line>
                     </svg>
-                    02 févr. 2026
+                    {{ series.release_date|default:series.created_at|date:"M Y"|capfirst }}
                 </span>
             </div>
 
             <div class="detail-actions">
-                <button class="btn btn-primary btn-lg btn-start-reading">
-                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"
-                        stroke="none">
+                {% if last_read_chapter %}
+                <a href="{% url 'reader:demo_chapter' last_read_chapter.id %}" class="btn btn-primary btn-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                    </svg> Commencer
-                </button>
+                    </svg>
+                    Lire (Ch. {{ last_read_chapter.number }})
+                </a>
+                {% elif chapters.first %}
+                <a href="{% url 'reader:demo_chapter' chapters.first.id %}" class="btn btn-primary btn-lg">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                    </svg>
+                    Commencer
+                </a>
+                {% endif %}
                 <button class="btn btn-secondary btn-chat">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
@@ -122,6 +136,21 @@
     <div class="detail-content-wrapper">
         <!-- Chapters Tab -->
         <div id="chapters" class="tab-content active">
+            {% if chapters %}
+            <div class="chapters-grid">
+                {% for chapter in chapters %}
+                <a href="{% url 'reader:demo_chapter' chapter.id %}" class="chapter-item">
+                    <div class="chapter-info">
+                        <span class="chapter-number">Chapter {{ chapter.number|stringformat:".1f" }}</span>
+                        {% if chapter.title and "Chapter" not in chapter.title and "Chapitre" not in chapter.title %}
+                        <span class="chapter-name">{{ chapter.title }}</span>
+                        {% endif %}
+                    </div>
+                    <span class="chapter-date">{{ chapter.created_at|date:"d M Y" }}</span>
+                </a>
+                {% endfor %}
+            </div>
+            {% else %}
             <div class="chapters-list empty-state-dark">
                 <div class="empty-icon-large">
                     <svg class="icon icon-xxl" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -131,11 +160,15 @@
                 </div>
                 <p class="empty-text">Aucun chapitre disponible</p>
             </div>
+            {% endif %}
         </div>
 
         <!-- Informations Tab -->
         <div id="info" class="tab-content">
             <div class="info-content-box">
+                {% if series.description %}
+                <p class="description-text">{{ series.description|linebreaks }}</p>
+                {% else %}
                 <div class="empty-icon-large">
                     <svg class="icon icon-xxl" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="10"></circle>
@@ -144,8 +177,9 @@
                     </svg>
                 </div>
                 <p class="empty-text">
-                    Auccune information pour le moment
+                    Aucune information pour le moment
                 </p>
+                {% endif %}
             </div>
         </div>
 

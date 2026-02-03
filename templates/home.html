@@ -15,40 +15,25 @@
             </div>
             <div class="block-content">
                 <div class="cards-grid-3">
-                    <!-- Card 1 -->
-                    <a href="{% url 'catalog:detail' %}" class="manga-card">
+                    {% for series in latest_updates %}
+                    <!-- Card {{ forloop.counter }} -->
+                    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
                         <div class="manga-cover">
-                            <!-- Placeholder Image Gradient -->
-                            <div class="manga-image mock-cover-1"></div>
-                            <span class="badge-status">En cours</span>
+                            {% if series.cover %}
+                            <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
+                            {% else %}
+                            <div class="manga-image mock-cover-{{ forloop.counter }}"></div>
+                            {% endif %}
+                            <span class="badge-status">{{ series.get_status_display|default:"En cours" }}</span>
                             <div class="badge-rating"><span>★</span> 4.5</div>
-                            <span class="badge-chapter">Ch. 124</span>
+                            <span class="badge-chapter">{{ series.chapters.count }} ch.</span>
                         </div>
-                        <h3 class="manga-title">Solo Leveling</h3>
-                        <p class="manga-meta">Il y a 2 heures</p>
+                        <h3 class="manga-title">{{ series.title }}</h3>
+                        <p class="manga-meta">{{ series.updated_at|timesince }}</p>
                     </a>
-                    <!-- Card 2 -->
-                    <a href="{% url 'catalog:detail' %}" class="manga-card">
-                        <div class="manga-cover">
-                            <div class="manga-image mock-cover-2"></div>
-                            <span class="badge-status">En cours</span>
-                            <div class="badge-rating"><span>★</span> 4.8</div>
-                            <span class="badge-chapter">Ch. 1092</span>
-                        </div>
-                        <h3 class="manga-title">One Piece</h3>
-                        <p class="manga-meta">Il y a 4 heures</p>
-                    </a>
-                    <!-- Card 3 -->
-                    <a href="{% url 'catalog:detail' %}" class="manga-card">
-                        <div class="manga-cover">
-                            <div class="manga-image mock-cover-3"></div>
-                            <span class="badge-status">En cours</span>
-                            <div class="badge-rating"><span>★</span> 4.2</div>
-                            <span class="badge-chapter">Ch. 24</span>
-                        </div>
-                        <h3 class="manga-title">Kaiju No. 8</h3>
-                        <p class="manga-meta">Il y a 5 heures</p>
-                    </a>
+                    {% empty %}
+                    <p class="empty-text">Aucun manga récent.</p>
+                    {% endfor %}
                 </div>
             </div>
         </section>
@@ -77,36 +62,23 @@
             </div>
             <div class="block-content">
                 <div class="cards-grid-3">
-                    <!-- Card 1 -->
-                    <a href="{% url 'catalog:detail' %}" class="manga-card">
+                    {% for series in popular_series %}
+                    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
                         <div class="manga-cover">
-                            <div class="manga-image mock-cover-4"></div>
-                            <span class="badge-status">Terminé</span>
+                            {% if series.cover %}
+                            <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
+                            {% else %}
+                            <div class="manga-image mock-cover-{{ forloop.counter|add:3 }}"></div>
+                            {% endif %}
+                            <span class="badge-status">{{ series.get_status_display }}</span>
                             <div class="badge-rating"><span>★</span> 4.9</div>
                         </div>
-                        <h3 class="manga-title">Naruto</h3>
+                        <h3 class="manga-title">{{ series.title }}</h3>
                         <p class="manga-meta">Action, Aventure</p>
                     </a>
-                    <!-- Card 2 -->
-                    <a href="{% url 'catalog:detail' %}" class="manga-card">
-                        <div class="manga-cover">
-                            <div class="manga-image mock-cover-5"></div>
-                            <span class="badge-status">En cours</span>
-                            <div class="badge-rating"><span>★</span> 4.7</div>
-                        </div>
-                        <h3 class="manga-title">Jujutsu Kaisen</h3>
-                        <p class="manga-meta">Action, Surnaturel</p>
-                    </a>
-                    <!-- Card 3 -->
-                    <a href="{% url 'catalog:detail' %}" class="manga-card">
-                        <div class="manga-cover">
-                            <div class="manga-image mock-cover-6"></div>
-                            <span class="badge-status">En cours</span>
-                            <div class="badge-rating"><span>★</span> 4.6</div>
-                        </div>
-                        <h3 class="manga-title">Chainsaw Man</h3>
-                        <p class="manga-meta">Action, Horreur</p>
-                    </a>
+                    {% empty %}
+                    <p class="empty-text">Aucun manga populaire.</p>
+                    {% endfor %}
                 </div>
             </div>
         </section>

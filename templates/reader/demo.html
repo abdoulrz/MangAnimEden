@@ -5,47 +5,233 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/reader.css' %}?v={{ STATIC_VERSION }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
 {% endblock %}
 
 {% block content %}
 <div class="reader-container" id="reader-container">
-    {% if page %}
+    {% if chapter %}
     <div class="reader-info">
-        <h1 class="reader-title">{{ page.chapter.series.title }}</h1>
-        <p class="reader-subtitle">Chapitre {{ page.chapter.number }} - Page {{ page.page_number }}</p>
+        <h1 class="reader-title">{{ chapter.series.title }}</h1>
+        <p class="reader-subtitle">
+            Chapter {{ chapter.number|stringformat:".1f" }}
+            {% if chapter.title and "Chapter" not in chapter.title and "Chapitre" not in chapter.title %}
+            - {{ chapter.title }}
+            {% endif %}
+        </p>
+        <div class="reader-back-container">
+            <a href="{% url 'catalog:detail' chapter.series.id %}" class="nav-btn btn-sm">
+                ← Retour à la fiche
+            </a>
+        </div>
     </div>
 
-    <img class="manga-page lazy reader-page" data-src="{{ page.image.url }}"
-        alt="Page {{ page.page_number }} - {{ page.chapter.series.title }}">
+    <!-- Navigation Top -->
+    <div class="chapter-nav">
+        {% if prev_chapter %}
+        <a href="{% url 'reader:demo_chapter' prev_chapter.id %}" class="nav-btn">← Précédent</a>
+        {% else %}
+        <span class="nav-btn disabled">← Précédent</span>
+        {% endif %}
+
+        {% if next_chapter %}
+        <a href="{% url 'reader:demo_chapter' next_chapter.id %}" class="nav-btn">Suivant →</a>
+        {% else %}
+        <span class="nav-btn disabled">Suivant →</span>
+        {% endif %}
+    </div>
+
+    {% if chapter.pdf_file %}
+    <!-- PDF MODE -->
+    <div id="pdf-render-container" data-url="{{ chapter.pdf_file.url }}">
+        <!-- Canvas elements will be injected here -->
+    </div>
+    {% elif pages %}
+    <!-- IMAGE MODE -->
+    {% for p in pages %}
+    <img class="manga-page lazy reader-page" data-src="{{ p.image.url }}" alt="Page {{ p.page_number }}">
+    {% endfor %}
+    {% else %}
+    <div class="reader-empty">
+        <h2 class="reader-empty-title">Chapitre vide</h2>
+    </div>
+    {% endif %}
+
+    <!-- Navigation Bottom -->
+    <div class="chapter-nav">
+        {% if prev_chapter %}
+        <a href="{% url 'reader:demo_chapter' prev_chapter.id %}" class="nav-btn">← Précédent</a>
+        {% else %}
+        <span class="nav-btn disabled">← Précédent</span>
+        {% endif %}
+
+        {% if next_chapter %}
+        <a href="{% url 'reader:demo_chapter' next_chapter.id %}" class="nav-btn">Suivant →</a>
+        {% else %}
+        <span class="nav-btn disabled">Suivant →</span>
+        {% endif %}
+    </div>
+
     {% else %}
     <div class="reader-empty">
         <div class="reader-empty-icon">📚</div>
-        <h2 class="reader-empty-title">Aucune page disponible</h2>
-        <p class="reader-empty-text">
-            Commencez par ajouter du contenu via
-            <a href="/admin" class="reader-empty-link">l'administration</a>
-        </p>
-
-        <div class="reader-empty-steps">
-            <h3>Pour tester le lecteur :</h3>
-            <ol>
-                <li>Allez sur <code>/admin</code></li>
-                <li>Créez une <strong>Série</strong> (Series)</li>
-                <li>Créez un <strong>Chapitre</strong> (Chapter) lié à cette série</li>
-                <li>Ajoutez une <strong>Page</strong> (Page) avec une image</li>
-                <li>Revenez ici pour voir la page s'afficher !</li>
-            </ol>
-        </div>
+        <h2 class="reader-empty-title">Aucun chapitre trouvé</h2>
     </div>
     {% endif %}
+
 </div>
+
+<!-- Scroll To Top Button -->
+<button id="scrollTopBtn" class="scroll-top-btn" title="Retour en haut">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m18 15-6-6-6 6" />
+    </svg>
+</button>
+
+<div id="reader-data" data-total="{{ page.chapter.pages.count|default:'1' }}" style="display: none;"></div>
 {% endblock %}
 
 {% block extra_js %}
+<script>
+    // Global Scroll To Top Logic
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+
+    if (scrollTopBtn) {
+        let isVisible = false;
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                if (!isVisible) {
+                    isVisible = true;
+                    scrollTopBtn.style.pointerEvents = 'auto';
+                    scrollTopBtn.animate([
+                        { opacity: 0, transform: 'translateY(20px)' },
+                        { opacity: 1, transform: 'translateY(0)' }
+                    ], {
+                        duration: 300,
+                        easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                        fill: 'forwards'
+                    });
+                }
+            } else {
+                if (isVisible) {
+                    isVisible = false;
+                    scrollTopBtn.style.pointerEvents = 'none';
+                    scrollTopBtn.animate([
+                        { opacity: 1, transform: 'translateY(0)' },
+                        { opacity: 0, transform: 'translateY(20px)' }
+                    ], {
+                        duration: 300,
+                        easing: 'ease-in',
+                        fill: 'forwards'
+                    });
+                }
+            }
+        });
+
+        scrollTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+
+            // Optional: Bounce animation on click
+            scrollTopBtn.animate([
+                { transform: 'translateY(0)' },
+                { transform: 'translateY(-10px)' },
+                { transform: 'translateY(0)' }
+            ], {
+                duration: 300,
+                easing: 'ease-out'
+            });
+        });
+
+        // Hover animation using JS (optional, but requested)
+        scrollTopBtn.addEventListener('mouseenter', () => {
+            scrollTopBtn.animate([
+                { transform: 'translateY(0)' },
+                { transform: 'translateY(-3px)' }
+            ], {
+                duration: 200,
+                fill: 'forwards',
+                easing: 'ease-out'
+            });
+        });
+
+        scrollTopBtn.addEventListener('mouseleave', () => {
+            scrollTopBtn.animate([
+                { transform: 'translateY(-3px)' },
+                { transform: 'translateY(0)' }
+            ], {
+                duration: 200,
+                fill: 'forwards',
+                easing: 'ease-out'
+            });
+        });
+    }
+</script>
+{% if chapter and not chapter.pdf_file %}
 <script src="{% static 'js/reader.js' %}?v={{ STATIC_VERSION }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         MangaReader.init();
     });
 </script>
+{% endif %}
+
+{% if chapter and chapter.pdf_file %}
+<script>
+    document.addEventListener('DOMContentLoaded', async function () {
+        // Force scroll to top prevents "slightly scrolled" issue on refresh
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+        window.scrollTo(0, 0);
+
+        const container = document.getElementById('pdf-render-container');
+        const url = container.dataset.url;
+
+        if (!url) return;
+
+        try {
+            const loadingTask = pdfjsLib.getDocument(url);
+            const pdf = await loadingTask.promise;
+            console.log('PDF loaded');
+
+            // Render all pages
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+
+                const scale = 1.5;
+                const viewport = page.getViewport({ scale: scale });
+
+                const canvas = document.createElement('canvas');
+                canvas.className = 'pdf-page';
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                // Adjust styling max-width
+                canvas.style.maxWidth = '100%';
+                canvas.style.height = 'auto';
+
+                container.appendChild(canvas);
+
+                const renderContext = {
+                    canvasContext: context,
+                    viewport: viewport
+                };
+                page.render(renderContext);
+            }
+        } catch (error) {
+            console.error('Error loading PDF:', error);
+            container.innerHTML = '<p class="error">Erreur lors du chargement du PDF.</p>';
+        }
+    });
+</script>
+{% endif %}
 {% endblock %}

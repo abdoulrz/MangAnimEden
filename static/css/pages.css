@@ -1766,3 +1766,60 @@
         /* 1 col on mobile */
     }
 }
+/* Chapter List - Neumorphic Style (Moved from reader.css) */
+.chapters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+    padding: 10px;
+}
+
+.chapter-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: linear-gradient(145deg, #1c222f, #151a23);
+    border-radius: 12px;
+    box-shadow: 
+        5px 5px 10px rgba(0,0,0,0.2),
+        -5px -5px 10px rgba(255,255,255,0.03);
+    color: #cecfd1;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255,255,255,0.02);
+}
+
+.chapter-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        6px 6px 12px rgba(0,0,0,0.3),
+        -6px -6px 12px rgba(255,255,255,0.05);
+    color: var(--color-purple-primary);
+    border-color: rgba(167, 139, 250, 0.1);
+}
+
+.chapter-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.chapter-number {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: #e2e8f0;
+}
+
+.chapter-name {
+    font-size: 0.8rem;
+    color: #94a3b8;
+    margin-top: 2px;
+}
+
+.chapter-date {
+    font-size: 0.75rem;
+    color: #64748b;
+    white-space: nowrap;
+    margin-left: 10px;
+}
+

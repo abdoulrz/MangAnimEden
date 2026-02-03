@@ -3,7 +3,7 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from users.forms import CustomUserCreationForm, CustomAuthenticationForm
-
+from catalog.models import Series
 
 @login_required
 def home_view(request):
@@ -11,7 +11,13 @@ def home_view(request):
     Page d'accueil avec sections principales.
     Accessible seulement aux utilisateurs connectés.
     """
+    # Fetch series for the homepage
+    latest_updates = Series.objects.all().order_by('-updated_at')[:3]
+    popular_series = Series.objects.all().order_by('?')[:3] # Random for now as popular
+
     return render(request, 'home.html', {
+        'latest_updates': latest_updates,
+        'popular_series': popular_series,
         'STATIC_VERSION': settings.STATIC_VERSION
     })
 
