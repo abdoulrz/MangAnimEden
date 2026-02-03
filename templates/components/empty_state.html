@@ -1,0 +1,15 @@
+<!-- Empty State Component -->
+<!-- Usage example (do not execute): include 'components/empty_state.html' with icon="📚" title="Aucun manga disponible" -->
+
+<div class="empty-state">
+    <div class="empty-state-icon">{{ icon|default:"📭" }}</div>
+    <div class="empty-state-title">{{ title|default:"Aucun contenu disponible" }}</div>
+    {% if text %}
+    <div class="empty-state-text">{{ text }}</div>
+    {% endif %}
+    {% if link_url %}
+    <a href="{{ link_url }}" class="btn-ghost empty-state-link">
+        {{ link_text|default:"En savoir plus" }} →
+    </a>
+    {% endif %}
+</div>

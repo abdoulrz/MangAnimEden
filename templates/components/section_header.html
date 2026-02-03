@@ -1,0 +1,15 @@
+<!-- Section Header Component -->
+<!-- Usage example (do not execute): include 'components/section_header.html' with icon="🔥" title="Populaires en ce moment" -->
+
+<div class="section-header">
+    <h2 class="section-title">
+        {% if icon %}<span>{{ icon }}</span>{% endif %}
+        {{ title }}
+    </h2>
+    {% if link_url %}
+    <a href="{{ link_url }}" class="section-link">
+        {{ link_text|default:"Voir tout" }}
+        <span>→</span>
+    </a>
+    {% endif %}
+</div>

@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MangAnimEDen - Lecture de manga{% endblock %}</title>
+
+    <!-- Design Tokens -->
+    <!-- Design Tokens -->
+    <link rel="stylesheet" href="{% static 'css/tokens.css' %}?v={{ STATIC_VERSION }}&t=7">
+    <link rel="stylesheet" href="{% static 'css/components.css' %}?v={{ STATIC_VERSION }}&t=7">
+    <link rel="stylesheet" href="{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}&t=7">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@400;700&display=swap"
+        rel="stylesheet">
+
+    {% block extra_css %}{% endblock %}
+</head>
+
+<body>
+    <!-- Navigation -->
+    {% include 'components/navbar.html' %}
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    {% include 'components/footer.html' %}
+
+    {% block extra_js %}{% endblock %}
+</body>
+
+</html>

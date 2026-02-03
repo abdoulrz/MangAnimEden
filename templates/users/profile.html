@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Profil de {{ user.nickname }} - MangAnimEDen{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% load static %}{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
+
+{% block content %}
+<div class="container page-container">
+
+    <!-- Header Notification -->
+    <div class="profile-notification">
+        <div class="notification-text">
+            <h3>Complétez votre profil</h3>
+            <p>Personnalisez votre expérience</p>
+        </div>
+        <a href="{% url 'users:edit_profile' %}" class="btn btn-primary btn-sm">Compléter</a>
+    </div>
+
+    <!-- Main Profile Card -->
+    <div class="profile-card">
+        <div class="profile-header-bg">
+            <a href="{% url 'users:edit_profile' %}" class="edit-profile-btn">📝</a>
+        </div>
+
+        <div class="profile-info-container">
+            <!-- Avatar -->
+            <div class="profile-avatar-wrapper">
+                <div class="profile-avatar">
+                    {{ user.username|make_list|first|upper }}
+                </div>
+            </div>
+
+            <!-- User Info -->
+            <h1 class="profile-username">{{ user.nickname|default:user.email }}</h1>
+            <div class="profile-level-bar"></div> <!-- Small purple bar -->
+
+            <!-- Stats Grid -->
+            <div class="profile-stats">
+                <div class="stat-box">
+                    <span class="stat-icon">🏆</span>
+                    <span class="stat-value">1</span>
+                    <span class="stat-label">NIVEAU</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-icon">👥</span>
+                    <span class="stat-value">42</span>
+                    <span class="stat-label">AMIS</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-icon">⭐</span>
+                    <span class="stat-value">3</span>
+                    <span class="stat-label">BADGES</span>
+                </div>
+            </div>
+
+            <p class="member-since">Membre depuis {{ user.date_joined|date:"F Y" }}</p>
+        </div>
+    </div>
+
+    <!-- Carte Otaku Banner -->
+    <div class="otaku-card-banner">
+        <div class="otaku-icon-wrapper">
+            <span class="otaku-icon">💳</span>
+        </div>
+        <div class="otaku-text">
+            <h3>Carte Otaku</h3>
+            <p>Obtenez des réductions exclusives</p>
+        </div>
+        <div class="otaku-arrow">›</div>
+    </div>
+
+    <!-- Quick Access Grid -->
+    <div class="quick-access-section">
+        <h2 class="section-title">Mes accès rapides</h2>
+        <div class="quick-access-grid">
+            <a href="#" class="quick-access-item">
+                <div class="access-icon-circle icon-heart">❤️</div>
+                <span>Mes Favoris</span>
+            </a>
+
+            <a href="#" class="quick-access-item">
+                <div class="access-icon-circle icon-book">📖</div>
+                <span>Mes Mangas</span>
+            </a>
+
+            <a href="#" class="quick-access-item">
+                <div class="access-icon-circle icon-bookmark">🔖</div>
+                <span>Enregistrements</span>
+            </a>
+
+            <a href="#" class="quick-access-item">
+                <div class="access-icon-circle icon-team">👥</div>
+                <span>Mes Équipes</span>
+            </a>
+
+            <a href="#" class="quick-access-item">
+                <div class="access-icon-circle icon-chat">💬</div>
+                <span>Chat</span>
+            </a>
+
+            <a href="#" class="quick-access-item">
+                <div class="access-icon-circle icon-calendar">📅</div>
+                <span>Événements</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Profile Settings Link -->
+    <a href="#" class="settings-link-row">
+        <div class="settings-icon-circle">⚙️</div>
+        <div class="settings-text">
+            <h3>Paramètres du profil</h3>
+            <p>Modifier mes informations</p>
+        </div>
+        <div class="settings-arrow">›</div>
+    </a>
+
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+
+{% block title %}MangAnimEDen - Accueil{% endblock %}
+
+{% block content %}
+<div class="container home-container">
+
+    <!-- Home Grid Layout -->
+    <div class="home-grid">
+        <!-- Top Left: Dernières mises à jour (3fr) -->
+        <section class="home-block updates-block">
+            <div class="block-header">
+                <h2 class="block-title"><span>🕐</span> Dernières mises à jour</h2>
+                <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
+            </div>
+            <div class="block-content">
+                <div class="cards-grid-3">
+                    <!-- Card 1 -->
+                    <a href="{% url 'catalog:detail' %}" class="manga-card">
+                        <div class="manga-cover">
+                            <!-- Placeholder Image Gradient -->
+                            <div class="manga-image mock-cover-1"></div>
+                            <span class="badge-status">En cours</span>
+                            <div class="badge-rating"><span>★</span> 4.5</div>
+                            <span class="badge-chapter">Ch. 124</span>
+                        </div>
+                        <h3 class="manga-title">Solo Leveling</h3>
+                        <p class="manga-meta">Il y a 2 heures</p>
+                    </a>
+                    <!-- Card 2 -->
+                    <a href="{% url 'catalog:detail' %}" class="manga-card">
+                        <div class="manga-cover">
+                            <div class="manga-image mock-cover-2"></div>
+                            <span class="badge-status">En cours</span>
+                            <div class="badge-rating"><span>★</span> 4.8</div>
+                            <span class="badge-chapter">Ch. 1092</span>
+                        </div>
+                        <h3 class="manga-title">One Piece</h3>
+                        <p class="manga-meta">Il y a 4 heures</p>
+                    </a>
+                    <!-- Card 3 -->
+                    <a href="{% url 'catalog:detail' %}" class="manga-card">
+                        <div class="manga-cover">
+                            <div class="manga-image mock-cover-3"></div>
+                            <span class="badge-status">En cours</span>
+                            <div class="badge-rating"><span>★</span> 4.2</div>
+                            <span class="badge-chapter">Ch. 24</span>
+                        </div>
+                        <h3 class="manga-title">Kaiju No. 8</h3>
+                        <p class="manga-meta">Il y a 5 heures</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Top Right: Dernières lectures -->
+        <section class="home-block history-block">
+            <div class="block-header">
+                <h2 class="block-title"><span>📖</span> Dernières lectures</h2>
+            </div>
+            <div class="block-content">
+                <!-- Last Read Article Block (Neumorphic) -->
+                <div class="last-read-card">
+                    <div class="last-read-info">
+                        <span class="last-read-title">Aucune lecture récente</span>
+                        <span class="last-read-chapter">-</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom Left: Populaires (3fr) -->
+        <section class="home-block popular-block">
+            <div class="block-header">
+                <h2 class="block-title"><span>🔥</span> Populaires en ce moment</h2>
+                <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
+            </div>
+            <div class="block-content">
+                <div class="cards-grid-3">
+                    <!-- Card 1 -->
+                    <a href="{% url 'catalog:detail' %}" class="manga-card">
+                        <div class="manga-cover">
+                            <div class="manga-image mock-cover-4"></div>
+                            <span class="badge-status">Terminé</span>
+                            <div class="badge-rating"><span>★</span> 4.9</div>
+                        </div>
+                        <h3 class="manga-title">Naruto</h3>
+                        <p class="manga-meta">Action, Aventure</p>
+                    </a>
+                    <!-- Card 2 -->
+                    <a href="{% url 'catalog:detail' %}" class="manga-card">
+                        <div class="manga-cover">
+                            <div class="manga-image mock-cover-5"></div>
+                            <span class="badge-status">En cours</span>
+                            <div class="badge-rating"><span>★</span> 4.7</div>
+                        </div>
+                        <h3 class="manga-title">Jujutsu Kaisen</h3>
+                        <p class="manga-meta">Action, Surnaturel</p>
+                    </a>
+                    <!-- Card 3 -->
+                    <a href="{% url 'catalog:detail' %}" class="manga-card">
+                        <div class="manga-cover">
+                            <div class="manga-image mock-cover-6"></div>
+                            <span class="badge-status">En cours</span>
+                            <div class="badge-rating"><span>★</span> 4.6</div>
+                        </div>
+                        <h3 class="manga-title">Chainsaw Man</h3>
+                        <p class="manga-meta">Action, Horreur</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom Right: Ads / Quotes -->
+        <section class="home-block ads-block">
+            <div class="block-content centered-content">
+                <div class="quote-container">
+                    <p class="quote-text">"Le pouvoir ne vient pas de la volonté de frapper, mais de la volonté de
+                        protéger."</p>
+                    <span class="quote-author">- Anime World</span>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+
+{% if not user.is_authenticated %}
+<!-- CTA Banner -->
+<div class="container-wide">
+    {% include 'components/cta_banner.html' %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lecteur - {{ page.chapter.series.title|default:"MangAnimEDen" }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/reader.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
+
+{% block content %}
+<div class="reader-container" id="reader-container">
+    {% if page %}
+    <div class="reader-info">
+        <h1 class="reader-title">{{ page.chapter.series.title }}</h1>
+        <p class="reader-subtitle">Chapitre {{ page.chapter.number }} - Page {{ page.page_number }}</p>
+    </div>
+
+    <img class="manga-page lazy reader-page" data-src="{{ page.image.url }}"
+        alt="Page {{ page.page_number }} - {{ page.chapter.series.title }}">
+    {% else %}
+    <div class="reader-empty">
+        <div class="reader-empty-icon">📚</div>
+        <h2 class="reader-empty-title">Aucune page disponible</h2>
+        <p class="reader-empty-text">
+            Commencez par ajouter du contenu via
+            <a href="/admin" class="reader-empty-link">l'administration</a>
+        </p>
+
+        <div class="reader-empty-steps">
+            <h3>Pour tester le lecteur :</h3>
+            <ol>
+                <li>Allez sur <code>/admin</code></li>
+                <li>Créez une <strong>Série</strong> (Series)</li>
+                <li>Créez un <strong>Chapitre</strong> (Chapter) lié à cette série</li>
+                <li>Ajoutez une <strong>Page</strong> (Page) avec une image</li>
+                <li>Revenez ici pour voir la page s'afficher !</li>
+            </ol>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/reader.js' %}?v={{ STATIC_VERSION }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        MangaReader.init();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,113 @@
+/**
+ * READER STYLES
+ * Styles pour le lecteur de manga
+ */
+
+.reader-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--space-lg);
+    background: var(--color-bg-primary);
+}
+
+.reader-page {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: var(--space-md);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+}
+
+.reader-page.lazy {
+    opacity: 0;
+    transition: opacity var(--transition-slow);
+}
+
+.reader-page.loaded {
+    opacity: 1;
+}
+
+.reader-info {
+    text-align: center;
+    margin-bottom: var(--space-lg);
+}
+
+.reader-title {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--space-sm);
+    color: var(--color-text-primary);
+}
+
+.reader-subtitle {
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-base);
+}
+
+.reader-empty {
+    text-align: center;
+    padding: var(--space-3xl);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--color-border);
+}
+
+.reader-empty-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-lg);
+    opacity: 0.5;
+}
+
+.reader-empty-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--space-md);
+    color: var(--color-text-primary);
+}
+
+.reader-empty-text {
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.reader-empty-link {
+    color: var(--color-purple-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.reader-empty-steps {
+    margin-top: var(--space-xl);
+    padding-top: var(--space-xl);
+    border-top: 1px solid var(--color-border);
+    text-align: left;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.reader-empty-steps h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--space-md);
+    color: var(--color-text-primary);
+}
+
+.reader-empty-steps ol {
+    color: var(--color-text-secondary);
+    padding-left: var(--space-lg);
+}
+
+.reader-empty-steps li {
+    margin-bottom: var(--space-sm);
+    line-height: 1.6;
+}
+
+.reader-empty-steps code {
+    background: var(--color-bg-primary);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: var(--color-purple-primary);
+}

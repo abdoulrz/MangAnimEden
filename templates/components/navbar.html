@@ -1,0 +1,108 @@
+<!-- Navigation Bar Component -->
+<nav class="navbar">
+    <div class="container navbar-container">
+        <!-- 1. Left: Logo + Brand + Menu -->
+        <div class="navbar-left">
+            <a href="{% url 'home' %}" class="navbar-brand">
+                <div class="navbar-logo">📚</div>
+                <span class="gradient-text navbar-brand-text">MangAnimEDen</span>
+            </a>
+
+            <!-- Navigation Links (Grouped with Brand) -->
+            <div class="navbar-menu">
+                {% with url_name=request.resolver_match.view_name %}
+                <a href="{% url 'home' %}"
+                    class="nav-link {% if url_name == 'home' or url_name == 'catalog:detail' %}active{% endif %}">Accueil</a>
+                <a href="{% url 'catalog:index' %}"
+                    class="nav-link {% if url_name == 'catalog:index' %}active{% endif %}">Catalogue</a>
+                <a href="{% url 'social_home' %}"
+                    class="nav-link {% if url_name == 'social_home' %}active{% endif %}">Chat</a>
+                <a href="{% url 'news' %}" class="nav-link {% if url_name == 'news' %}active{% endif %}">Actualités</a>
+                {% endwith %}
+            </div>
+        </div>
+
+        <!-- 3. Right: Search + Icons + Profile -->
+        <div class="navbar-right">
+            <!-- Search Bar -->
+            {% if request.resolver_match.view_name != 'catalog:index' %}
+            <div class="navbar-search">
+                <input type="text" placeholder="Rechercher un manga..." class="input navbar-search-input">
+                <span class="navbar-search-icon">🔍</span>
+            </div>
+            {% endif %}
+
+            <!-- Dark Mode Toggle -->
+            <button class="btn-ghost navbar-icon-btn">🌙</button>
+
+            <!-- Notification Bell -->
+            <button class="btn-ghost navbar-icon-btn">🔔</button>
+
+            <!-- User Profile Avatar or Login -->
+            {% if user.is_authenticated %}
+            <div class="navbar-profile-container">
+                <div class="navbar-profile" id="profileDropdownTrigger">
+                    <div class="user-avatar">{{ user.username|make_list|first|upper }}</div>
+                </div>
+
+                <!-- Dropdown Menu -->
+                <div class="profile-dropdown" id="profileDropdown">
+                    <div class="dropdown-header">
+                        <span class="dropdown-title">Mon compte</span>
+                    </div>
+
+                    <a href="{% url 'users:profile' %}" class="dropdown-item">
+                        <span class="dropdown-icon">👤</span>
+                        Mon Profil
+                    </a>
+
+                    <a href="#" class="dropdown-item">
+                        <span class="dropdown-icon">❤️</span>
+                        Mes Favoris
+                    </a>
+
+                    <a href="#" class="dropdown-item">
+                        <span class="dropdown-icon">👥</span>
+                        Mes Teams
+                    </a>
+
+                    <div class="dropdown-divider"></div>
+
+                    <form action="{% url 'logout' %}" method="post" class="dropdown-form">
+                        {% csrf_token %}
+                        <button type="submit" class="dropdown-item text-danger">
+                            <span class="dropdown-icon">↪️</span>
+                            Déconnexion
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Simple Script for Dropdown Toggle -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const trigger = document.getElementById('profileDropdownTrigger');
+                    const dropdown = document.getElementById('profileDropdown');
+
+                    if (trigger && dropdown) {
+                        trigger.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            dropdown.classList.toggle('active');
+                        });
+
+                        document.addEventListener('click', function (e) {
+                            if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
+                                dropdown.classList.remove('active');
+                            }
+                        });
+                    }
+                });
+            </script>
+            {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary">
+                Connexion
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</nav>
