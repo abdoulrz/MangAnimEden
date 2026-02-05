@@ -23,28 +23,24 @@
                 </div>
 
                 <div class="catalog-grid">
-                    <!-- Manga Card 8 -->
-                    <a href="{% url 'catalog:detail' %}" class="manga-card">
+                    {% for series in series_list %}
+                    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
                         <div class="manga-cover">
-                            <div class="manga-image mock-cover-2"></div>
-                            <span class="badge-status">Terminé</span>
-                            <div class="badge-rating"><span>★</span> 4.9</div>
+                            {% if series.cover %}
+                            <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
+                            {% else %}
+                            <div class="manga-image placeholder"></div>
+                            {% endif %}
+                            <span class="badge-status">{{ series.get_status_display }}</span>
+                            <!-- Rating is hardcoded or needs a field, using placeholder for now -->
+                            <!-- <div class="badge-rating"><span>★</span> 4.X</div> -->
                         </div>
-                        <h3 class="manga-title">Fullmetal Alchemist</h3>
-                        <p class="manga-meta">Aventure, Fantasy</p>
+                        <h3 class="manga-title">{{ series.title }}</h3>
+                        <p class="manga-meta">{{ series.author }}</p>
                     </a>
-
-                    <!-- Manga Card 9 -->
-                    <a href="{% url 'catalog:detail' %}" class="manga-card">
-                        <div class="manga-cover">
-                            <div class="manga-image mock-cover-3"></div>
-                            <span class="badge-status">En cours</span>
-                            <div class="badge-rating"><span>★</span> 4.3</div>
-                            <span class="badge-chapter">Ch. 12</span>
-                        </div>
-                        <h3 class="manga-title">Dandadan</h3>
-                        <p class="manga-meta">Surnaturel, Action</p>
-                    </a>
+                    {% empty %}
+                    <p>Aucun manga trouvé.</p>
+                    {% endfor %}
                 </div>
             </section>
         </main>
@@ -57,65 +53,24 @@
                 </div>
 
                 <div class="trending-list">
-                    <!-- Item 1 -->
-                    <a href="{% url 'catalog:detail' %}" class="trending-item">
-                        <span class="trending-rank">1</span>
-                        <img src="https://picsum.photos/50/70?random=1" alt="Cover" class="trending-cover">
+                    {% for item in trending_series %}
+                    <a href="{% url 'catalog:detail' item.id %}" class="trending-item">
+                        <span class="trending-rank">{{ forloop.counter }}</span>
+                        {% if item.cover %}
+                        <img src="{{ item.cover.url }}" alt="{{ item.title }}" class="trending-cover">
+                        {% else %}
+                        <div class="trending-cover placeholder-trending">?</div>
+                        {% endif %}
                         <div class="trending-info">
-                            <h4 class="trending-name">One Piece</h4>
+                            <h4 class="trending-name">{{ item.title }}</h4>
                             <div class="trending-stats">
-                                <span class="trending-stat-icon">👁</span> 1.2M vues
+                                <span class="trending-stat-icon">👁</span> {{ item.views_count }} vues
                             </div>
                         </div>
                     </a>
-
-                    <!-- Item 2 -->
-                    <a href="{% url 'catalog:detail' %}" class="trending-item">
-                        <span class="trending-rank">2</span>
-                        <img src="https://picsum.photos/50/70?random=2" alt="Cover" class="trending-cover">
-                        <div class="trending-info">
-                            <h4 class="trending-name">Jujutsu Kaisen</h4>
-                            <div class="trending-stats">
-                                <span class="trending-stat-icon">👁</span> 980k vues
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Item 3 -->
-                    <a href="{% url 'catalog:detail' %}" class="trending-item">
-                        <span class="trending-rank">3</span>
-                        <img src="https://picsum.photos/50/70?random=3" alt="Cover" class="trending-cover">
-                        <div class="trending-info">
-                            <h4 class="trending-name">Solo Leveling</h4>
-                            <div class="trending-stats">
-                                <span class="trending-stat-icon">👁</span> 850k vues
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Item 4 -->
-                    <a href="{% url 'catalog:detail' %}" class="trending-item">
-                        <span class="trending-rank">4</span>
-                        <img src="https://picsum.photos/50/70?random=4" alt="Cover" class="trending-cover">
-                        <div class="trending-info">
-                            <h4 class="trending-name">My Hero Academia</h4>
-                            <div class="trending-stats">
-                                <span class="trending-stat-icon">👁</span> 720k vues
-                            </div>
-                        </div>
-                    </a>
-
-                    <!-- Item 5 -->
-                    <a href="{% url 'catalog:detail' %}" class="trending-item">
-                        <span class="trending-rank">5</span>
-                        <img src="https://picsum.photos/50/70?random=5" alt="Cover" class="trending-cover">
-                        <div class="trending-info">
-                            <h4 class="trending-name">Blue Lock</h4>
-                            <div class="trending-stats">
-                                <span class="trending-stat-icon">👁</span> 690k vues
-                            </div>
-                        </div>
-                    </a>
+                    {% empty %}
+                    <p class="trending-empty">Aucune tendance pour le moment.</p>
+                    {% endfor %}
                 </div>
             </div>
         </aside>

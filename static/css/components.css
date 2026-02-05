@@ -424,3 +424,19 @@
         justify-content: center;
     }
 }
+
+/* ==================== UTILITY CLASSES ==================== */
+.hidden {
+    display: none !important;
+}
+
+.placeholder {
+    background-color: #333 !important;
+}
+
+.placeholder-trending {
+    background-color: #333;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

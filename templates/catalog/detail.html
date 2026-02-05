@@ -88,7 +88,8 @@
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg> Chat communautaire
                 </button>
-                <button class="btn btn-icon btn-favorite" onclick="toggleFavorite(this)">
+                <button class="btn btn-icon btn-favorite {% if is_favorite %}liked{% endif %}"
+                    onclick="toggleFavorite(this)" aria-label="Ajouter aux favoris" data-series-id="{{ series.id }}">
                     <!-- Outline Heart (Visible by default) -->
                     <svg class="heart-icon heart-outline" xmlns="http://www.w3.org/2000/svg" fill="none"
                         viewBox="0 0 24 24" stroke="currentColor">
@@ -200,27 +201,49 @@
 </div>
 
 <script>
-    function openTab(evt, tabName) {
-        var i, tabcontent, tablinks;
-        // Hide all tab content by removing active class
-        tabcontent = document.getElementsByClassName("tab-content");
-        for (i = 0; i < tabcontent.length; i++) {
-            tabcontent[i].classList.remove("active");
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
         }
-
-        // Remove active class from all tab links
-        tablinks = document.getElementsByClassName("tab-link");
-        for (i = 0; i < tablinks.length; i++) {
-            tablinks[i].classList.remove("active");
-        }
-
-        // Show current tab and set button active
-        document.getElementById(tabName).classList.add("active");
-        evt.currentTarget.classList.add("active");
+        return cookieValue;
     }
 
     function toggleFavorite(btn) {
-        btn.classList.toggle("liked");
+        const seriesId = btn.dataset.seriesId;
+        const csrftoken = getCookie('csrftoken');
+
+        fetch(`/catalogue/series/${seriesId}/favorite/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json'
+            },
+            mode: 'same-origin'
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else if (response.status === 403 || response.status === 401) {
+                    window.location.href = "{% url 'login' %}?next={{ request.path }}";
+                }
+                throw new Error('Network response was not ok');
+            })
+            .then(data => {
+                if (data.is_favorite) {
+                    btn.classList.add("liked");
+                } else {
+                    btn.classList.remove("liked");
+                }
+            })
+            .catch(error => console.error('Error:', error));
     }
 </script>
 </div>

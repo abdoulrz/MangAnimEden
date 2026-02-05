@@ -8,6 +8,7 @@
                 <span class="gradient-text navbar-brand-text">MangAnimEDen</span>
             </a>
 
+
             <!-- Navigation Links (Grouped with Brand) -->
             <div class="navbar-menu">
                 {% with url_name=request.resolver_match.view_name %}
@@ -15,9 +16,8 @@
                     class="nav-link {% if url_name == 'home' or url_name == 'catalog:detail' %}active{% endif %}">Accueil</a>
                 <a href="{% url 'catalog:index' %}"
                     class="nav-link {% if url_name == 'catalog:index' %}active{% endif %}">Catalogue</a>
-                <a href="{% url 'social_home' %}"
-                    class="nav-link {% if url_name == 'social_home' %}active{% endif %}">Chat</a>
-                <a href="{% url 'news' %}" class="nav-link {% if url_name == 'news' %}active{% endif %}">Actualités</a>
+                <a href="{% url 'forum_home' %}"
+                    class="nav-link {% if url_name == 'forum_home' %}active{% endif %}">Forum</a>
                 {% endwith %}
             </div>
         </div>
@@ -56,9 +56,9 @@
                         Mon Profil
                     </a>
 
-                    <a href="#" class="dropdown-item">
-                        <span class="dropdown-icon">❤️</span>
-                        Mes Favoris
+                    <a href="{% url 'users:domaine' %}" class="dropdown-item">
+                        <span class="dropdown-icon">📖</span>
+                        Domaine
                     </a>
 
                     <a href="#" class="dropdown-item">

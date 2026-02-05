@@ -1,0 +1,275 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Social - MangaAnimEden{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/chat.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-page-container">
+    <!-- 1. Top Section: Stories (reusing classes from pages.css) -->
+    <div class="stories-section">
+        <div class="stories-container">
+            <!-- Add Story Trigger (Moderators Only) -->
+            {% if can_post_story %}
+            <div class="story-item story-add" onclick="openStoryModal()">
+                <div class="story-ring">
+                    <div class="story-circle">
+                        <span class="story-add-icon">+</span>
+                    </div>
+                </div>
+                <span class="story-name">Ajouter</span>
+            </div>
+            {% endif %}
+
+            <!-- Stories Loop -->
+            {% for group in story_groups %}
+            <a href="?story_group_id={{ group.id }}" class="story-item">
+                <div class="story-ring has-story {% if active_story_group == group %}active{% endif %}">
+                    <div class="story-circle">
+                        {% if group.icon %}
+                        <img src="{{ group.icon.url }}" alt="{{ group.name }}" class="story-user-avatar">
+                        {% else %}
+                        <span>{{ group.name|slice:":1"|upper }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <span class="story-name">{{ group.name }}</span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Story Upload Modal -->
+    <div id="storyModal" class="modal-overlay hidden">
+        <div class="glass-panel modal-content">
+            <div class="modal-header">
+                <h3>Nouvelle Story de Groupe</h3>
+                <span class="close-modal" onclick="closeStoryModal()">×</span>
+            </div>
+            <form method="post" enctype="multipart/form-data" class="story-form-styled">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label>Choisir le groupe</label>
+                    <select name="target_group_id" class="modal-select" required>
+                        <option value="">-- Sélectionner --</option>
+                        {% for g in groups %}
+                        <option value="{{ g.id }}">{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group file-upload-group">
+                    <label for="story_file" class="file-dummy">
+                        <span>📤 Sélectionner une image</span>
+                    </label>
+                    <input type="file" name="story_image" id="story_file" accept="image/*" required
+                        onchange="updateFileName(this)">
+                    <span id="file-name" class="file-name-display">Aucun fichier choisi</span>
+                </div>
+                <button type="submit" class="modal-submit-btn">Publier</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Main 3-Column Layout -->
+    <div class="chat-main-layout">
+
+        <!-- Left Column: Groups -->
+        <div class="sidebar-container groups-sidebar">
+            <h2 class="section-title">Groupes</h2>
+            <div class="glass-panel sidebar-content">
+                <div class="groups-list">
+                    {% for group in groups %}
+                    <a href="?group_id={{ group.id }}"
+                        class="group-card {% if active_group.id == group.id %}active{% endif %}">
+                        <div class="group-icon">
+                            {% if group.icon %}
+                            <img src="{{ group.icon.url }}" alt="{{ group.name }}">
+                            {% else %}
+                            <span>{{ group.name|slice:":1"|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="group-info">
+                            <span class="group-name">{{ group.name }}</span>
+                            <span class="group-desc-short">{{ group.description|truncatechars:30 }}</span>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="no-data">Aucun groupe.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Center Column: Dynamic Content -->
+        <div class="chat-window-container">
+
+            {% if active_mode == 'chat' %}
+            <!-- Chat View -->
+            <div class="glass-panel chat-window">
+                <div class="chat-header">
+                    <h3>{{ active_group.name }}</h3>
+                    <p class="group-desc">{{ active_group.description|truncatechars:50 }}</p>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    {% for message in messages %}
+                    <div class="message {% if message.sender == user %}my-message{% else %}other-message{% endif %}">
+                        <div class="message-bubble">
+                            <div class="message-info">
+                                <span class="sender-name">{{ message.sender.nickname }}</span>
+                                <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
+                            </div>
+                            <p class="message-text">{{ message.content }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon">💬</div>
+                        <h3>Pas encore de messages...</h3>
+                        <p>Commencez la conversation !</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="chat-input-area">
+                    <form method="post" action="?group_id={{ active_group.id }}" class="chat-form">
+                        {% csrf_token %}
+                        <input type="text" name="content" class="chat-input" placeholder="Écrivez votre message..."
+                            autocomplete="off" required>
+                        <button type="submit" class="send-btn">🚀</button>
+                    </form>
+                </div>
+            </div>
+
+            {% elif active_mode == 'story' %}
+            <!-- Story View (Full) -->
+            <div class="glass-panel story-view-container">
+                <div class="story-view-header">
+                    <h3>Stories : {{ active_story_group.name }}</h3>
+                    <a href="{% url 'forum_home' %}" class="close-story-btn">×</a>
+                </div>
+                <div class="story-carousel">
+                    {% for story in active_group_stories %}
+                    <div class="story-card-full">
+                        <img src="{{ story.image.url }}" alt="Story">
+                        <a href="?group_id={{ active_story_group.id }}" class="discuss-btn">
+                            💬 Discuter ici
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% elif active_mode == 'event' %}
+            <!-- Event View (Centered) -->
+            <div class="glass-panel event-view-container text-center">
+                <div class="event-view-header">
+                    <h3>{{ active_event.title }}</h3>
+                    <a href="{% url 'forum_home' %}" class="close-event-btn">×</a>
+                </div>
+                <div class="event-focused-content">
+                    <div class="event-icon-medium">
+                        {% if active_event.image %}
+                        <img src="{{ active_event.image.url }}" alt="{{ active_event.title }}">
+                        {% else %}
+                        <span>📅</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="event-meta-centered">
+                        <p class="event-date-large">
+                            {{ active_event.date|date:"d/m/y" }}
+                            <span class="date-separator">●</span>
+                            {{ active_event.date|date:"H:i" }}
+                        </p>
+                        <p class="event-location-large">📍 {{ active_event.location }}</p>
+                    </div>
+
+                    <div class="event-description-centered">
+                        {{ active_event.description|linebreaks }}
+                    </div>
+                </div>
+            </div>
+
+            {% else %}
+            <!-- Default View -->
+            <div class="glass-panel empty-selection">
+                <div class="empty-content">
+                    <div class="logo-animation">
+                        <span class="logo-icon">🌸</span>
+                    </div>
+                    <h2>MangaAnimEden Forum</h2>
+                    <p>Sélectionnez un groupe, une story, ou un event pour afficher les détails.</p>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Right Column: Events -->
+        <div class="sidebar-container events-sidebar">
+            <h2 class="section-title">Events</h2>
+            <div class="glass-panel sidebar-content">
+                <div class="events-list">
+                    {% for event in events %}
+                    <a href="?event_id={{ event.id }}"
+                        class="event-card {% if active_event.id == event.id %}active{% endif %}">
+                        <div class="event-image">
+                            {% if event.image %}
+                            <img src="{{ event.image.url }}" alt="{{ event.title }}">
+                            {% else %}
+                            <div class="event-placeholder">📅</div>
+                            {% endif %}
+                        </div>
+                        <div class="event-details">
+                            <h4>{{ event.title }}</h4>
+                            <p class="event-date">{{ event.date|date:"d M" }}</p>
+                            <p class="event-location">📍 {{ event.location }}</p>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="no-data">Aucun événement.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Auto scroll to bottom of chat
+    const chatMessages = document.getElementById('chatMessages');
+    if (chatMessages) {
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Modal Logic
+    function openStoryModal() {
+        document.getElementById('storyModal').style.display = 'flex';
+    }
+
+    function closeStoryModal() {
+        document.getElementById('storyModal').style.display = 'none';
+    }
+
+    function updateFileName(input) {
+        const display = document.getElementById('file-name');
+        if (input.files && input.files.length > 0) {
+            display.textContent = input.files[0].name;
+        } else {
+            display.textContent = "Aucun fichier choisi";
+        }
+    }
+
+    // Close modal on outside click
+    window.onclick = function (event) {
+        const modal = document.getElementById('storyModal');
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+{% endblock %}

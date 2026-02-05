@@ -4,118 +4,324 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% load static %}{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/domaine.css' %}?v={{ STATIC_VERSION }}">
+<style>
+    /* Inline override for profile specific layout if needed, though reuse is preferred */
+    .profile-layout-container {
+        display: flex;
+        gap: 1.5rem;
+        max-width: 1100px;
+        /* Wider than original 800px to fit sidebar */
+        margin: 0 auto;
+        padding-top: var(--space-2xl);
+        padding-bottom: var(--space-3xl);
+    }
+
+    .profile-main-content {
+        flex: 1;
+        min-width: 0;
+    }
+
+    .profile-sidebar {
+        width: 280px;
+        flex-shrink: 0;
+        position: sticky;
+        top: 50vh;
+        transform: translateY(-50%);
+        height: min-content;
+        /* Important for sticky to work if parent is tall */
+    }
+</style>
 {% endblock %}
 
 {% block content %}
-<div class="container page-container">
+<div class="profile-layout-container">
 
-    <!-- Header Notification -->
-    <div class="profile-notification">
-        <div class="notification-text">
-            <h3>Complétez votre profil</h3>
-            <p>Personnalisez votre expérience</p>
-        </div>
-        <a href="{% url 'users:edit_profile' %}" class="btn btn-primary btn-sm">Compléter</a>
-    </div>
-
-    <!-- Main Profile Card -->
-    <div class="profile-card">
-        <div class="profile-header-bg">
-            <a href="{% url 'users:edit_profile' %}" class="edit-profile-btn">📝</a>
+    <!-- Main Content Column -->
+    <div class="profile-main-content">
+        <!-- Header Notification -->
+        <div class="profile-notification">
+            <div class="notification-text">
+                <h3>Complétez votre profil</h3>
+                <p>Personnalisez votre expérience</p>
+            </div>
+            <a href="{% url 'users:edit_profile' %}" class="btn btn-primary btn-sm">Compléter</a>
         </div>
 
-        <div class="profile-info-container">
-            <!-- Avatar -->
-            <div class="profile-avatar-wrapper">
-                <div class="profile-avatar">
-                    {{ user.username|make_list|first|upper }}
+        <!-- Main Profile Card -->
+        <div class="profile-card">
+            <div class="profile-header-bg">
+                <a href="{% url 'users:edit_profile' %}" class="edit-profile-btn">📝</a>
+            </div>
+
+            <div class="profile-info-container">
+                <!-- Avatar -->
+                <div class="profile-avatar-wrapper">
+                    <div class="profile-avatar">
+                        {{ user.username|make_list|first|upper }}
+                    </div>
+                </div>
+
+                <!-- User Info -->
+                <h1 class="profile-username">{{ user.nickname|default:user.email }}</h1>
+                <div class="profile-level-bar"></div> <!-- Small purple bar -->
+
+                <!-- Stats Grid -->
+                <div class="profile-stats">
+                    <div class="stat-box">
+                        <span class="stat-icon">🏆</span>
+                        <span class="stat-value">1</span>
+                        <span class="stat-label">NIVEAU</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-icon">👥</span>
+                        <span class="stat-value">42</span>
+                        <span class="stat-label">AMIS</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-icon">⭐</span>
+                        <span class="stat-value">3</span>
+                        <span class="stat-label">BADGES</span>
+                    </div>
+                </div>
+
+                <p class="member-since">Membre depuis {{ user.date_joined|date:"F Y" }}</p>
+            </div>
+        </div>
+
+        <!-- Carte Otaku Banner -->
+        <div class="otaku-card-banner">
+            <div class="otaku-icon-wrapper">
+                <span class="otaku-icon">💳</span>
+            </div>
+            <div class="otaku-text">
+                <h3>Carte Otaku</h3>
+                <p>Obtenez des réductions exclusives</p>
+            </div>
+            <div class="otaku-arrow">›</div>
+        </div>
+
+        <!-- Dynamic Domaine Content (Replacing Quick Access) -->
+        <div id="domaine-content-area" class="domaine-dynamic-content glass-panel custom-scrollbar"
+            style="padding: 2rem; min-height: 500px; max-height: 700px;">
+
+            <!-- Default / Empty State (Optional) -->
+            <div id="content-overview" class="content-block">
+                <h2 class="section-title">Domaine</h2>
+                <!-- Reusing a simpler quick access if needed, or just intro -->
+                <div class="profile-welcome-panel"
+                    style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4rem 2rem;">
+
+                    <!-- Added Book Animation -->
+                    <div class="book-animation" style="margin-bottom: 2rem;">
+                        <div class="book-cover"></div>
+                        <div class="book-page"></div>
+                        <div class="book-page"></div>
+                    </div>
+
+                    <h3>Bienvenue dans votre Espace</h3>
+                    <p class="profile-welcome-text">Sélectionnez une catégorie à droite pour voir vos contenus.
+                    </p>
                 </div>
             </div>
 
-            <!-- User Info -->
-            <h1 class="profile-username">{{ user.nickname|default:user.email }}</h1>
-            <div class="profile-level-bar"></div> <!-- Small purple bar -->
-
-            <!-- Stats Grid -->
-            <div class="profile-stats">
-                <div class="stat-box">
-                    <span class="stat-icon">🏆</span>
-                    <span class="stat-value">1</span>
-                    <span class="stat-label">NIVEAU</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-icon">👥</span>
-                    <span class="stat-value">42</span>
-                    <span class="stat-label">AMIS</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-icon">⭐</span>
-                    <span class="stat-value">3</span>
-                    <span class="stat-label">BADGES</span>
+            <!-- Scans Block -->
+            <div id="content-scans" class="content-block content-hidden" style="display: none;">
+                <h2 class="panel-title">📚 Mes Scans</h2>
+                <div class="scans-grid">
+                    {% for series in scans %}
+                    <a href="{% url 'catalog:detail' series.id %}" class="scan-card">
+                        {% if series.cover %}
+                        <img src="{{ series.cover.url }}" alt="{{ series.title }}">
+                        {% else %}
+                        <div class="manga-cover placeholder">
+                            <span>📚</span>
+                        </div>
+                        {% endif %}
+                        <h4>{{ series.title }}</h4>
+                    </a>
+                    {% empty %}
+                    <div class="empty-state-container">
+                        <div class="empty-state-animation">
+                            <div class="book-animation">
+                                <div class="book-cover"></div>
+                                <div class="book-page"></div>
+                                <div class="book-page"></div>
+                            </div>
+                        </div>
+                        <p class="empty-state-text">Aucun scan enregistré pour le moment.</p>
+                        <p class="empty-state-subtext">Commencez à lire pour voir vos scans ici !</p>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
 
-            <p class="member-since">Membre depuis {{ user.date_joined|date:"F Y" }}</p>
+            <!-- Favoris Block -->
+            <div id="content-favoris" class="content-block content-hidden" style="display: none;">
+                <h2 class="panel-title">❤️ Mes Favoris</h2>
+                <div class="scans-grid">
+                    {% for series in favoris %}
+                    <a href="{% url 'catalog:detail' series.id %}" class="scan-card">
+                        {% if series.cover %}
+                        <img src="{{ series.cover.url }}" alt="{{ series.title }}">
+                        {% else %}
+                        <div class="manga-cover placeholder">
+                            <span>❤️</span>
+                        </div>
+                        {% endif %}
+                        <h4>{{ series.title }}</h4>
+                    </a>
+                    {% empty %}
+                    <div class="empty-state-container">
+                        <div class="empty-state-animation">
+                            <!-- Reuse animation or simple text -->
+                            <p class="empty-state-text">Aucun favori pour le moment.</p>
+                            <p class="empty-state-subtext">Ajoutez des séries à vos favoris pour les retrouver ici !</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Stats Block -->
+            <div id="content-stats" class="content-block content-hidden" style="display: none;">
+                <h2 class="panel-title">📊 Statistiques de Lecture</h2>
+                <div class="stats-dashboard">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ stats.total_chapters }}</div>
+                        <div class="stat-label">Chapitres lus</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ stats.series_in_progress }}</div>
+                        <div class="stat-label">Séries en cours</div>
+                    </div>
+                    <div class="stat-card">
+                        {% if stats.finished_series > 0 %}
+                        <div class="stat-value">{{ stats.finished_series }}</div>
+                        {% else %}
+                        <div class="stat-value" style="font-size: 2.5rem;">🚧</div>
+                        {% endif %}
+                        <div class="stat-label">Séries terminées</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Block -->
+            <div id="content-history" class="content-block content-hidden" style="display: none;">
+                <h2 class="panel-title">📚 Historique de Lecture</h2>
+                <div class="history-timeline">
+                    {% for series, progress_list in series_progress.items %}
+                    <div class="history-group">
+                        <h3 class="series-title">{{ series.title }}</h3>
+                        {% for progress in progress_list %}
+                        <div class="history-item">
+                            <a href="{% url 'reader:demo_chapter' progress.chapter.id %}">
+                                {% if series.cover %}
+                                <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="history-cover">
+                                {% else %}
+                                <div class="history-cover placeholder"
+                                    style="display:flex; justify-content:center; align-items:center; background:rgba(255,255,255,0.1); border-radius:8px;">
+                                    <span>📚</span>
+                                </div>
+                                {% endif %}
+                                <div class="history-details">
+                                    <h4>Chapitre {{ progress.chapter.number }}</h4>
+                                    <span class="history-time">{{ progress.last_read|timesince }}</span>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% empty %}
+                    <p class="empty-message">Aucun historique de lecture.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
         </div>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                const sidebarLinks = document.querySelectorAll('.profile-sidebar .block-item');
+                const contentBlocks = document.querySelectorAll('.content-block');
+                const contentArea = document.getElementById('domaine-content-area');
+
+                sidebarLinks.forEach(link => {
+                    link.addEventListener('click', function (e) {
+                        e.preventDefault();
+
+                        // EXTRACT TARGET ID
+                        let targetId = 'overview';
+                        const url = new URL(this.href, window.location.origin);
+                        const mode = url.searchParams.get('mode');
+                        if (mode) targetId = mode;
+
+                        // 1. HIDE ALL BLOCKS FORCEFULLY
+                        contentBlocks.forEach(block => {
+                            block.style.display = 'none'; // Force inline hide
+                            block.classList.add('content-hidden'); // Backup class
+                        });
+
+                        // 2. RESET ACTIVE STATE ON SIDEBAR
+                        sidebarLinks.forEach(l => l.classList.remove('active'));
+
+                        // 3. SHOW TARGET BLOCK
+                        const targetBlock = document.getElementById('content-' + targetId);
+                        if (targetBlock) {
+                            targetBlock.style.display = 'block'; // Force inline show
+                            targetBlock.classList.remove('content-hidden');
+                            this.classList.add('active'); // Add active class to clicked link
+
+                            // 4. SCROLL TO CONTENT CENTERED
+                            requestAnimationFrame(() => {
+                                contentArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            });
+                        }
+                    });
+                });
+            });
+        </script>
+
+        <!-- Profile Settings Link -->
+        <a href="#" class="settings-link-row">
+            <div class="settings-icon-circle">⚙️</div>
+            <div class="settings-text">
+                <h3>Paramètres du profil</h3>
+                <p>Modifier mes informations</p>
+            </div>
+            <div class="settings-arrow">›</div>
+        </a>
     </div>
 
-    <!-- Carte Otaku Banner -->
-    <div class="otaku-card-banner">
-        <div class="otaku-icon-wrapper">
-            <span class="otaku-icon">💳</span>
-        </div>
-        <div class="otaku-text">
-            <h3>Carte Otaku</h3>
-            <p>Obtenez des réductions exclusives</p>
-        </div>
-        <div class="otaku-arrow">›</div>
-    </div>
-
-    <!-- Quick Access Grid -->
-    <div class="quick-access-section">
-        <h2 class="section-title">Mes accès rapides</h2>
-        <div class="quick-access-grid">
-            <a href="#" class="quick-access-item">
-                <div class="access-icon-circle icon-heart">❤️</div>
-                <span>Mes Favoris</span>
+    <!-- Right Sidebar (Fixed) -->
+    <div class="profile-sidebar">
+        <!-- Reusing sidebar-content class but ensuring it works with imported CSS -->
+        <div class="glass-panel sidebar-content">
+            <!-- Favoris -->
+            <a href="{% url 'users:domaine' %}?mode=favoris" class="block-item" id="nav-item-favoris">
+                <span class="block-icon">❤️</span>
+                <span class="block-title">Favoris</span>
             </a>
 
-            <a href="#" class="quick-access-item">
-                <div class="access-icon-circle icon-book">📖</div>
-                <span>Mes Mangas</span>
+            <!-- Scans -->
+            <a href="{% url 'users:domaine' %}?mode=scans" class="block-item" id="nav-item-scans">
+                <span class="block-icon">📚</span>
+                <span class="block-title">Scans</span>
             </a>
 
-            <a href="#" class="quick-access-item">
-                <div class="access-icon-circle icon-bookmark">🔖</div>
-                <span>Enregistrements</span>
+            <!-- Statistiques -->
+            <a href="{% url 'users:domaine' %}?mode=stats" class="block-item" id="nav-item-stats">
+                <span class="block-icon">📊</span>
+                <span class="block-title">Statistiques</span>
             </a>
 
-            <a href="#" class="quick-access-item">
-                <div class="access-icon-circle icon-team">👥</div>
-                <span>Mes Équipes</span>
-            </a>
-
-            <a href="#" class="quick-access-item">
-                <div class="access-icon-circle icon-chat">💬</div>
-                <span>Chat</span>
-            </a>
-
-            <a href="#" class="quick-access-item">
-                <div class="access-icon-circle icon-calendar">📅</div>
-                <span>Événements</span>
+            <!-- Historique -->
+            <a href="{% url 'users:domaine' %}?mode=history" class="block-item" id="nav-item-history">
+                <span class="block-icon">📚</span>
+                <span class="block-title">Historique</span>
             </a>
         </div>
     </div>
-
-    <!-- Profile Settings Link -->
-    <a href="#" class="settings-link-row">
-        <div class="settings-icon-circle">⚙️</div>
-        <div class="settings-text">
-            <h3>Paramètres du profil</h3>
-            <p>Modifier mes informations</p>
-        </div>
-        <div class="settings-arrow">›</div>
-    </a>
 
 </div>
 {% endblock %}

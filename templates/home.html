@@ -5,101 +5,127 @@
 {% block content %}
 <div class="container home-container">
 
-    <!-- Home Grid Layout -->
-    <div class="home-grid">
-        <!-- Top Left: Dernières mises à jour (3fr) -->
-        <section class="home-block updates-block">
-            <div class="block-header">
-                <h2 class="block-title"><span>🕐</span> Dernières mises à jour</h2>
-                <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
+    <!-- Continue Reading Hero (NEW - Above Grid) -->
+    {% if user.is_authenticated and continue_reading %}
+    <section class="continue-reading-hero">
+        <div class="hero-banner">
+            {% if continue_reading.series.cover %}
+            <img src="{{ continue_reading.series.cover.url }}" class="hero-bg" alt="bg">
+            {% endif %}
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <span class="hero-label">📖 Reprendre la lecture</span>
+                <h2>{{ continue_reading.series.title }}</h2>
+                <p class="hero-chapter">Chapitre {{ continue_reading.number }}</p>
+                <a href="{% url 'reader:demo_chapter' continue_reading.id %}" class="btn-hero-continue">
+                    Continuer →
+                </a>
             </div>
-            <div class="block-content">
-                <div class="cards-grid-3">
-                    {% for series in latest_updates %}
-                    <!-- Card {{ forloop.counter }} -->
-                    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
-                        <div class="manga-cover">
-                            {% if series.cover %}
-                            <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
-                            {% else %}
-                            <div class="manga-image mock-cover-{{ forloop.counter }}"></div>
-                            {% endif %}
-                            <span class="badge-status">{{ series.get_status_display|default:"En cours" }}</span>
-                            <div class="badge-rating"><span>★</span> 4.5</div>
-                            <span class="badge-chapter">{{ series.chapters.count }} ch.</span>
-                        </div>
-                        <h3 class="manga-title">{{ series.title }}</h3>
-                        <p class="manga-meta">{{ series.updated_at|timesince }}</p>
-                    </a>
-                    {% empty %}
-                    <p class="empty-text">Aucun manga récent.</p>
-                    {% endfor %}
-                </div>
-            </div>
-        </section>
+        </div>
+    </section>
+    {% endif %}
 
-        <!-- Top Right: Dernières lectures -->
-        <section class="home-block history-block">
-            <div class="block-header">
-                <h2 class="block-title"><span>📖</span> Dernières lectures</h2>
-            </div>
-            <div class="block-content">
-                <!-- Last Read Article Block (Neumorphic) -->
-                <div class="last-read-card">
-                    <div class="last-read-info">
-                        <span class="last-read-title">Aucune lecture récente</span>
-                        <span class="last-read-chapter">-</span>
+    <!-- Home Grid Layout -->
+    <div class="container home-container">
+
+        <!-- Home Grid Layout -->
+        <div class="home-grid">
+            <!-- Top Left: Dernières mises à jour (3fr) -->
+            <section class="home-block updates-block">
+                <div class="block-header">
+                    <h2 class="block-title"><span>🕐</span> Dernières mises à jour</h2>
+                    <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
+                </div>
+                <div class="block-content">
+                    <div class="cards-grid-3">
+                        {% for series in latest_updates %}
+                        <!-- Card {{ forloop.counter }} -->
+                        <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
+                            <div class="manga-cover">
+                                {% if series.cover %}
+                                <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
+                                {% else %}
+                                <div class="manga-image mock-cover-{{ forloop.counter }}"></div>
+                                {% endif %}
+                                <span class="badge-status">{{ series.get_status_display|default:"En cours" }}</span>
+                                <div class="badge-rating"><span>★</span> 4.5</div>
+                                <span class="badge-chapter">{{ series.chapters.count }} ch.</span>
+                            </div>
+                            <h3 class="manga-title">{{ series.title }}</h3>
+                            <p class="manga-meta">{{ series.updated_at|timesince }}</p>
+                        </a>
+                        {% empty %}
+                        <p class="empty-text">Aucun manga récent.</p>
+                        {% endfor %}
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Bottom Left: Populaires (3fr) -->
-        <section class="home-block popular-block">
-            <div class="block-header">
-                <h2 class="block-title"><span>🔥</span> Populaires en ce moment</h2>
-                <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
-            </div>
-            <div class="block-content">
-                <div class="cards-grid-3">
-                    {% for series in popular_series %}
-                    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
-                        <div class="manga-cover">
-                            {% if series.cover %}
-                            <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
-                            {% else %}
-                            <div class="manga-image mock-cover-{{ forloop.counter|add:3 }}"></div>
-                            {% endif %}
-                            <span class="badge-status">{{ series.get_status_display }}</span>
-                            <div class="badge-rating"><span>★</span> 4.9</div>
+            <!-- Top Right: Ad Block -->
+            <section class="home-block ad-block">
+                <div class="block-content centered-content">
+                    <div class="ad-placeholder">
+                        <div class="ad-animation">
+                            <span class="ad-text">Espace Publicitaire</span>
                         </div>
-                        <h3 class="manga-title">{{ series.title }}</h3>
-                        <p class="manga-meta">Action, Aventure</p>
-                    </a>
-                    {% empty %}
-                    <p class="empty-text">Aucun manga populaire.</p>
-                    {% endfor %}
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Bottom Right: Ads / Quotes -->
-        <section class="home-block ads-block">
-            <div class="block-content centered-content">
-                <div class="quote-container">
-                    <p class="quote-text">"Le pouvoir ne vient pas de la volonté de frapper, mais de la volonté de
-                        protéger."</p>
-                    <span class="quote-author">- Anime World</span>
+            <!-- Bottom Left: Populaires (3fr) -->
+            <section class="home-block popular-block">
+                <div class="block-header">
+                    <h2 class="block-title"><span>🔥</span> Populaires en ce moment</h2>
+                    <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
                 </div>
-            </div>
-        </section>
+                <div class="block-content">
+                    <div class="cards-grid-3">
+                        {% for series in popular_series %}
+                        <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
+                            <div class="manga-cover">
+                                {% if series.cover %}
+                                <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
+                                {% else %}
+                                <div class="manga-image mock-cover-{{ forloop.counter|add:3 }}"></div>
+                                {% endif %}
+                                <span class="badge-status">{{ series.get_status_display }}</span>
+                                <div class="badge-rating"><span>★</span> 4.9</div>
+                            </div>
+                            <h3 class="manga-title">{{ series.title }}</h3>
+                            <p class="manga-meta">Action, Aventure</p>
+                        </a>
+                        {% empty %}
+                        <p class="empty-text">Aucun manga populaire.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Bottom Right: Wisdom/Quotes Block -->
+            <section class="home-block ads-block">
+                <div class="block-content centered-content">
+                    <div class="quote-container">
+                        {% if quote %}
+                        <p class="quote-text">"{{ quote.quote }}"</p>
+                        <span class="quote-author">
+                            — {{ quote.character|default:"Unknown" }}
+                            {% if quote.anime %}<br><small>{{ quote.anime }}</small>{% endif %}
+                        </span>
+                        {% else %}
+                        <p class="quote-text">"Le pouvoir ne vient pas de la volonté de frapper, mais de la volonté de
+                            protéger."</p>
+                        <span class="quote-author">— Anime World</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
-</div>
 
-{% if not user.is_authenticated %}
-<!-- CTA Banner -->
-<div class="container-wide">
-    {% include 'components/cta_banner.html' %}
-</div>
-{% endif %}
-{% endblock %}
+    {% if not user.is_authenticated %}
+    <!-- CTA Banner -->
+    <div class="container-wide">
+        {% include 'components/cta_banner.html' %}
+    </div>
+    {% endif %}
+    {% endblock %}

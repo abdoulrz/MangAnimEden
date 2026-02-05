@@ -1,0 +1,333 @@
+/**
+ * DESIGN TOKENS - Single Source of Truth
+ * Basé sur SPEC-002 pour le design purple/pink moderne
+ * Inspiré des mockups fournis
+ */
+
+:root {
+    /* === PALETTE PURPLE/PINK === */
+    --color-bg-primary: #0A0A0A;
+    /* Très sombre (quasi noir) */
+    --color-bg-secondary: #141414;
+    --color-bg-elevated: #1A1A1A;
+    --color-bg-card: #1E1E1E;
+    --color-bg-input: #0F0F0F;
+
+    /* Purple Gradient */
+    --color-purple-primary: #8B5CF6;
+    /* Violet vibrant */
+    --color-purple-hover: #7C3AED;
+    --color-purple-dark: #6D28D9;
+
+    /* Pink Gradient */
+    --color-pink-primary: #EC4899;
+    /* Rose vibrant */
+    --color-pink-hover: #DB2777;
+
+    /* Gradients */
+    --gradient-purple-pink: linear-gradient(135deg, #8B5CF6 0%, #EC4899 100%);
+    --gradient-purple-pink-hover: linear-gradient(135deg, #7C3AED 0%, #DB2777 100%);
+
+    /* Texte */
+    --color-text-primary: #FFFFFF;
+    --color-text-secondary: #A1A1AA;
+    /* Gray 400 */
+    --color-text-muted: #71717A;
+    /* Gray 500 */
+    --color-text-dim: #52525B;
+    /* Gray 600 */
+
+    /* Accents */
+    --color-border: #27272A;
+    /* Subtle border */
+    --color-border-hover: #3F3F46;
+
+    /* === ESPACEMENTS (Grille de 8px) === */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+    --space-2xl: 48px;
+    --space-3xl: 64px;
+
+    /* === TYPOGRAPHIE === */
+    --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-reading: 'Merriweather', serif;
+
+    --font-size-xs: 0.75rem;
+    /* 12px */
+    --font-size-sm: 0.875rem;
+    /* 14px */
+    --font-size-base: 1rem;
+    /* 16px */
+    --font-size-lg: 1.125rem;
+    /* 18px */
+    --font-size-xl: 1.25rem;
+    /* 20px */
+    --font-size-2xl: 1.5rem;
+    /* 24px */
+    --font-size-3xl: 2rem;
+    /* 32px */
+    --font-size-4xl: 2.5rem;
+    /* 40px */
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    /* === TRANSITIONS === */
+    --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow: 400ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* === BORDERS & RADIUS === */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+    --radius-full: 9999px;
+
+    /* === SHADOWS === */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-base: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.7);
+    --shadow-purple: 0 8px 32px rgba(139, 92, 246, 0.25);
+
+    /* === Z-INDEX === */
+    --z-base: 1;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-overlay: 500;
+    --z-modal: 1000;
+    --z-toast: 2000;
+}
+
+/* === RESET GLOBAL === */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-ui);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* === UTILITIES === */
+.container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+.container-wide {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 var(--space-lg);
+}
+
+.hidden {
+    display: none !important;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.gradient-text {
+    background: var(--gradient-purple-pink);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* === BUTTONS === */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-sm);
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-ui);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    text-decoration: none;
+}
+
+.btn-primary {
+    background: var(--gradient-purple-pink);
+    color: var(--color-text-primary);
+    box-shadow: var(--shadow-purple);
+}
+
+.btn-primary:hover {
+    background: var(--gradient-purple-pink-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(139, 92, 246, 0.35);
+}
+
+.btn-secondary {
+    background: var(--color-bg-card);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+    background: var(--color-bg-elevated);
+    border-color: var(--color-border-hover);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--color-text-secondary);
+}
+
+.btn-ghost:hover {
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+}
+
+/* === INPUTS === */
+.input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--color-bg-input);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-family: var(--font-ui);
+    font-size: var(--font-size-base);
+    transition: all var(--transition-base);
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--color-purple-primary);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.input::placeholder {
+    color: var(--color-text-muted);
+}
+
+/* === CARDS === */
+.card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-lg);
+    transition: all var(--transition-base);
+}
+
+.card:hover {
+    border-color: var(--color-border-hover);
+    transform: translateY(-2px);
+}
+
+/* === LINKS === */
+a {
+    color: var(--color-purple-primary);
+    text-decoration: none;
+    transition: color var(--transition-fast);
+}
+
+a:hover {
+    color: var(--color-purple-hover);
+}
+
+/* === SECTION HEADERS === */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-lg);
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.section-link {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    font-size: var(--font-size-sm);
+    color: var(--color-purple-primary);
+    font-weight: var(--font-weight-medium);
+}
+
+.section-link:hover {
+    gap: var(--space-sm);
+}
+
+/* === EMPTY STATES === */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3xl) var(--space-lg);
+    text-align: center;
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-lg);
+    opacity: 0.5;
+}
+
+.empty-state-title {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-sm);
+}
+
+.empty-state-text {
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+}
+
+.empty-state-link {
+    margin-top: var(--space-md);
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+
+    .container,
+    .container-wide {
+        padding: 0 var(--space-md);
+    }
+
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-sm);
+    }
+}

@@ -1,9 +1,11 @@
 from django.db import models
+from django.conf import settings  # Import settings for AUTH_USER_MODEL
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 
 class Series(models.Model):
+
     """
     Représente une série de manga/manhwa/manhua.
     """
@@ -26,6 +28,9 @@ class Series(models.Model):
         verbose_name="Statut"
     )
     release_date = models.DateField(blank=True, null=True, verbose_name="Date de publication")
+    
+    # Analytics
+    views_count = models.PositiveIntegerField(default=0, verbose_name="Nombre de vues")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -101,6 +106,26 @@ class Page(models.Model):
         verbose_name_plural = "Pages"
         ordering = ['chapter', 'page_number']
         unique_together = ['chapter', 'page_number']
+
+
+class Favorite(models.Model):
+    """
+    Modèle pour les favoris utilisateur.
+    Relie un utilisateur à une série.
+    """
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='favorites')
+    series = models.ForeignKey(Series, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'series')
+        verbose_name = "Favori"
+        verbose_name_plural = "Favoris"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user} ❤️ {self.series}"
+
 
 
 

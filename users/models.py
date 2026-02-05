@@ -20,6 +20,12 @@ class CustomUserManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
+
+        if extra_fields.get('is_staff') is not True:
+            raise ValueError('Superuser must have is_staff=True.')
+        if extra_fields.get('is_superuser') is not True:
+            raise ValueError('Superuser must have is_superuser=True.')
+
         return self.create_user(email, password, **extra_fields)
 
 
@@ -41,10 +47,15 @@ class User(AbstractUser):
     xp = models.PositiveIntegerField(default=0)
 
     # Roles (Activités)
+    role_admin = models.BooleanField(default=False, verbose_name="Administrateur")
+    role_moderator = models.BooleanField(default=False, verbose_name="Modérateur")
     role_reader = models.BooleanField(default=True, verbose_name="Lecteur")
     role_translator = models.BooleanField(default=False, verbose_name="Traducteur")
     role_editor = models.BooleanField(default=False, verbose_name="Éditeur")
     role_author = models.BooleanField(default=False, verbose_name="Auteur")
+
+    # Status
+    is_banned = models.BooleanField(default=False, verbose_name="Banni")
 
     # Réseaux Sociaux
     social_facebook = models.URLField(blank=True, verbose_name="Facebook")

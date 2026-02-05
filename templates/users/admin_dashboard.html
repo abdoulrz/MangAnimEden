@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+
+{% block title %}Administration - MangaAnimEden{% endblock %}
+
+{% block extra_css %}
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/admin.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Tableau de Bord Administrateur</h1>
+        <div class="user-info">
+            Connecté en tant que {{ request.user.nickname }}
+        </div>
+    </div>
+
+    <div class="dashboard-tabs">
+        <button class="tab-btn active" onclick="switchTab('users')">Utilisateurs</button>
+        <button class="tab-btn" onclick="switchTab('content')">Contenu</button>
+    </div>
+
+    <!-- Users Tab -->
+    <div id="users" class="tab-content active">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>Utilisateur</th>
+                    <th>Email</th>
+                    <th>Rôles</th>
+                    <th>Statut</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>
+                        <div class="user-info-avatar-container">
+                            {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="avatar" class="user-avatar-img">
+                            {% else %}
+                            <div class="user-avatar-placeholder">
+                                {{ user.nickname|first|upper }}
+                            </div>
+                            {% endif %}
+                            {{ user.nickname }}
+                        </div>
+                    </td>
+                    <td>{{ user.email }}</td>
+                    <td>
+                        {% if user.role_admin %}<span class="role-badge admin">Admin</span>{% endif %}
+                        {% if user.role_moderator %}<span class="role-badge mod">Mod</span>{% endif %}
+                        {% if user.role_reader %}<span class="role-badge">Lecteur</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if user.is_banned %}
+                        <span class="status-banned">Banni</span>
+                        {% else %}
+                        <span class="status-active">Actif</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if user != request.user %}
+                        <div class="actions-container">
+                            <form method="POST" class="form-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <input type="hidden" name="action" value="toggle_admin">
+                                <button type="submit" class="action-btn btn-toggle-admin" title="Toggle Admin">
+                                    {% if user.role_admin %}Unset Admin{% else %}Set Admin{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" class="form-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <input type="hidden" name="action" value="toggle_moderator">
+                                <button type="submit" class="action-btn btn-toggle-mod" title="Toggle Mod">
+                                    {% if user.role_moderator %}Unset Mod{% else %}Set Mod{% endif %}
+                                </button>
+                            </form>
+                            <form method="POST" class="form-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="user_id" value="{{ user.id }}">
+                                <input type="hidden" name="action" value="toggle_ban">
+                                <button type="submit"
+                                    class="action-btn btn-toggle-ban {% if user.is_banned %}banned{% endif %}"
+                                    title="Toggle Ban">
+                                    {% if user.is_banned %}Unban{% else %}Ban{% endif %}
+                                </button>
+                            </form>
+                        </div>
+                        {% else %}
+                        <span class="user-self-label">(Vous)</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Content Tab -->
+    <div id="content" class="tab-content">
+        <div class="content-header">
+            <h2>Gestion du Catalogue</h2>
+            <!-- This allows adding content directly via Django Admin for now, or could link to a custom form -->
+            <a href="/admin/catalog/series/add/" target="_blank" class="add-btn">
+                <span>+</span> Ajouter une Série
+            </a>
+        </div>
+
+        <div class="series-grid">
+            {% for series in recent_series %}
+            <div class="series-card">
+                {% if series.cover %}
+                <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="series-cover">
+                {% else %}
+                <div class="series-cover no-cover-placeholder">
+                    No Cover</div>
+                {% endif %}
+                <div class="series-info">
+                    <div class="series-title">{{ series.title }}</div>
+                    <div class="series-status">{{ series.get_status_display }}</div>
+                    <a href="/admin/catalog/series/{{ series.id }}/change/" target="_blank"
+                        class="action-link">Modifier</a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-state">
+                Aucune série trouvée.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function switchTab(tabId) {
+        // Update Buttons
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+
+        // Update Content
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+    }
+</script>
+{% endblock %}
