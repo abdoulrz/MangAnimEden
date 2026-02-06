@@ -10,10 +10,10 @@
 
             <!-- Right: Links -->
             <div class="footer-links">
-                <a href="#" class="footer-link">Catalogue</a>
-                <a href="#" class="footer-link">Conditions</a>
-                <a href="#" class="footer-link">Confidentialité</a>
-                <a href="#" class="footer-link">Contact</a>
+                <a href="{% url 'catalog:index' %}" class="footer-link">Catalogue</a>
+                <a href="{% url 'about' %}#conditions" class="footer-link">Conditions</a>
+                <a href="{% url 'about' %}#conditions" class="footer-link">Confidentialité</a>
+                <a href="{% url 'about' %}" class="footer-link">A propos</a>
             </div>
         </div>
     </div>

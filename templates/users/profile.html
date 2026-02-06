@@ -48,44 +48,102 @@
             <a href="{% url 'users:edit_profile' %}" class="btn btn-primary btn-sm">Compléter</a>
         </div>
 
-        <!-- Main Profile Card -->
-        <div class="profile-card">
-            <div class="profile-header-bg">
-                <a href="{% url 'users:edit_profile' %}" class="edit-profile-btn">📝</a>
+        <!-- Main Profile Card (Premium Redesign) -->
+        <div class="profile-card profile-card-premium">
+            <div class="profile-header-gradient">
+                <a href="{% url 'users:edit_profile' %}" class="edit-profile-btn" title="Modifier le profil">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                </a>
             </div>
 
-            <div class="profile-info-container">
-                <!-- Avatar -->
-                <div class="profile-avatar-wrapper">
-                    <div class="profile-avatar">
-                        {{ user.username|make_list|first|upper }}
+            <div class="profile-content-premium">
+                <!-- Avatar with Ring -->
+                <div class="profile-avatar-premium-wrapper">
+                    <div class="profile-avatar-ring">
+                        {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.nickname }}" class="profile-avatar-img">
+                        {% else %}
+                        <div class="profile-avatar-placeholder">
+                            {{ user.nickname|first|upper }}
+                        </div>
+                        {% endif %}
                     </div>
+                    <div class="level-badge">Lvl {{ user.level }}</div>
                 </div>
 
                 <!-- User Info -->
-                <h1 class="profile-username">{{ user.nickname|default:user.email }}</h1>
-                <div class="profile-level-bar"></div> <!-- Small purple bar -->
+                <div class="profile-identity">
+                    <h1 class="profile-username">{{ user.nickname|default:user.username }}</h1>
+                    <p class="profile-role">
+                        {% if user.is_staff %}Administrateur{% else %}Membre Explorateur{% endif %}
+                    </p>
+                    <p class="member-since">Membre depuis {{ user.date_joined|date:"F Y" }}</p>
+                </div>
 
-                <!-- Stats Grid -->
-                <div class="profile-stats">
-                    <div class="stat-box">
-                        <span class="stat-icon">🏆</span>
-                        <span class="stat-value">1</span>
-                        <span class="stat-label">NIVEAU</span>
+                <!-- Level Progress -->
+                <div class="level-progress-container">
+                    <div class="level-info">
+                        <span>XP</span>
+                        <span>{{ level_data.current }} / {{ level_data.next }}</span>
                     </div>
-                    <div class="stat-box">
-                        <span class="stat-icon">👥</span>
-                        <span class="stat-value">42</span>
-                        <span class="stat-label">AMIS</span>
-                    </div>
-                    <div class="stat-box">
-                        <span class="stat-icon">⭐</span>
-                        <span class="stat-value">3</span>
-                        <span class="stat-label">BADGES</span>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" data-percent="{{ level_data.percent }}"
+                            style="width: {{ level_data.percent }}%;"></div>
                     </div>
                 </div>
 
-                <p class="member-since">Membre depuis {{ user.date_joined|date:"F Y" }}</p>
+                <!-- Stats Grid (Glass Cards) -->
+                <div class="profile-stats-grid">
+                    <div class="stat-glass-card">
+                        <div class="stat-icon-wrapper icon-purple">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value">42</span>
+                            <span class="stat-label">Amis</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-glass-card">
+                        <div class="stat-icon-wrapper icon-pink">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path
+                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z">
+                                </path>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value">12</span>
+                            <span class="stat-label">Badges</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-glass-card">
+                        <div class="stat-icon-wrapper icon-blue">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <span class="stat-value">{{ stats.total_chapters }}</span>
+                            <span class="stat-label">Chapitres</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -102,18 +160,16 @@
         </div>
 
         <!-- Dynamic Domaine Content (Replacing Quick Access) -->
-        <div id="domaine-content-area" class="domaine-dynamic-content glass-panel custom-scrollbar"
-            style="padding: 2rem; min-height: 500px; max-height: 700px;">
+        <div id="domaine-content-area"
+            class="domaine-dynamic-content glass-panel custom-scrollbar profile-content-area">
 
             <!-- Default / Empty State (Optional) -->
             <div id="content-overview" class="content-block">
                 <h2 class="section-title">Domaine</h2>
                 <!-- Reusing a simpler quick access if needed, or just intro -->
-                <div class="profile-welcome-panel"
-                    style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4rem 2rem;">
+                <div class="profile-welcome-panel profile-welcome-flex">
 
-                    <!-- Added Book Animation -->
-                    <div class="book-animation" style="margin-bottom: 2rem;">
+                    <div class="book-animation profile-book-animation">
                         <div class="book-cover"></div>
                         <div class="book-page"></div>
                         <div class="book-page"></div>
@@ -126,7 +182,7 @@
             </div>
 
             <!-- Scans Block -->
-            <div id="content-scans" class="content-block content-hidden" style="display: none;">
+            <div id="content-scans" class="content-block content-hidden">
                 <h2 class="panel-title">📚 Mes Scans</h2>
                 <div class="scans-grid">
                     {% for series in scans %}
@@ -157,7 +213,7 @@
             </div>
 
             <!-- Favoris Block -->
-            <div id="content-favoris" class="content-block content-hidden" style="display: none;">
+            <div id="content-favoris" class="content-block content-hidden">
                 <h2 class="panel-title">❤️ Mes Favoris</h2>
                 <div class="scans-grid">
                     {% for series in favoris %}
@@ -184,7 +240,7 @@
             </div>
 
             <!-- Stats Block -->
-            <div id="content-stats" class="content-block content-hidden" style="display: none;">
+            <div id="content-stats" class="content-block content-hidden">
                 <h2 class="panel-title">📊 Statistiques de Lecture</h2>
                 <div class="stats-dashboard">
                     <div class="stat-card">
@@ -199,7 +255,7 @@
                         {% if stats.finished_series > 0 %}
                         <div class="stat-value">{{ stats.finished_series }}</div>
                         {% else %}
-                        <div class="stat-value" style="font-size: 2.5rem;">🚧</div>
+                        <div class="stat-value stat-value-large">🚧</div>
                         {% endif %}
                         <div class="stat-label">Séries terminées</div>
                     </div>
@@ -207,7 +263,7 @@
             </div>
 
             <!-- History Block -->
-            <div id="content-history" class="content-block content-hidden" style="display: none;">
+            <div id="content-history" class="content-block content-hidden">
                 <h2 class="panel-title">📚 Historique de Lecture</h2>
                 <div class="history-timeline">
                     {% for series, progress_list in series_progress.items %}
@@ -219,8 +275,7 @@
                                 {% if series.cover %}
                                 <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="history-cover">
                                 {% else %}
-                                <div class="history-cover placeholder"
-                                    style="display:flex; justify-content:center; align-items:center; background:rgba(255,255,255,0.1); border-radius:8px;">
+                                <div class="history-cover placeholder history-cover-placeholder">
                                     <span>📚</span>
                                 </div>
                                 {% endif %}
@@ -273,24 +328,37 @@
                             this.classList.add('active'); // Add active class to clicked link
 
                             // 4. SCROLL TO CONTENT CENTERED
-                            requestAnimationFrame(() => {
-                                contentArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            });
+                            if (contentArea) {
+                                requestAnimationFrame(() => {
+                                    contentArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                });
+                            }
                         }
                     });
                 });
+
+                // FORCE PROGRESS BAR FIX - Read from data attribute
+                const progressBar = document.querySelector('.progress-bar-fill');
+                if (progressBar) {
+                    const percentValue = parseFloat(progressBar.getAttribute('data-percent') || '0');
+                    console.log('Progress bar percent:', percentValue); // Debug
+
+                    if (percentValue === 0 || percentValue < 0.1) {
+                        // Force complete invisibility for 0% or near-0%
+                        progressBar.style.width = '0';
+                        progressBar.style.minWidth = '0';
+                        progressBar.style.opacity = '0';
+                        progressBar.style.visibility = 'hidden';
+                    } else {
+                        // Ensure visible for non-zero values
+                        progressBar.style.width = percentValue + '%';
+                        progressBar.style.opacity = '1';
+                        progressBar.style.visibility = 'visible';
+                    }
+                }
             });
         </script>
 
-        <!-- Profile Settings Link -->
-        <a href="#" class="settings-link-row">
-            <div class="settings-icon-circle">⚙️</div>
-            <div class="settings-text">
-                <h3>Paramètres du profil</h3>
-                <p>Modifier mes informations</p>
-            </div>
-            <div class="settings-arrow">›</div>
-        </a>
     </div>
 
     <!-- Right Sidebar (Fixed) -->

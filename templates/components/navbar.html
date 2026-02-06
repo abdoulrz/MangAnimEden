@@ -4,7 +4,7 @@
         <!-- 1. Left: Logo + Brand + Menu -->
         <div class="navbar-left">
             <a href="{% url 'home' %}" class="navbar-brand">
-                <div class="navbar-logo">📚</div>
+                <div class="navbar-logo">⛩️</div>
                 <span class="gradient-text navbar-brand-text">MangAnimEDen</span>
             </a>
 
@@ -33,7 +33,7 @@
             {% endif %}
 
             <!-- Dark Mode Toggle -->
-            <button class="btn-ghost navbar-icon-btn">🌙</button>
+            <button id="theme-toggle" class="btn-ghost navbar-icon-btn">🌙</button>
 
             <!-- Notification Bell -->
             <button class="btn-ghost navbar-icon-btn">🔔</button>
@@ -42,7 +42,7 @@
             {% if user.is_authenticated %}
             <div class="navbar-profile-container">
                 <div class="navbar-profile" id="profileDropdownTrigger">
-                    <div class="user-avatar">{{ user.username|make_list|first|upper }}</div>
+                    <div class="user-avatar">{{ user.nickname|default:user.email|make_list|first|upper }}</div>
                 </div>
 
                 <!-- Dropdown Menu -->
@@ -56,15 +56,17 @@
                         Mon Profil
                     </a>
 
-                    <a href="{% url 'users:domaine' %}" class="dropdown-item">
-                        <span class="dropdown-icon">📖</span>
-                        Domaine
+                    <a href="{% url 'about' %}" class="dropdown-item">
+                        <span class="dropdown-icon">ℹ️</span>
+                        A propos
                     </a>
 
-                    <a href="#" class="dropdown-item">
-                        <span class="dropdown-icon">👥</span>
-                        Mes Teams
+                    {% if user.is_staff or user.role_admin %}
+                    <a href="{% url 'users:admin_dashboard' %}" class="dropdown-item">
+                        <span class="dropdown-icon">⚡</span>
+                        Tableau de bord
                     </a>
+                    {% endif %}
 
                     <div class="dropdown-divider"></div>
 
@@ -78,9 +80,10 @@
                 </div>
             </div>
 
-            <!-- Simple Script for Dropdown Toggle -->
+            <!-- Simple Script for Dropdown Toggle & Theme -->
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
+                    // Profile Dropdown
                     const trigger = document.getElementById('profileDropdownTrigger');
                     const dropdown = document.getElementById('profileDropdown');
 
@@ -94,6 +97,26 @@
                             if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
                                 dropdown.classList.remove('active');
                             }
+                        });
+                    }
+
+                    // Theme Toggle
+                    const themeBtn = document.getElementById('theme-toggle');
+                    const body = document.body;
+
+                    // Check saved theme
+                    const savedTheme = localStorage.getItem('theme');
+                    if (savedTheme === 'light') {
+                        body.classList.add('light-mode');
+                        themeBtn.textContent = '☀️';
+                    }
+
+                    if (themeBtn) {
+                        themeBtn.addEventListener('click', () => {
+                            body.classList.toggle('light-mode');
+                            const isLight = body.classList.contains('light-mode');
+                            themeBtn.textContent = isLight ? '☀️' : '🌙';
+                            localStorage.setItem('theme', isLight ? 'light' : 'dark');
                         });
                     }
                 });

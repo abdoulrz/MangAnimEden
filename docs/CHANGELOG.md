@@ -11,6 +11,26 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Feature "Trending" dans la sidebar (actuellement placeholders statiques).
 - Implémentation du système de "Stories" (en cours).
 
+## [1.5.0] - 2026-02-05 ([Phase 2.3 - Wisdom & UX Polish])
+
+### Added Wisdom
+
+- **Feature "Wisdom" (Support Régional)** : Base de données client-side (`app.js`) de citations inspirantes (Manga, Manhwa, Manhua).
+- **Localization** : Traduction intégrale des citations en Français.
+- **Performance** : Suppression de l'appel API bloquant vers `animechan.xyz`.
+
+### Changed Design
+
+- **Hero Banner Redesign** :
+  - **Compact Mode** : Bannière réduite (~100px) pour les utilisateurs connectés ("Reprendre la lecture").
+  - **Guest Mode** : Teaser "Prochainement" pour les fonctionnalités sociales (Groupes/Niveaux).
+- **Ambiance** : Ajout de gradients d'arrière-plan "Ambient" (Violet/Rose) pour réchauffer l'interface sombre.
+- **Spacing** : Réduction significative de l'espace entre le Hero et la grille de contenu.
+
+### Added Docs
+
+- **Mobile Strategy** : Nouvelle section "Mobile First" dans `DESIGN_SYSTEM.md`.
+
 ## [1.4.9] - 2026-02-05 ([Phase 2.5 - Profile Polish])
 
 ### Added Profile
@@ -33,8 +53,6 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - **Domaine** : Nouvelle section "Mes Favoris" accessible depuis le dashboard utilisateur.
 - **Page Détail** : Bouton favori dynamique avec état persisté et animation (AJAX).
 - **Backend** : Modèle `Favorite` (User <-> Series) et vues associées.
-
-### Fixed
 
 - **Navigation** : Suppression de "Mes Favoris" du menu dropdown (maintenant dans Domaine).
 - **URL Routing** : Correction du path API pour les favoris (`/catalogue/` vs `/catalog/`).

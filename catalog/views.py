@@ -9,7 +9,7 @@ def catalog_index(request):
     """
     Page principale du catalogue de mangas.
     """
-    series_list = Series.objects.all().order_by('-updated_at')
+    series_list = Series.objects.all().order_by('title')
     trending_series = Series.objects.all().order_by('-views_count')[:5]
     return render(request, 'catalog/index.html', {
         'series_list': series_list,

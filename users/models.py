@@ -46,6 +46,44 @@ class User(AbstractUser):
     level = models.PositiveIntegerField(default=1)
     xp = models.PositiveIntegerField(default=0)
 
+    def calculate_level(self):
+        """
+        Calcule le niveau basé sur l'XP total.
+        Formule simple : Niveau = (XP // 100) + 1
+        """
+        return (self.xp // 100) + 1
+
+    def add_xp(self, amount):
+        """
+        Ajoute de l'XP et met à jour le niveau si nécessaire.
+        """
+        self.xp += amount
+        new_level = self.calculate_level()
+        
+        if new_level > self.level:
+            self.level = new_level
+            # Ici on pourrait ajouter une notification de "Level Up"
+            
+        self.save()
+
+    def get_level_progress(self):
+        """
+        Retourne le pourcentage de progression vers le prochain niveau
+        et les valeurs XP actuelles/requises.
+        """
+        xp_per_level = 100
+        current_level_xp_start = (self.level - 1) * xp_per_level
+        next_level_xp_target = self.level * xp_per_level
+        
+        xp_in_current_level = self.xp - current_level_xp_start
+        progress_percent = (xp_in_current_level / xp_per_level) * 100
+        
+        return {
+            'current': self.xp,
+            'next': next_level_xp_target,
+            'percent': min(max(progress_percent, 0), 100)  # Clamp between 0-100
+        }
+
     # Roles (Activités)
     role_admin = models.BooleanField(default=False, verbose_name="Administrateur")
     role_moderator = models.BooleanField(default=False, verbose_name="Modérateur")

@@ -30,12 +30,13 @@ def demo_view(request, chapter_id=None):
     prev_chapter = Chapter.objects.filter(series=chapter.series, number__lt=chapter.number).order_by('-number').first()
     next_chapter = Chapter.objects.filter(series=chapter.series, number__gt=chapter.number).order_by('number').first()
     
-    # Save Reading Progress
+    # Save Reading Progress & Mark as Completed (awards XP via signal)
     if request.user.is_authenticated:
         from reader.models import ReadingProgress
-        ReadingProgress.objects.update_or_create(
+        progress, created = ReadingProgress.objects.update_or_create(
             user=request.user,
-            chapter=chapter
+            chapter=chapter,
+            defaults={'completed': True}  # Mark as completed to award XP
         )
     
     # Context

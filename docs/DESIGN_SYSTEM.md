@@ -117,3 +117,27 @@ Utilisées pour les Mangas, Postes, etc.
 
 Usage d'emojis pour le prototypage rapide ou d'icônes SVG (Lucide/Heroicons) stylisées en CSS.
 Les icônes doivent être alignées verticalement avec le texte (`flex`, `gap: 8px`).
+
+---
+
+## 7. Stratégie Mobile First
+
+L'application étant principalement consultée sur mobile, les règles suivantes sont critiques :
+
+### Ergonomie Tactile
+
+* **Touch Targets** : Minimum **44x44px** pour tous les éléments interactifs.
+* **Zones de Pouce** : Les actions principales (Navigation, Suivant/Précédent) doivent être accessibles à une main (bas de l'écran).
+* **Gestures** : Support du swipe pour la navigation entre chapitres (Reader) et les carousels.
+
+### Layout Réactif
+
+* **Grilles** : Passage automatique à 1 colonne sur mobile (`< 768px`) et 2 colonnes (`< 1024px`) avant layoyt desktop.
+* **Navigation** : Transformation de la Navbar en **Bottom Tab Bar** (prévu) ou Menu Burger simplifié.
+* **Immersion** : Masquage automatique des barres de navigation lors du scroll vers le bas (Reader).
+
+### Performance Mobile
+
+* **Images** : Format WebP + Lazy Loading natif (`loading="lazy"`).
+* **Feedback** : États `:active` distincts (pas de `:hover` sur mobile).
+* **PWA** : Manifest et Service Worker pour installation et cache offline.

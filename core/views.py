@@ -4,7 +4,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login, logout, authenticate
 from users.forms import CustomUserCreationForm, CustomAuthenticationForm
 from catalog.models import Series, Chapter
-import requests
 from django.core.cache import cache
 
 @login_required
@@ -16,17 +15,6 @@ def home_view(request):
     # Fetch series for the homepage
     latest_updates = Series.objects.all().order_by('-updated_at')[:3]
     popular_series = Series.objects.all().order_by('?')[:3] # Random for now as popular
-    
-    # Fetch anime quote from API (cached for 1 hour)
-    quote_data = cache.get('anime_quote')
-    if not quote_data:
-        try:
-            response = requests.get('https://animechan.xyz/api/random', timeout=5)
-            if response.status_code == 200:
-                quote_data = response.json()
-                cache.set('anime_quote', quote_data, 3600)  # Cache for 1 hour
-        except Exception:
-            quote_data = None
     
     # Continue Reading logic
     continue_reading = None
@@ -51,7 +39,6 @@ def home_view(request):
     return render(request, 'home.html', {
         'latest_updates': latest_updates,
         'popular_series': popular_series,
-        'quote': quote_data,
         'continue_reading': continue_reading,
         'STATIC_VERSION': settings.STATIC_VERSION
     })
@@ -106,6 +93,14 @@ def logout_view(request):
     """
     logout(request)
     return redirect('login')
+
+def about_view(request):
+    """
+    Page À propos (Founders, History, Conditions).
+    """
+    return render(request, 'core/about.html', {
+        'STATIC_VERSION': settings.STATIC_VERSION
+    })
 
 
 

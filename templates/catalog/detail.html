@@ -6,12 +6,12 @@
 <div class="container detail-page-container">
     <!-- Breadcrumb / Back Navigation -->
     <div class="detail-nav-top">
-        <a href="{% url 'home' %}" class="btn-back">
+        <a href="{% url 'catalog:index' %}" class="btn-back">
             <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
                 stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Retour à l'accueil
+            Retour au Catalogue
         </a>
     </div>
 
@@ -35,9 +35,16 @@
         <div class="detail-info">
             <div class="detail-meta-top">
                 <span class="badge-status-pill">{{ series.get_status_display|default:"En cours" }}</span>
+                <span class="badge-status-pill badge-type">{{ series.get_type_display|upper }}</span>
             </div>
 
             <h1 class="detail-title">{{ series.title }}</h1>
+
+            <div class="detail-genres">
+                {% for genre in series.genres.all %}
+                <span class="genre-tag">{{ genre.name }}</span>
+                {% endfor %}
+            </div>
 
             <div class="detail-stats">
                 <span class="stat-item">
@@ -83,11 +90,11 @@
                     Commencer
                 </a>
                 {% endif %}
-                <button class="btn btn-secondary btn-chat">
+                <a href="{% url 'forum_home' %}" class="btn btn-secondary btn-chat">
                     <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                         <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                     </svg> Chat communautaire
-                </button>
+                </a>
                 <button class="btn btn-icon btn-favorite {% if is_favorite %}liked{% endif %}"
                     onclick="toggleFavorite(this)" aria-label="Ajouter aux favoris" data-series-id="{{ series.id }}">
                     <!-- Outline Heart (Visible by default) -->
@@ -138,7 +145,7 @@
         <!-- Chapters Tab -->
         <div id="chapters" class="tab-content active">
             {% if chapters %}
-            <div class="chapters-grid">
+            <div class="chapters-grid scrollable-chapters">
                 {% for chapter in chapters %}
                 <a href="{% url 'reader:demo_chapter' chapter.id %}" class="chapter-item">
                     <div class="chapter-info">
@@ -201,6 +208,41 @@
 </div>
 
 <script>
+    // Tabs Logic
+    function openTab(evt, tabName) {
+        // Declare all variables
+        var i, tabcontent, tablinks;
+
+        // Get all elements with class="tab-content" and hide them
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+            tabcontent[i].classList.remove("active");
+        }
+
+        // Get all elements with class="tab-link" and remove the class "active"
+        tablinks = document.getElementsByClassName("tab-link");
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].classList.remove("active");
+        }
+
+        // Show the current tab, and add an "active" class to the button that opened the tab
+        const activeTab = document.getElementById(tabName);
+        if (activeTab) {
+            activeTab.style.display = "block";
+            setTimeout(() => activeTab.classList.add("active"), 10); // Small delay for fade in if handled by CSS
+        }
+        evt.currentTarget.classList.add("active");
+    }
+
+    // Default open first tab if none active (safety check)
+    document.addEventListener("DOMContentLoaded", () => {
+        if (document.querySelector('.tab-content.active') === null) {
+            document.getElementById("chapters").style.display = "block";
+            document.getElementById("chapters").classList.add("active");
+        }
+    });
+
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {

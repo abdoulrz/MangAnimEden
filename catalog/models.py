@@ -4,17 +4,49 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
 
+
+class Genre(models.Model):
+    """
+    Représente un genre de manga (Action, Aventure, etc.)
+    """
+    name = models.CharField(max_length=100, unique=True, verbose_name="Nom")
+    slug = models.SlugField(max_length=100, unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Genre"
+        verbose_name_plural = "Genres"
+        ordering = ['name']
+
+
 class Series(models.Model):
 
     """
     Représente une série de manga/manhwa/manhua.
     """
+    TYPE_CHOICES = [
+        ('manga', 'Manga'),
+        ('manhwa', 'Manhwa'),
+        ('manhua', 'Manhua'),
+        ('novel', 'Novel'),
+        ('webtoon', 'Webtoon'),
+    ]
+
     title = models.CharField(max_length=200, verbose_name="Titre")
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     description = models.TextField(blank=True, verbose_name="Description")
     cover = models.ImageField(upload_to='covers/', blank=True, null=True, verbose_name="Couverture")
     
     # Métadonnées
+    type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='manga', verbose_name="Type")
+    genres = models.ManyToManyField(Genre, blank=True, verbose_name="Genres", related_name='series')
     author = models.CharField(max_length=200, blank=True, verbose_name="Auteur")
     artist = models.CharField(max_length=200, blank=True, verbose_name="Artiste")
     status = models.CharField(

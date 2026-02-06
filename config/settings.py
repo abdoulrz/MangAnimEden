@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Static files version for cache busting
-STATIC_VERSION = '1.4.8'
+STATIC_VERSION = '1.4.14'
 
 
 # Application definition

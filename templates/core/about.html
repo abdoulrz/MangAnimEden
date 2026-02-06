@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}À propos - MangAnimEDen{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
+
+{% block content %}
+<div class="container about-container">
+    <div class="about-header">
+        <h1 class="about-title">À propos de MangAnimEDen</h1>
+        <p class="about-subtitle">L'Eden des passionnés de Manga et d'Animation</p>
+    </div>
+
+    <!-- Founders & History -->
+    <section class="about-section highlight-purple">
+        <h2>🏛️ Notre Histoire</h2>
+        <p>
+            Créé par une équipe de passionnés, MangAnimEDen est né d'une volonté simple : offrir une plateforme
+            moderne, fluide et communautaire pour tous les amateurs de culture Otaku.
+        </p>
+        <div class="team-grid">
+            <div class="team-card">
+                <div class="team-avatar">F</div>
+                <h3>Fondateur</h3>
+                <p>Créateur de la vision</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">D</div>
+                <h3>Dev Team</h3>
+                <p>Architectes du code</p>
+            </div>
+            <div class="team-card">
+                <div class="team-avatar">C</div>
+                <h3>Communauté</h3>
+                <p>Le cœur du projet</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Objectives -->
+    <section class="about-section highlight-blue">
+        <h2>🎯 Nos Objectifs</h2>
+        <p>
+            Nous visons à centraliser le meilleur de l'expérience manga en ligne :
+        </p>
+        <ul class="conditions-list">
+            <li>Une lecture fluide et accessible partout.</li>
+            <li>Une communauté bienveillante et engagée.</li>
+            <li>Des fonctionnalités exclusives pour les créateurs de groupes.</li>
+            <li>Une interface moderne et respectueuse des standards UX.</li>
+        </ul>
+    </section>
+
+    <!-- Conditions & Privacy -->
+    <section id="conditions" class="about-section highlight-pink">
+        <h2>📜 Conditions & Confidentialité</h2>
+        <p>En utilisant MangAnimEDen, vous acceptez de respecter notre charte et notre politique de confidentialité :
+        </p>
+
+        <div class="legal-grid">
+            <div class="legal-block">
+                <h3>Règles de Communauté</h3>
+                <ul class="conditions-list">
+                    <li>Respect des autres membres et de la courtoisie.</li>
+                    <li>Aucun contenu illégal ou inapproprié.</li>
+                    <li>Utilisation équitable des ressources du site.</li>
+                </ul>
+            </div>
+
+            <div class="legal-block">
+                <h3>Données Personnelles</h3>
+                <ul class="conditions-list">
+                    <li>Nous ne revendons pas vos données.</li>
+                    <li>Cookies utilisés uniquement pour la session.</li>
+                    <li>Droit à l'oubli sur simple demande.</li>
+                </ul>
+            </div>
+        </div>
+
+        <p class="legal-footer">
+            *Ces conditions sont sujettes à modification. Dernière mise à jour : Février 2026.*
+        </p>
+    </section>
+</div>
+{% endblock %}

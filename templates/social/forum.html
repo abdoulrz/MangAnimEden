@@ -52,8 +52,8 @@
             <form method="post" enctype="multipart/form-data" class="story-form-styled">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label>Choisir le groupe</label>
-                    <select name="target_group_id" class="modal-select" required>
+                    <label for="group-select">Choisir le groupe</label>
+                    <select name="target_group_id" id="group-select" class="modal-select" required>
                         <option value="">-- Sélectionner --</option>
                         {% for g in groups %}
                         <option value="{{ g.id }}">{{ g.name }}</option>
@@ -247,12 +247,17 @@
     }
 
     // Modal Logic
+    // Modal Logic
     function openStoryModal() {
-        document.getElementById('storyModal').style.display = 'flex';
+        const modal = document.getElementById('storyModal');
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
     }
 
     function closeStoryModal() {
-        document.getElementById('storyModal').style.display = 'none';
+        const modal = document.getElementById('storyModal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
     }
 
     function updateFileName(input) {

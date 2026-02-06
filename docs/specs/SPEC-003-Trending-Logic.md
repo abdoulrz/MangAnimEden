@@ -1,45 +1,52 @@
 # **Spécification : Logique "Trending" (Catalogue Sidebar)**
 
-**Titre :** Implémentation de la Logique de Tendance (Trending)
-**Statut :** En cours
-**Priorité :** Moyenne
+## **1. Méta-données**
+
+* **Titre :** Implémentation de la Logique de Tendance (Trending Series)
+* **Statut :** En cours
+* **Priorité :** Moyenne
 
 ## **2. Contexte & Intention ("The Why")**
 
-Actuellement, la sidebar du catalogue affiche des "Tendances" hardcodées (placeholders). Pour améliorer l'engagement et la découverte de contenu, nous devons afficher les séries les plus populaires basées sur les vues réelles des utilisateurs.
+Actuellement, la sidebar du catalogue affiche "Mangas du Moment" avec des données statiques (placeholders). Les utilisateurs doivent voir les séries réellement populaires pour découvrir du contenu pertinent.
+Nous voulons mettre en avant les séries les plus consultées ou les mieux notées.
 
 ## **3. Description du Produit ("The What")**
 
 ### **User Stories**
 
-* [ ] En tant que **Lecteur**, je veux voir les mangas les plus consultés dans la sidebar "Tendances".
-* [ ] En tant que **Lecteur**, je veux que la liste soit mise à jour dynamiquement en fonction de l'activité.
+* [ ] En tant qu'**Utilisateur**, je veux voir une liste de 3 à 5 séries "Trending" dans la barre latérale du catalogue.
+* [ ] En tant qu'**Administrateur**, je veux que cette liste se mette à jour automatiquement en fonction de l'activité.
 
 ### **Contraintes UI/UX**
 
-* Afficher le top 5 des séries.
-* Conserver le design actuel (Image, Titre, Rang/Compteur).
-* Neumorphism : Intégration fluide dans la sidebar existante.
+* Réutiliser le design existant des "mini-cards" dans la sidebar (`.sidebar-content`, `.trending-item`).
+* Afficher : Cover (petite), Titre, et idéalement un indicateur (Note ou Vues).
 
 ## **4. Description Technique ("The How")**
 
 ### **Modèles de Données**
 
-* **Modification** de `catalog.Series` :
-  * Ajout du champ `views_count = models.PositiveIntegerField(default=0)`.
+* Utiliser le champ existant `Series.views_count` (s'il existe) ou `Series.popularity`.
+* Si inexistant, ajouter un champ simple `views_count = models.PositiveIntegerField(default=0)`.
 
-### **Logique Métier**
+### **Logique Backend**
 
-* **Incrémentation** : À chaque visite sur la `SeriesDetailView` (ou équivalent), incrémenter `views_count`. (Simple counter pour l'instant, pas de tracking par période).
-* **Requête** : `Series.objects.order_by('-views_count')[:5]`.
+1. **Tracking des Vues** :
+    * Dans `CatalogDetailView` (`catalog/views.py`), incrémenter `series.views_count` à chaque chargement de page (avec une protection basique session/cookie pour éviter le spam F5 si nécessaire, ou juste simple incrément pour le MVP).
+    * `Series.objects.filter(id=self.object.id).update(views_count=F('views_count') + 1)`
 
-### **Vues**
+2. **Context Processor ou Mixin** :
+    * Puisque cette sidebar apparaît potentiellement sur plusieurs pages (Catalogue, Home...), créer un Context Processor ou un Tag.
+    * Pour le moment, c'est surtout sur le Catalogue. Injecter `trending_series` dans le contexte de `CatalogListView`.
+    * Query : `Series.objects.order_by('-views_count')[:5]`
 
-* **Catalog View** (`catalog.views.CatalogListView` ?) : Ajouter `trending_series` au contexte.
+### **Frontend**
 
-## **5. Critères de Validation ("Definition of Done")**
+* Modifier `catalog/list.html` et `home.html` (si présent) pour itérer sur `trending_series`.
 
-* [ ] Le champ `views_count` existe en base.
-* [ ] Visiter une page de manga incrémente le compteur.
-* [ ] La sidebar affiche les 5 séries les plus vues.
-* [ ] Pas de régression sur l'affichage du catalogue.
+## **5. Critères de Validation**
+
+* [ ] Le champ `views_count` s'incrémente lors de la visite d'une page détail.
+* [ ] La sidebar affiche les 5 séries avec le plus de vues.
+* [ ] L'affichage gère les cas d'égalité ou de 0 vues (fallback sur date de création ?).

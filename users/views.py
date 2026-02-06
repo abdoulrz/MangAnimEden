@@ -88,6 +88,9 @@ def profile_view(request):
         'finished_series': finished_series_count,
     }
 
+    # Level Progress
+    context['level_data'] = request.user.get_level_progress()
+
     # --- Favoris ---
     favorites = Favorite.objects.filter(user=request.user).select_related('series')
     context['favoris'] = [f.series for f in favorites]
@@ -136,82 +139,13 @@ def edit_profile_view(request):
 @login_required
 def domaine_view(request):
     """
-    Page Domaine - Dashboard utilisateur avec Quick Access, Stats, et History.
+    DEPRECATED: Redirect to profile.
+    Old Description: Page Domaine - Dashboard utilisateur avec Quick Access, Stats, et History.
     """
-    from reader.models import ReadingProgress
-    from django.utils import timezone
-    from datetime import timedelta
-    
-    # Get active mode from query params (quick_access, stats, history)
-    active_mode = request.GET.get('mode', 'quick_access')
-    active_submenu = request.GET.get('submenu', '')  # For quick access submenus
-    
-    context = {
-        'active_mode': active_mode,
-        'active_submenu': active_submenu,
-        'STATIC_VERSION': settings.STATIC_VERSION
-    }
-    
-    # Load data based on active mode
-    if active_mode == 'stats':
-        # Calculate reading statistics
-        total_chapters = ReadingProgress.objects.filter(user=request.user).count()
-        series_in_progress = ReadingProgress.objects.filter(
-            user=request.user
-        ).values('chapter__series').distinct().count()
-        
-        # Calculate finished series
-        finished_series_count = 0
-        # Get IDs of series user has read at least one chapter of
-        user_series_ids = ReadingProgress.objects.filter(user=request.user).values_list('chapter__series', flat=True).distinct()
-        
-        for series_id in user_series_ids:
-            series_obj = Series.objects.get(id=series_id)
-            total_chapters_count = series_obj.chapters.count()
-            if total_chapters_count > 0:
-                user_completed_count = ReadingProgress.objects.filter(
-                    user=request.user, 
-                    chapter__series=series_obj, 
-                    completed=True
-                ).count()
-                if user_completed_count == total_chapters_count:
-                    finished_series_count += 1
-        
-        context['stats'] = {
-            'total_chapters': total_chapters,
-            'series_in_progress': series_in_progress,
-            'finished_series': finished_series_count,
-        }
-
-    elif active_mode == 'favoris':
-        # Load user favorites
-        from catalog.models import Favorite
-        favorites = Favorite.objects.filter(user=request.user).select_related('series')
-        context['favoris'] = [f.series for f in favorites]
-    
-    elif active_mode == 'history':
-        # Get recent reading history
-        recent_progress = ReadingProgress.objects.filter(
-            user=request.user
-        ).select_related('chapter__series').order_by('-last_read')[:50]
-        
-        # Group by series
-        series_progress = defaultdict(list)
-        for progress in recent_progress:
-            series_progress[progress.chapter.series].append(progress)
-        
-        context['recent_progress'] = recent_progress
-        context['series_progress'] = dict(series_progress)
-    
-    elif active_mode == 'quick_access' and active_submenu:
-        # Handle quick access submenus
-        if active_submenu == 'scans':
-            # Get all series user has started reading (could extend with favorites later)
-            user_series_ids = ReadingProgress.objects.filter(
-                user=request.user
-            ).values_list('chapter__series', flat=True).distinct()
-            context['scans'] = Series.objects.filter(id__in=user_series_ids)
-        # Add other submenus as needed (favoris, equipes, etc.)
-    
-    return render(request, 'users/domaine.html', context)
+    # Preserve query params for smooth transition if needed (e.g. ?mode=scans)
+    query_string = request.META.get('QUERY_STRING', '')
+    url = redirect('users:profile').url
+    if query_string:
+        url = f"{url}?{query_string}"
+    return redirect(url)
 

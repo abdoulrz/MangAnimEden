@@ -5,22 +5,44 @@
 {% block content %}
 <div class="container home-container">
 
-    <!-- Continue Reading Hero (NEW - Above Grid) -->
-    {% if user.is_authenticated and continue_reading %}
-    <section class="continue-reading-hero">
-        <div class="hero-banner">
+    <!-- Hero Section -->
+    {% if user.is_authenticated %}
+    {% if continue_reading %}
+    <!-- COmpact Hero for Logged In Users -->
+    <section class="hero-compact">
+        <div class="hero-compact-card">
             {% if continue_reading.series.cover %}
-            <img src="{{ continue_reading.series.cover.url }}" class="hero-bg" alt="bg">
+            <img src="{{ continue_reading.series.cover.url }}" class="hero-compact-bg" alt="Hero Background">
             {% endif %}
-            <div class="hero-overlay"></div>
-            <div class="hero-content">
-                <span class="hero-label">📖 Reprendre la lecture</span>
-                <h2>{{ continue_reading.series.title }}</h2>
-                <p class="hero-chapter">Chapitre {{ continue_reading.number }}</p>
-                <a href="{% url 'reader:demo_chapter' continue_reading.id %}" class="btn-hero-continue">
-                    Continuer →
+            <div class="hero-compact-overlay"></div>
+
+            <div class="hero-compact-content">
+                <div class="hero-compact-info">
+                    <span class="hero-label-sm">📖 Reprendre</span>
+                    <div class="hero-text-group">
+                        <h3 class="hero-title-sm">{{ continue_reading.series.title }}</h3>
+                        <span class="hero-chapter-sm">Chapitre {{ continue_reading.number }}</span>
+                    </div>
+                </div>
+                <a href="{% url 'reader:demo_chapter' continue_reading.id %}" class="btn-hero-compact">
+                    Continuer <span class="arr">→</span>
                 </a>
             </div>
+        </div>
+    </section>
+    {% endif %}
+    {% else %}
+    <!-- Feature Teaser for Guests -->
+    <section class="hero-guest">
+        <div class="hero-guest-card">
+            <div class="hero-guest-content">
+                <span class="badge-feature">🚀 Prochainement</span>
+                <h2 class="guest-title">Système de Niveaux & Groupes</h2>
+                <p class="guest-desc">Bientôt sur MangAnimEDen : Créez votre clan, publiez des stories et gagnez de l'XP
+                    à chaque chapitre lu !</p>
+            </div>
+            <!-- Optional decoration/icon -->
+            <div class="hero-guest-deco">✨</div>
         </div>
     </section>
     {% endif %}
@@ -104,18 +126,13 @@
             <!-- Bottom Right: Wisdom/Quotes Block -->
             <section class="home-block ads-block">
                 <div class="block-content centered-content">
-                    <div class="quote-container">
-                        {% if quote %}
-                        <p class="quote-text">"{{ quote.quote }}"</p>
-                        <span class="quote-author">
-                            — {{ quote.character|default:"Unknown" }}
-                            {% if quote.anime %}<br><small>{{ quote.anime }}</small>{% endif %}
-                        </span>
-                        {% else %}
-                        <p class="quote-text">"Le pouvoir ne vient pas de la volonté de frapper, mais de la volonté de
-                            protéger."</p>
-                        <span class="quote-author">— Anime World</span>
-                        {% endif %}
+                    <div class="quote-container" id="wisdom-container">
+                        <!-- Content injected by static/js/app.js -->
+                        <noscript>
+                            <p class="quote-text">"The world isn't perfect. But it's there for us, doing the best it
+                                can..."</p>
+                            <span class="quote-author">— Roy Mustang</span>
+                        </noscript>
                     </div>
                 </div>
             </section>

@@ -2,16 +2,19 @@
 <html lang="fr">
 
 <head>
-    {% load static %}
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MangAnimEDen - Lecture de manga{% endblock %}</title>
+    {% load static %}
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛩️</text></svg>">
 
     <!-- Design Tokens -->
     <!-- Design Tokens -->
     <link rel="stylesheet" href="{% static 'css/tokens.css' %}?v={{ STATIC_VERSION }}&t=7">
     <link rel="stylesheet" href="{% static 'css/components.css' %}?v={{ STATIC_VERSION }}&t=7">
     <link rel="stylesheet" href="{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}&t=7">
+    <link rel="stylesheet" href="{% static 'css/hero.css' %}?v={{ STATIC_VERSION }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -34,6 +37,9 @@
 
     <!-- Footer -->
     {% include 'components/footer.html' %}
+
+    <!-- Global Scripts -->
+    <script src="{% static 'js/app.js' %}?v={{ STATIC_VERSION }}"></script>
 
     {% block extra_js %}{% endblock %}
 </body>
