@@ -1,0 +1,294 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Recherche d'Utilisateurs{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Search Header & Form */
+    .search-header {
+        margin-bottom: 2rem;
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+    }
+
+    .search-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .search-form {
+        display: grid;
+        grid-template-columns: 2fr 1fr 1fr auto;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9rem;
+    }
+
+    .form-control {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: var(--radius-md);
+        padding: 0.75rem 1rem;
+        color: white;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--primary);
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    .search-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        height: 46px;
+        /* Match input height */
+    }
+
+    .search-btn:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
+
+    /* Results Grid */
+    .results-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .user-card {
+        background: rgba(25, 25, 35, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .user-card:hover {
+        transform: translateY(-5px);
+        background: rgba(30, 30, 45, 0.8);
+        border-color: rgba(99, 102, 241, 0.3);
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+        border: 3px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .user-info h3 {
+        margin: 0 0 0.5rem 0;
+        font-size: 1.2rem;
+    }
+
+    .user-info h3 a {
+        color: white;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .user-info h3 a:hover {
+        color: var(--primary);
+    }
+
+    .user-stats {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .stat-value {
+        font-weight: 700;
+        color: white;
+    }
+
+    /* Pagination */
+    .pagination {
+        display: flex;
+        justify-content: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+    }
+
+    .page-link {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        color: white;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .page-link:hover,
+    .page-link.active {
+        background: var(--primary);
+    }
+
+    .no-results {
+        text-align: center;
+        padding: 4rem;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    @media (max-width: 768px) {
+        .search-form {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container fade-in">
+    <!-- Search Header -->
+    <div class="search-header">
+        <h1 class="search-title">Découvrir la Communauté</h1>
+
+        <form method="get" class="search-form">
+            <div class="form-group">
+                <label for="q">Recherche</label>
+                <input type="text" name="q" id="q" class="form-control" placeholder="Pseudo..." value="{{ query }}">
+            </div>
+
+            <div class="form-group">
+                <label for="min_level">Niveau Min</label>
+                <input type="number" name="min_level" id="min_level" class="form-control" placeholder="1" min="1"
+                    value="{{ min_level }}">
+            </div>
+
+            <div class="form-group">
+                <label for="max_level">Niveau Max</label>
+                <input type="number" name="max_level" id="max_level" class="form-control" placeholder="100" min="1"
+                    value="{{ max_level }}">
+            </div>
+
+            <button type="submit" class="search-btn">🔍 Rechercher</button>
+        </form>
+    </div>
+
+    <!-- Results Count -->
+    <div style="margin-bottom: 1.5rem; color: rgba(255,255,255,0.6);">
+        {% if query or min_level or max_level %}
+        Found {{ total_results }} user{{ total_results|pluralize }} matching your filters
+        {% else %}
+        Showing {{ page_obj.end_index }} of {{ total_results }} users
+        {% endif %}
+    </div>
+
+    <!-- Results Grid -->
+    {% if page_obj %}
+    <div class="results-grid">
+        {% for user in page_obj %}
+        <div class="user-card">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="{{ user.nickname }}" class="user-avatar">
+            {% else %}
+            <img src="https://ui-avatars.com/api/?name={{ user.nickname }}&background=6366f1&color=fff"
+                alt="{{ user.nickname }}" class="user-avatar">
+            {% endif %}
+
+            <div class="user-info">
+                <h3><a href="{% url 'users:public_profile' user.id %}">{{ user.nickname }}</a></h3>
+                <div style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.5rem;">
+                    Level {{ user.level }}
+                </div>
+            </div>
+
+            <div class="user-stats">
+                <div class="stat-item">
+                    <span class="stat-value">{{ user.xp }}</span>
+                    <span>XP</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-value">{{ user.get_friend_count }}</span>
+                    <span>Amis</span>
+                </div>
+            </div>
+
+            <a href="{% url 'users:public_profile' user.id %}" class="btn btn-sm"
+                style="background: rgba(255,255,255,0.1); width: 100%; margin-top: 1rem;">
+                Voir Profil
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="no-results">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+        <h3>Aucun utilisateur trouvé</h3>
+        <p>Essayez de modifier vos filtres de recherche.</p>
+    </div>
+    {% endif %}
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if min_level %}&min_level={{ min_level }}{% endif %}{% if max_level %}&max_level={{ max_level }}{% endif %}"
+            class="page-link">←</a>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+        <a href="#" class="page-link active">{{ num }}</a>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+            href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if min_level %}&min_level={{ min_level }}{% endif %}{% if max_level %}&max_level={{ max_level }}{% endif %}"
+            class="page-link">{{ num }}</a>
+            {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if min_level %}&min_level={{ min_level }}{% endif %}{% if max_level %}&max_level={{ max_level }}{% endif %}"
+                class="page-link">→</a>
+            {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

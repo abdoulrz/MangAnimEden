@@ -119,7 +119,9 @@
                     <div class="message {% if message.sender == user %}my-message{% else %}other-message{% endif %}">
                         <div class="message-bubble">
                             <div class="message-info">
-                                <span class="sender-name">{{ message.sender.nickname }}</span>
+                                <a href="{% url 'users:public_profile' message.sender.id %}" class="sender-name"
+                                    style="color: inherit; text-decoration: none; transition: opacity 0.3s;">{{
+                                    message.sender.nickname }}</a>
                                 <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
                             </div>
                             <p class="message-text">{{ message.content }}</p>
@@ -149,7 +151,7 @@
             <div class="glass-panel story-view-container">
                 <div class="story-view-header">
                     <h3>Stories : {{ active_story_group.name }}</h3>
-                    <a href="{% url 'forum_home' %}" class="close-story-btn">×</a>
+                    <a href="{% url 'social:forum_home' %}" class="close-story-btn">×</a>
                 </div>
                 <div class="story-carousel">
                     {% for story in active_group_stories %}
@@ -168,7 +170,7 @@
             <div class="glass-panel event-view-container text-center">
                 <div class="event-view-header">
                     <h3>{{ active_event.title }}</h3>
-                    <a href="{% url 'forum_home' %}" class="close-event-btn">×</a>
+                    <a href="{% url 'social:forum_home' %}" class="close-event-btn">×</a>
                 </div>
                 <div class="event-focused-content">
                     <div class="event-icon-medium">

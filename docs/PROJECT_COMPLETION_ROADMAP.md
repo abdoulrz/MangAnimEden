@@ -55,31 +55,31 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [x] **Support Régional (Wisdom)** : Validation finale.
 - [x] **Historique de Lecture** : Visualisation dans le Profil et le Domaine (ReadingProgress implémenté).
 
-### 2.4 Retours Utilisateurs & Fixes (URGENT)
+### 2.4 Retours Utilisateurs & Fixes (URGENT) ✅ (COMPLÉTÉ)
 
 *Corrections immédiates et ajustements UX demandés.*
 
 #### 2.4.1 Nettoyage & Redondance
 
-- [ ] **Suppression Page Domaine** : Rediriger `/domaine/` vers `/profile/` (section intégrée). Supprimer le code mort.
-- [ ] **Profil** : Supprimer le bloc "Paramètres du profil" (doublon ou inutile).
-- [ ] **Profil Redesign** : Refondre le bloc "Info Utilisateur" (Niveau, Amis) pour un look plus premium.
+- [x] **Suppression Page Domaine** : Rediriger `/domaine/` vers `/profile/` (section intégrée). Supprimer le code mort.
+- [x] **Profil** : Supprimer le bloc "Paramètres du profil" (doublon ou inutile).
+- [x] **Profil Redesign** : Refondre le bloc "Info Utilisateur" (Niveau, Amis) pour un look plus premium.
 
 #### 2.4.2 Navigation & Footer
 
-- [ ] **Footer Global** :
-  - [ ] Lien "Catalogue" -> `/catalogue/`.
-  - [ ] Lien "Conditions" -> `/about/#conditions`.
-  - [ ] Remplacer "Contact" par "About" (Fondateurs, Histoire, Objectifs).
-- [ ] **Page Détail** :
-  - [ ] Bouton Retour : "Retour à l'accueil" -> "Retour au Catalogue".
-  - [ ] Tabs : Réparer les boutons Info/Avis qui ne fonctionnent plus.
-  - [ ] Liste Chapitres : Afficher 10 chapitres max + Scroll infini/Load more dans un container stylisé.
+- [x] **Footer Global** :
+  - [x] Lien "Catalogue" -> `/catalogue/`.
+  - [x] Lien "Conditions" -> `/about/#conditions`.
+  - [x] Remplacer "Contact" par "About" (Fondateurs, Histoire, Objectifs).
+- [x] **Page Détail** :
+  - [x] Bouton Retour : "Retour à l'accueil" -> "Retour au Catalogue".
+  - [x] Tabs : Réparer les boutons Info/Avis qui ne fonctionnent plus.
+  - [x] Liste Chapitres : Afficher 10 chapitres max + Scroll infini/Load more dans un container stylisé.
 
 #### 2.4.3 Fonctionnalités "Quick Wins"
 
-- [ ] **Forum** : Réparer le bouton "Ajouter une Story".
-- [ ] **Thème** : Activer la logique du Theme Switcher (bouton existant).
+- [x] **Forum** : Réparer le bouton "Ajouter une Story".
+- [x] **Thème** : Activer la logique du Theme Switcher (bouton existant).
 
 ### 2.5 Gamification & Système de Gestion de Groupes
 
@@ -89,30 +89,48 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   
 #### 2.5.1 Système de Niveaux (Leveling & XP)
 
-- [ ] **Backend - Logique XP** :
-  - [ ] **Signal** : Créer un signal (sur lecture de chapitre) pour attribuer de l'XP (+10 XP / chapitre).
-  - [ ] **Calcul** : Méthode `User.calculate_level()` basée sur l'XP total.
-  - [ ] **View** : Mettre à jour `profile_view` pour injecter les vraies données (XP actuel, Next Level XP, Barre de progression) au template.
+- [x] **Backend - Logique XP** :
+  - [x] **Signal** : Créer un signal (sur lecture de chapitre) pour attribuer de l'XP (+10 XP / chapitre).
+  - [x] **Calcul** : Méthode `User.calculate_level()` basée sur l'XP total.
+  - [x] **View** : Mettre à jour `profile_view` pour injecter les vraies données (XP actuel, Next Level XP, Barre de progression) au template.
   
-- [ ] **Backend - Promotion Automatique** :
-  - [ ] À niveau 50 (500 chapitres) : `User.role_moderator = True` automatiquement.
-  - [ ] Signal `post_save` sur `User` pour mettre à jour les rôles.
+- [x] **Backend - Promotion Automatique** :
+  - [x] À niveau 50 (500 chapitres) : `User.role_moderator = True` automatiquement.
+  - [x] Signal `post_save` sur `User` pour mettre à jour les rôles.
 
 #### 2.5.2 Système Social (Amis)
 
 - [ ] **Backend - Gestion des Amis** :
   - [ ] Modèle `Friendship` (Demandeur, Receveur, Statut: Pending/Accepted).
-  - [ ] Logique : Envoyer demande, Accepter, Refuser, Retirer.
-  - [ ] Compteurs : Méthode pour compter les amis actifs.
-- [ ] **Frontend - UI Sociale** :
-  - [ ] Profil Public : Bouton "Ajouter en ami" / "Demande envoyée".
-  - [ ] Profil Privé : Liste des amis et compteur dans la "Glass Card".
+  - [x] Logique : Envoyer demande, Accepter, Refuser, Retirer.
+  - [x] Compteurs : Méthode pour compter les amis actifs.
+- [x] **Frontend - UI Sociale** :
+  - [x] Profil Public : Bouton "Ajouter en ami" / "Demande envoyée".
+  - [x] Profil Privé : Liste des amis et compteur dans la "Glass Card".
+  - [x] Nicknames cliquables : Forum/Chat messages link to public profiles.
+- [x] **Tests** : Unit tests pour Friendship model (13 tests).
+
+#### 2.5.2.1 Découverte Sociale (Social Discovery) - PARTIAL COMPLETE
+
+*Permettre aux utilisateurs de découvrir d'autres membres facilement.*
+
+- [x] **Page de Recherche d'Utilisateurs** :
+  - [x] Barre de recherche par nickname/username.
+  - [x] Filtres : Par niveau.
+  - [x] Affichage en grille avec avatars et statistiques.
+- [x] **Section "Qui lit cette série ?"** :
+  - [x] Sur la page détail manga : Liste des 10 lecteurs actifs récents.
+  - [x] Link to Public Profile.
+- [ ] **Fil d'Activité / Leaderboard** (DEFERRED):
+  - [ ] Activité récente : "User X a terminé Série Y".
+  - [ ] Classement par XP/Niveau (Top 10).
+  - [ ] Classement par chapitres lus cette semaine/mois.
 
 #### 2.5.3 Système de Badges (Achievements)
 
 - [ ] **Backend - Gestion des Badges** :
   - [ ] Modèle `Badge` (Nom, Icone, Condition, Slug).
-  - [ ] Modèle `UserBadge` (Liaison User-Badge avec date d'obtention).
+  - [ ] Modèle `UserBadge` (son User-Badge avec date d'obtention).
   - [ ] Service d'attribution : Vérifier les règles (e.g. "Premier Chapitre", "100 Chapitres") et débloquer.
 - [ ] **Frontend - UI Badges** :
   - [ ] Affichage du compteur de badges dans la "Glass Card".

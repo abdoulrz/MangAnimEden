@@ -6,10 +6,97 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ## [Unreleased]
 
-### Added
+### To Be Implemented
 
-- Feature "Trending" dans la sidebar (actuellement placeholders statiques).
-- Implémentation du système de "Stories" (en cours).
+- Phase 2.5.3: Système de Badges (Achievements)
+- Phase 2.5.4: Système de Création de Groupes
+
+## [1.4.18] - 2026-02-06 ([Phase 2.5.2 - Friendship System])
+
+### Added - Système Social (Amis)
+
+- **Friendship Model & Backend**
+  - Nouveau modèle `Friendship` avec gestion des statuts (pending/accepted)
+  - Migration `0004_friendship` avec contraintes d'unicité
+  - 6 nouvelles méthodes User: `get_friends()`, `get_friend_count()`, `get_pending_requests()`, `is_friend_with()`, `has_pending_request_from()`, `has_sent_request_to()`
+  - 5 vues friendship: envoyer, accepter, refuser, retirer demandes + API JSON liste d'amis
+  - Routage URL pour toutes les opérations d'amitié (`/forum/friends/*`)
+  - Intégration Django admin pour gestion des amitiés
+
+- **Profils Publics**
+  - Nouvelle vue profil public à `/users/user/<id>/`
+  - Bouton action ami dynamique avec 4 états: "Ajouter en ami", "Demande envoyée", "Accepter la demande", "Amis"
+  - Affichage statistiques publiques (niveau, XP, amis, chapitres, séries)
+  - Redirection automatique vers profil privé si consultation de soi-même
+
+- **Découverte d'Amis**
+  - Pseudos cliquables dans les messages de chat de groupe
+  - Liens directs des messages vers profils publics
+  - Flux de découverte: Chat → Profil → Ajouter Ami
+
+- **Améliorations Profil Privé**
+  - Panneau amis pliable avec design glassmorphique
+  - Section demandes en attente avec boutons Accepter/Refuser
+  - Liste d'amis chargée via AJAX
+  - Compteur d'amis dynamique avec badge demandes en attente
+  - Animations fluides pour mises à jour en temps réel
+
+- **Tests**
+  - 13 tests unitaires complets pour modèle Friendship
+  - Couverture cas limites: doublons, auto-amitié, relations bidirectionnelles
+  - Toutes les méthodes friend User testées
+
+### Fixed
+
+- Barre XP apparaissant pleine à faibles pourcentages sur profils publics
+- Pseudos chat affichant texte littéral template (problème variable template multiligne)
+- Problèmes cache template résolus avec mises à jour STATIC_VERSION
+
+## [1.5.2] - 2026-02-06 ([Phase 2.5.1 - Automatic Promotion])
+
+### Added Automatic Promotion
+
+- **Promotion Automatique** : Les utilisateurs atteignant **niveau 50** (500 chapitres lus) sont automatiquement promus au rôle de **Modérateur**.
+- **Backend Logic** : Nouvelle méthode `User.update_role_based_on_level()` pour vérifier et mettre à jour les rôles basés sur le niveau.
+- **Django Signal** : `check_and_promote_user` dans `users/signals.py` - Déclenche automatiquement la promotion lors de la sauvegarde d'un utilisateur.
+- **Prévention Récursion** : Utilisation de `update_fields=['role_moderator']` pour éviter les boucles infinies.
+- **Tests Unitaires** : Suite de 6 tests automatisés dans `users/tests/test_models.py` (AutomaticPromotionTests) :
+  - Test utilisateur niveau 49 (pas de promotion)
+  - Test utilisateur niveau 50 (promotion automatique)
+  - Test utilisateur niveau > 50 (promotion garantie)
+  - Test utilisateur déjà modérateur (pas de toggle)
+  - Test méthode `update_role_based_on_level()`
+  - Test intégration XP → Level → Promotion
+- **Scripts de Vérification** : `scripts/verify_promotion.py` pour validation manuelle et démonstration.
+
+### Technical Details
+
+- **Formule Niveau** : `Level = (XP // 100) + 1`
+- **Seuil Promotion** : Niveau 50 = 4900-4999 XP
+- **Flow Complet** : ReadingProgress (completed) → Signal XP → User.add_xp() → Level Update → Signal Promotion → role_moderator = True
+
+## [1.5.1] - 2026-02-06 ([Phase 2.5 - Gamification System])
+
+### Added Gamification
+
+- **Système XP & Niveaux** : Les utilisateurs gagnent **10 XP par chapitre lu**.
+- **Calcul Automatique** : `User.calculate_level()` (Niveau = XP // 100 + 1).
+- **Django Signal** : `users/signals.py` - Attribution automatique d'XP lors de la complétion d'un chapitre.
+- **Profile UI** : Badge de niveau dynamique et barre de progression XP (Glass Card design).
+- **Backend Methods** : `add_xp()`, `get_level_progress()` pour gestion et affichage temps réel.
+
+### Fixed Reader
+
+- **Bug Critique** : Les chapitres lus n'étaient pas marqués `completed=True`, empêchant l'attribution d'XP.
+- **Solution** : Ajout de `defaults={'completed': True}` dans `reader/views.py` (`update_or_create`).
+- **Migration Données** : Script de réparation rétroactif pour accorder XP manquant aux utilisateurs existants.
+
+### Changed UX
+
+- **Favicon** : Icône Torii Gate (⛩️) pour refléter le thème "Eden/Gateway".
+- **Navbar** : Remplacement de l'icône pile de livres par Torii Gate.
+- **Avatar Utilisateur** : Correction de l'initiale (affichage du `nickname` au lieu de "N").
+- **Catalogue** : Tri alphabétique (A-Z) des séries au lieu du tri par "Dernière mise à jour".
 
 ## [1.5.0] - 2026-02-05 ([Phase 2.3 - Wisdom & UX Polish])
 
@@ -40,7 +127,7 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - **Statistiques** : Nouvelle logique "Séries terminées" (Calcul backend basé sur le ratio chapitres lus/total) + Empty States avec icônes.
 - **UX** : Scrollbar customisée (Glassmorphism) pour les listes longues.
 
-### Fixed
+### Fixed Profile
 
 - **Stabilité** : Correction du crash si une série n'a pas de couverture (Placeholder automatique).
 - **Design** : Ajustement des hauteurs max et du scrolling pour éviter les pages infinies.

@@ -49,9 +49,10 @@ class User(AbstractUser):
     def calculate_level(self):
         """
         Calcule le niveau basé sur l'XP total.
-        Formule simple : Niveau = (XP // 100) + 1
+        Formule simple : Niveau = XP // 100
+        (5000 XP = Niveau 50)
         """
-        return (self.xp // 100) + 1
+        return self.xp // 100
 
     def add_xp(self, amount):
         """
@@ -71,9 +72,11 @@ class User(AbstractUser):
         Retourne le pourcentage de progression vers le prochain niveau
         et les valeurs XP actuelles/requises.
         """
+        # Use calculated level to ensure targets are correct even if DB level is stale
+        current_calculated_level = self.calculate_level()
         xp_per_level = 100
-        current_level_xp_start = (self.level - 1) * xp_per_level
-        next_level_xp_target = self.level * xp_per_level
+        current_level_xp_start = current_calculated_level * xp_per_level
+        next_level_xp_target = (current_calculated_level + 1) * xp_per_level
         
         xp_in_current_level = self.xp - current_level_xp_start
         progress_percent = (xp_in_current_level / xp_per_level) * 100
@@ -83,6 +86,23 @@ class User(AbstractUser):
             'next': next_level_xp_target,
             'percent': min(max(progress_percent, 0), 100)  # Clamp between 0-100
         }
+
+    def update_role_based_on_level(self):
+        """
+        Met à jour automatiquement les rôles de l'utilisateur en fonction de son niveau.
+        À niveau 50 (500 chapitres lus) : promotion automatique au rôle de modérateur.
+        
+        Returns:
+            bool: True si le rôle a été mis à jour, False sinon.
+        """
+        role_updated = False
+        
+        # Promotion automatique au rôle de modérateur à niveau 50
+        if self.level >= 50 and not self.role_moderator:
+            self.role_moderator = True
+            role_updated = True
+        
+        return role_updated
 
     # Roles (Activités)
     role_admin = models.BooleanField(default=False, verbose_name="Administrateur")
@@ -110,6 +130,79 @@ class User(AbstractUser):
     REQUIRED_FIELDS = ['nickname']
 
     objects = CustomUserManager()
+
+    # Friend Management Methods (Phase 2.5.2)
+    def get_friends(self):
+        """
+        Retourne tous les amis acceptés de l'utilisateur.
+        """
+        from social.models import Friendship
+        from django.db.models import Q
+        
+        # Friends where this user is the requester
+        friends_as_requester = User.objects.filter(
+            friendship_requests_received__requester=self,
+            friendship_requests_received__status='accepted'
+        )
+        # Friends where this user is the receiver
+        friends_as_receiver = User.objects.filter(
+            friendship_requests_sent__receiver=self,
+            friendship_requests_sent__status='accepted'
+        )
+        return (friends_as_requester | friends_as_receiver).distinct()
+
+    def get_friend_count(self):
+        """
+        Retourne le nombre d'amis acceptés.
+        """
+        return self.get_friends().count()
+
+    def get_pending_requests(self):
+        """
+        Retourne les demandes d'amitié en attente reçues par cet utilisateur.
+        """
+        from social.models import Friendship
+        return Friendship.objects.filter(receiver=self, status='pending')
+    
+    def get_pending_requests_count(self):
+        """
+        Retourne le nombre de demandes d'amitié en attente.
+        """
+        return self.get_pending_requests().count()
+
+    def is_friend_with(self, other_user):
+        """
+        Vérifie si deux utilisateurs sont amis.
+        """
+        from social.models import Friendship
+        from django.db.models import Q
+        
+        return Friendship.objects.filter(
+            Q(requester=self, receiver=other_user, status='accepted') |
+            Q(requester=other_user, receiver=self, status='accepted')
+        ).exists()
+    
+    def has_pending_request_from(self, other_user):
+        """
+        Vérifie si cet utilisateur a une demande en attente de other_user.
+        """
+        from social.models import Friendship
+        return Friendship.objects.filter(
+            requester=other_user,
+            receiver=self,
+            status='pending'
+        ).exists()
+    
+    def has_sent_request_to(self, other_user):
+        """
+        Vérifie si cet utilisateur a envoyé une demande à other_user.
+        """
+        from social.models import Friendship
+        return Friendship.objects.filter(
+            requester=self,
+            receiver=other_user,
+            status='pending'
+        ).exists()
 
     def __str__(self):
         return self.nickname

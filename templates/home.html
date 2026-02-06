@@ -48,101 +48,99 @@
     {% endif %}
 
     <!-- Home Grid Layout -->
-    <div class="container home-container">
-
-        <!-- Home Grid Layout -->
-        <div class="home-grid">
-            <!-- Top Left: Dernières mises à jour (3fr) -->
-            <section class="home-block updates-block">
-                <div class="block-header">
-                    <h2 class="block-title"><span>🕐</span> Dernières mises à jour</h2>
-                    <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
-                </div>
-                <div class="block-content">
-                    <div class="cards-grid-3">
-                        {% for series in latest_updates %}
-                        <!-- Card {{ forloop.counter }} -->
-                        <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
-                            <div class="manga-cover">
-                                {% if series.cover %}
-                                <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
-                                {% else %}
-                                <div class="manga-image mock-cover-{{ forloop.counter }}"></div>
-                                {% endif %}
-                                <span class="badge-status">{{ series.get_status_display|default:"En cours" }}</span>
-                                <div class="badge-rating"><span>★</span> 4.5</div>
-                                <span class="badge-chapter">{{ series.chapters.count }} ch.</span>
-                            </div>
-                            <h3 class="manga-title">{{ series.title }}</h3>
-                            <p class="manga-meta">{{ series.updated_at|timesince }}</p>
-                        </a>
-                        {% empty %}
-                        <p class="empty-text">Aucun manga récent.</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </section>
-
-            <!-- Top Right: Ad Block -->
-            <section class="home-block ad-block">
-                <div class="block-content centered-content">
-                    <div class="ad-placeholder">
-                        <div class="ad-animation">
-                            <span class="ad-text">Espace Publicitaire</span>
+    <div class="home-grid">
+        <!-- Top Left: Dernières mises à jour (3fr) -->
+        <section class="home-block updates-block">
+            <div class="block-header">
+                <h2 class="block-title"><span>🕐</span> Dernières mises à jour</h2>
+                <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
+            </div>
+            <div class="block-content">
+                <div class="cards-grid-3">
+                    {% for series in latest_updates %}
+                    <!-- Card {{ forloop.counter }} -->
+                    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
+                        <div class="manga-cover">
+                            {% if series.cover %}
+                            <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
+                            {% else %}
+                            <div class="manga-image mock-cover-{{ forloop.counter }}"></div>
+                            {% endif %}
+                            <span class="badge-status">{{ series.get_status_display|default:"En cours" }}</span>
+                            <div class="badge-rating"><span>★</span> 4.5</div>
+                            <span class="badge-chapter">{{ series.chapters.count }} ch.</span>
                         </div>
-                    </div>
+                        <h3 class="manga-title">{{ series.title }}</h3>
+                        <p class="manga-meta">{{ series.updated_at|timesince }}</p>
+                    </a>
+                    {% empty %}
+                    <p class="empty-text">Aucun manga récent.</p>
+                    {% endfor %}
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Bottom Left: Populaires (3fr) -->
-            <section class="home-block popular-block">
-                <div class="block-header">
-                    <h2 class="block-title"><span>🔥</span> Populaires en ce moment</h2>
-                    <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
-                </div>
-                <div class="block-content">
-                    <div class="cards-grid-3">
-                        {% for series in popular_series %}
-                        <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
-                            <div class="manga-cover">
-                                {% if series.cover %}
-                                <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
-                                {% else %}
-                                <div class="manga-image mock-cover-{{ forloop.counter|add:3 }}"></div>
-                                {% endif %}
-                                <span class="badge-status">{{ series.get_status_display }}</span>
-                                <div class="badge-rating"><span>★</span> 4.9</div>
-                            </div>
-                            <h3 class="manga-title">{{ series.title }}</h3>
-                            <p class="manga-meta">Action, Aventure</p>
-                        </a>
-                        {% empty %}
-                        <p class="empty-text">Aucun manga populaire.</p>
-                        {% endfor %}
+        <!-- Top Right: Ad Block -->
+        <section class="home-block ad-block">
+            <div class="block-content centered-content">
+                <div class="ad-placeholder">
+                    <div class="ad-animation">
+                        <span class="ad-text">Espace Publicitaire</span>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Bottom Right: Wisdom/Quotes Block -->
-            <section class="home-block ads-block">
-                <div class="block-content centered-content">
-                    <div class="quote-container" id="wisdom-container">
-                        <!-- Content injected by static/js/app.js -->
-                        <noscript>
-                            <p class="quote-text">"The world isn't perfect. But it's there for us, doing the best it
-                                can..."</p>
-                            <span class="quote-author">— Roy Mustang</span>
-                        </noscript>
-                    </div>
+        <!-- Bottom Left: Populaires (3fr) -->
+        <section class="home-block popular-block">
+            <div class="block-header">
+                <h2 class="block-title"><span>🔥</span> Populaires en ce moment</h2>
+                <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
+            </div>
+            <div class="block-content">
+                <div class="cards-grid-3">
+                    {% for series in popular_series %}
+                    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
+                        <div class="manga-cover">
+                            {% if series.cover %}
+                            <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
+                            {% else %}
+                            <div class="manga-image mock-cover-{{ forloop.counter|add:3 }}"></div>
+                            {% endif %}
+                            <span class="badge-status">{{ series.get_status_display }}</span>
+                            <div class="badge-rating"><span>★</span> 4.9</div>
+                        </div>
+                        <h3 class="manga-title">{{ series.title }}</h3>
+                        <p class="manga-meta">Action, Aventure</p>
+                    </a>
+                    {% empty %}
+                    <p class="empty-text">Aucun manga populaire.</p>
+                    {% endfor %}
                 </div>
-            </section>
-        </div>
+            </div>
+        </section>
+
+        <!-- Bottom Right: Wisdom/Quotes Block -->
+        <section class="home-block ads-block">
+            <div class="block-content centered-content">
+                <div class="quote-container" id="wisdom-container">
+                    <!-- Content injected by static/js/app.js -->
+                    <noscript>
+                        <p class="quote-text">"The world isn't perfect. But it's there for us, doing the best it
+                            can..."</p>
+                        <span class="quote-author">— Roy Mustang</span>
+                    </noscript>
+                </div>
+            </div>
+        </section>
     </div>
 
-    {% if not user.is_authenticated %}
-    <!-- CTA Banner -->
-    <div class="container-wide">
-        {% include 'components/cta_banner.html' %}
-    </div>
-    {% endif %}
-    {% endblock %}
+</div>
+
+{% if not user.is_authenticated %}
+<!-- CTA Banner -->
+<div class="container-wide">
+    {% include 'components/cta_banner.html' %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Modifier le profil - MangAnimEDen{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% load static %}{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/edit_profile.css' %}?v={{ STATIC_VERSION }}">
 {% endblock %}
 
 {% block content %}

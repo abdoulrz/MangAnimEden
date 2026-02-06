@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profil de {{ profile_user.nickname }} - MangAnimEDen{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/domaine.css' %}?v={{ STATIC_VERSION }}">
+<style>
+    .public-profile-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding-top: var(--space-2xl);
+        padding-bottom: var(--space-3xl);
+    }
+
+    .friend-action-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: var(--radius-lg);
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        width: 100%;
+    }
+
+    .btn-add-friend {
+        background: linear-gradient(135deg, var(--purple-600), var(--purple-700));
+        color: white;
+    }
+
+    .btn-add-friend:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(147, 51, 234, 0.3);
+    }
+
+    .btn-pending {
+        background: rgba(255, 193, 7, 0.2);
+        color: #FFC107;
+        border: 1px solid rgba(255, 193, 7, 0.5);
+        cursor: not-allowed;
+    }
+
+    .btn-friends {
+        background: rgba(76, 175, 80, 0.2);
+        color: #4CAF50;
+        border: 1px solid rgba(76, 175, 80, 0.5);
+    }
+
+    .btn-accept-request {
+        background: linear-gradient(135deg, #4CAF50, #66BB6A);
+        color: white;
+    }
+
+    .btn-accept-request:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(76, 175, 80, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="public-profile-container">
+    <!-- Back to Search Link -->
+    <a href="{% url 'social:user_search' %}" class="back-link"
+        style="display: inline-flex; align-items: center; gap: 0.5rem; color: rgba(255,255,255,0.7); text-decoration: none; margin-bottom: 1.5rem; transition: color 0.2s;">
+        <span style="font-size: 1.2rem;">←</span> Retour à la recherche
+    </a>
+
+    <!-- Main Profile Card -->
+    <div class="profile-card profile-card-premium">
+        <div class="profile-header-gradient"></div>
+
+        <div class="profile-content-premium">
+            <!-- Avatar with Ring -->
+            <div class="profile-avatar-premium-wrapper">
+                <div class="profile-avatar-ring">
+                    {% if profile_user.avatar %}
+                    <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.nickname }}"
+                        class="profile-avatar-img">
+                    {% else %}
+                    <div class="profile-avatar-placeholder">
+                        {{ profile_user.nickname|first|upper }}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="level-badge">Lvl {{ profile_user.level }}</div>
+            </div>
+
+            <!-- User Info -->
+            <div class="profile-identity">
+                <h1 class="profile-username">{{ profile_user.nickname }}</h1>
+                <p class="profile-role">
+                    {% if profile_user.role_moderator %}Modérateur{% else %}Membre Explorateur{% endif %}
+                </p>
+                <p class="member-since">Membre depuis {{ profile_user.date_joined|date:"F Y" }}</p>
+            </div>
+
+            <!-- Level Progress -->
+            <div class="level-progress-container">
+                <div class="level-info">
+                    <span>XP</span>
+                    <span>{{ level_data.current }} / {{ level_data.next }}</span>
+                </div>
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" data-percent="{{ level_data.percent }}"
+                        style="width: {{ level_data.percent }}%;"></div>
+                </div>
+            </div>
+
+            <!-- Public Stats -->
+            <div class="profile-stats-grid">
+                <div class="stat-glass-card">
+                    <div class="stat-icon-wrapper icon-purple">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ friend_count }}</span>
+                        <span class="stat-label">Amis</span>
+                    </div>
+                </div>
+
+                <div class="stat-glass-card">
+                    <div class="stat-icon-wrapper icon-blue">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ stats.total_chapters }}</span>
+                        <span class="stat-label">Chapitres</span>
+                    </div>
+                </div>
+
+                <div class="stat-glass-card">
+                    <div class="stat-icon-wrapper icon-pink">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </div>
+                    <div class="stat-content">
+                        <span class="stat-value">{{ stats.series_in_progress }}</span>
+                        <span class="stat-label">Séries</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Friend Action Button (Phase 2.5.2) -->
+            {% if has_pending_from %}
+            <!-- User has sent request to YOU -->
+            <button class="friend-action-btn btn-accept-request" id="accept-friend-btn"
+                data-user-id="{{ profile_user.id }}">
+                ✓ Accepter la demande d'ami
+            </button>
+            {% elif has_sent_to %}
+            <!-- YOU have sent request to user -->
+            <button class="friend-action-btn btn-pending" disabled>
+                📤 Demande envoyée
+            </button>
+            {% elif is_friend %}
+            <!-- Already friends -->
+            <button class="friend-action-btn btn-friends">
+                ✓ Amis
+            </button>
+            {% else %}
+            <!-- Not friends, can send request -->
+            <button class="friend-action-btn btn-add-friend" id="add-friend-btn" data-user-id="{{ profile_user.id }}">
+                👋 Ajouter en ami
+            </button>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add friend button
+    const addFriendBtn = document.getElementById('add-friend-btn');
+    if (addFriendBtn) {
+        addFriendBtn.addEventListener('click', function () {
+            const userId = this.dataset.userId;
+
+            fetch(`/forum/friends/send/${userId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.textContent = '📤 Demande envoyée';
+                        this.className = 'friend-action-btn btn-pending';
+                        this.disabled = true;
+                    } else {
+                        alert(data.error || 'Erreur lors de l\'envoi de la demande');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    }
+
+    // Accept friend request button  
+    const acceptFriendBtn = document.getElementById('accept-friend-btn');
+    if (acceptFriendBtn) {
+        acceptFriendBtn.addEventListener('click', function () {
+            // We need the request ID, which we'll get from pending requests
+            const userId = this.dataset.userId;
+
+            // For now, reload to profile to see pending requests
+            // In a more polished version, we'd fetch the request ID via AJAX
+            window.location.href = '/users/profil/';
+        });
+    }
+
+    // Helper function
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // FORCE PROGRESS BAR FIX - Read from data attribute (same fix as private profile)
+    document.addEventListener('DOMContentLoaded', function () {
+        const progressBar = document.querySelector('.progress-bar-fill');
+        if (progressBar) {
+            const percentValue = parseFloat(progressBar.getAttribute('data-percent') || '0');
+
+            if (percentValue === 0 || percentValue < 0.1) {
+                // Force complete invisibility for 0% or near-0%
+                progressBar.style.width = '0';
+                progressBar.style.minWidth = '0';
+                progressBar.style.opacity = '0';
+                progressBar.style.visibility = 'hidden';
+            } else {
+                // Ensure visible for non-zero values
+                progressBar.style.width = percentValue + '%';
+                progressBar.style.opacity = '1';
+                progressBar.style.visibility = 'visible';
+            }
+        }
+    });
+</script>
+{% endblock %}

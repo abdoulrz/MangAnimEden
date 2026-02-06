@@ -1,6 +1,9 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.contrib.auth import get_user_model
 from reader.models import ReadingProgress
+
+User = get_user_model()
 
 @receiver(post_save, sender=ReadingProgress)
 def award_xp_on_read(sender, instance, created, **kwargs):
@@ -23,3 +26,25 @@ def award_xp_on_read(sender, instance, created, **kwargs):
         
         # On ajoute 10 XP
         instance.user.add_xp(10)
+
+
+@receiver(post_save, sender=User)
+def check_and_promote_user(sender, instance, created, **kwargs):
+    """
+    Vérifie et met à jour automatiquement les rôles de l'utilisateur
+    en fonction de son niveau.
+    
+    Phase 2.5.1 : Promotion automatique au rôle de modérateur à niveau 50.
+    """
+    # Éviter la récursion infinie : ne pas re-sauvegarder si on est
+    # déjà dans un signal post_save
+    if kwargs.get('update_fields') is not None:
+        return
+    
+    # Vérifier et mettre à jour les rôles basés sur le niveau
+    role_updated = instance.update_role_based_on_level()
+    
+    # Si le rôle a été mis à jour, sauvegarder les changements
+    if role_updated:
+        # Utiliser update_fields pour éviter de déclencher à nouveau tous les signaux
+        instance.save(update_fields=['role_moderator'])

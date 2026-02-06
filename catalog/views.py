@@ -30,6 +30,19 @@ def manga_detail(request, series_id):
     
     last_read_chapter = None
     is_favorite = False
+    
+    # Who's Reading This? (Phase 2.5.2.1)
+    # Get users who have read chapters from this series, ordered by most recent activity
+    from django.contrib.auth import get_user_model
+    User = get_user_model()
+    from django.db.models import Max
+    
+    readers = User.objects.filter(
+        reading_progress__chapter__series=series
+    ).annotate(
+        last_active=Max('reading_progress__last_read')
+    ).order_by('-last_active').distinct()[:10]
+
     if request.user.is_authenticated:
         is_favorite = Favorite.objects.filter(user=request.user, series=series).exists()
         # Avoid circular import if possible, or import inside
@@ -46,6 +59,7 @@ def manga_detail(request, series_id):
         'chapters': chapters,
         'last_read_chapter': last_read_chapter,
         'is_favorite': is_favorite,
+        'readers': readers,
         'STATIC_VERSION': settings.STATIC_VERSION
     })
 

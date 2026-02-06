@@ -58,6 +58,11 @@ def profile_view(request):
         'STATIC_VERSION': settings.STATIC_VERSION
     }
 
+    # --- Friend Stats (Phase 2.5.2) ---
+    context['friend_count'] = request.user.get_friend_count()
+    context['pending_requests'] = request.user.get_pending_requests()
+    context['pending_count'] = request.user.get_pending_requests_count()
+
     # --- Stats ---
     total_chapters = ReadingProgress.objects.filter(user=request.user).count()
     series_in_progress_count = ReadingProgress.objects.filter(
@@ -87,6 +92,12 @@ def profile_view(request):
         'series_in_progress': series_in_progress_count,
         'finished_series': finished_series_count,
     }
+
+    # Self-healing: Ensure level in DB matches XP formula (Fix for Lvl 51 issue)
+    calculated_level = request.user.calculate_level()
+    if request.user.level != calculated_level:
+        request.user.level = calculated_level
+        request.user.save(update_fields=['level'])
 
     # Level Progress
     context['level_data'] = request.user.get_level_progress()
@@ -148,4 +159,53 @@ def domaine_view(request):
     if query_string:
         url = f"{url}?{query_string}"
     return redirect(url)
+
+@login_required
+def public_profile_view(request, user_id):
+    """
+    Vue du profil public d'un utilisateur (Phase 2.5.2 - Friend Discovery).
+    Permet de voir le profil d'un autre utilisateur et d'envoyer une demande d'ami.
+    """
+    from reader.models import ReadingProgress
+    from catalog.models import Series
+    
+    # Get the profile user
+    profile_user = get_object_or_404(User, id=user_id)
+    
+    # Redirect to own profile if viewing self
+    if profile_user == request.user:
+        return redirect('users:profile')
+    
+    # Determine friendship status
+    is_friend = request.user.is_friend_with(profile_user)
+    has_pending_from = request.user.has_pending_request_from(profile_user)
+    has_sent_to = request.user.has_sent_request_to(profile_user)
+    
+    # Self-healing for public profile view as well
+    calculated_level = profile_user.calculate_level()
+    if profile_user.level != calculated_level:
+        profile_user.level = calculated_level
+        profile_user.save(update_fields=['level'])
+    
+    # Get public stats
+    total_chapters = ReadingProgress.objects.filter(user=profile_user).count()
+    series_in_progress_count = ReadingProgress.objects.filter(
+        user=profile_user
+    ).values('chapter__series').distinct().count()
+    
+    context = {
+        'profile_user': profile_user,
+        'is_friend': is_friend,
+        'has_pending_from': has_pending_from,
+        'has_sent_to': has_sent_to,
+        'friend_count': profile_user.get_friend_count(),
+        'level_data': profile_user.get_level_progress(),
+        'stats': {
+            'total_chapters': total_chapters,
+            'series_in_progress': series_in_progress_count,
+        },
+        'STATIC_VERSION': settings.STATIC_VERSION
+    }
+    
+    return render(request, 'users/public_profile.html', context)
 

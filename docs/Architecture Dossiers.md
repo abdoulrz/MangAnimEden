@@ -82,6 +82,15 @@ La couche sociale (basée sur vos demandes).
 * **Models:** CommunityGroup (Public/Private/Invite-only), DiscussionThread, Post.  
 * **Feature:** Accès basé sur les rôles (Admin de communauté vs Membre).
 
+### **4. apps/users (Gamification)**
+
+Système d'engagement utilisateur via XP et Niveaux.
+
+* **Models:** User (Extended avec `level`, `xp`).
+* **Signals:** `users/signals.py` - Django Signal post_save sur ReadingProgress → Attribution automatique de 10 XP.
+* **Logic:** `calculate_level()` (XP // 100 + 1), `add_xp(amount)`, `get_level_progress()` pour UI.
+* **Integration:** Reader marque `ReadingProgress.completed=True` → Signal fire → XP+.
+
 ## **Gestion des Assets (CSS/JS)**
 
 Pour respecter le design de vos images (moderne, sombre, propre), utilisez une architecture CSS **ITCSS** (Inverted Triangle CSS) ou **Tailwind** configuré avec vos propres couleurs.

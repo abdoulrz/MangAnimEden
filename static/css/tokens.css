@@ -107,11 +107,11 @@
 
 /* === LIGHT MODE OVERRIDES === */
 .light-mode {
-    --color-bg-primary: #F3F4F6;
-    --color-bg-secondary: #FFFFFF;
-    --color-bg-elevated: #E5E7EB;
-    --color-bg-card: #FFFFFF;
-    --color-bg-input: #F9FAFB;
+    --color-bg-primary: #d8dadd;
+    --color-bg-secondary: #d4d1d1;
+    --color-bg-elevated: #dbe2f1;
+    --color-bg-card: #c8c2c2;
+    --color-bg-input: #9ca2a9;
 
     --color-text-primary: #111827;
     --color-text-secondary: #4B5563;

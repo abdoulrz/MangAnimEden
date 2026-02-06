@@ -1,37 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Profil de {{ user.nickname }} - MangAnimEDen{% endblock %}
 
+
 {% block extra_css %}
-<link rel="stylesheet" href="{% load static %}{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
-<link rel="stylesheet" href="{% static 'css/domaine.css' %}?v={{ STATIC_VERSION }}">
-<style>
-    /* Inline override for profile specific layout if needed, though reuse is preferred */
-    .profile-layout-container {
-        display: flex;
-        gap: 1.5rem;
-        max-width: 1100px;
-        /* Wider than original 800px to fit sidebar */
-        margin: 0 auto;
-        padding-top: var(--space-2xl);
-        padding-bottom: var(--space-3xl);
-    }
-
-    .profile-main-content {
-        flex: 1;
-        min-width: 0;
-    }
-
-    .profile-sidebar {
-        width: 280px;
-        flex-shrink: 0;
-        position: sticky;
-        top: 50vh;
-        transform: translateY(-50%);
-        height: min-content;
-        /* Important for sticky to work if parent is tall */
-    }
-</style>
+<link rel="stylesheet" href="{% static 'css/profile.css' %}?v={{ STATIC_VERSION }}">
 {% endblock %}
 
 {% block content %}
@@ -91,14 +65,14 @@
                         <span>{{ level_data.current }} / {{ level_data.next }}</span>
                     </div>
                     <div class="progress-bar-bg">
-                        <div class="progress-bar-fill" data-percent="{{ level_data.percent }}"
-                            style="width: {{ level_data.percent }}%;"></div>
+                        <div class="progress-bar-fill" data-percent="{{ level_data.percent }}"></div>
                     </div>
                 </div>
 
                 <!-- Stats Grid (Glass Cards) -->
                 <div class="profile-stats-grid">
-                    <div class="stat-glass-card">
+                    <!-- Friends Card - Clickable (Phase 2.5.2) -->
+                    <div class="stat-glass-card stat-clickable" id="friends-card-toggle">
                         <div class="stat-icon-wrapper icon-purple">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -108,8 +82,13 @@
                             </svg>
                         </div>
                         <div class="stat-content">
-                            <span class="stat-value">42</span>
-                            <span class="stat-label">Amis</span>
+                            <span class="stat-value">{{ friend_count }}</span>
+                            <span class="stat-label">
+                                Amis
+                                {% if pending_count > 0 %}
+                                <span class="pending-badge">{{ pending_count }}</span>
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
 
@@ -144,6 +123,55 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Collapsible Friends Panel (Phase 2.5.2) -->
+                <div id="friends-panel" class="friends-panel friends-panel-hidden">
+                    <div class="friends-panel-header">
+                        <h3>👥 Mes Amis</h3>
+                        <button id="friends-panel-close" class="panel-close-btn" aria-label="Fermer">✕</button>
+                    </div>
+
+                    <!-- Pending Requests Section -->
+                    {% if pending_requests %}
+                    <div class="friends-section">
+                        <h4 class="friends-section-title">📬 Demandes en attente ({{ pending_count }})</h4>
+                        <div class="pending-requests-list">
+                            {% for request in pending_requests %}
+                            <div class="friend-request-item" data-request-id="{{ request.id }}">
+                                <div class="friend-avatar-small">
+                                    {% if request.requester.avatar %}
+                                    <img src="{{ request.requester.avatar.url }}"
+                                        alt="{{ request.requester.nickname }}">
+                                    {% else %}
+                                    <div class="avatar-placeholder-small">{{ request.requester.nickname|first|upper }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="friend-info">
+                                    <span class="friend-nickname">{{ request.requester.nickname }}</span>
+                                    <span class="friend-level">Niveau {{ request.requester.level }}</span>
+                                </div>
+                                <div class="friend-actions">
+                                    <button class="btn-accept-friend" data-request-id="{{ request.id }}"
+                                        title="Accepter">✓</button>
+                                    <button class="btn-reject-friend" data-request-id="{{ request.id }}"
+                                        title="Rejeter">✕</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Friends List Section -->
+                    <div class="friends-section">
+                        <h4 class="friends-section-title">✨ Liste d'amis</h4>
+                        <div id="friends-list-container" class="friends-list">
+                            <div class="loading-spinner">Chargement...</div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -357,6 +385,163 @@
                     }
                 }
             });
+
+            // ========== FRIENDS PANEL FUNCTIONALITY (Phase 2.5.2) ==========
+
+            const friendsCardToggle = document.getElementById('friends-card-toggle');
+            const friendsPanel = document.getElementById('friends-panel');
+            const friendsPanelClose = document.getElementById('friends-panel-close');
+            const friendsListContainer = document.getElementById('friends-list-container');
+
+            // Toggle friends panel
+            if (friendsCardToggle && friendsPanel) {
+                friendsCardToggle.addEventListener('click', function () {
+                    const isHidden = friendsPanel.classList.contains('friends-panel-hidden');
+
+                    if (isHidden) {
+                        friendsPanel.classList.remove('friends-panel-hidden');
+                        loadFriendsList();
+                    } else {
+                        friendsPanel.classList.add('friends-panel-hidden');
+                    }
+                });
+            }
+
+
+
+            // Close panel button
+            if (friendsPanelClose) {
+                friendsPanelClose.addEventListener('click', function () {
+                    friendsPanel.classList.add('friends-panel-hidden');
+                });
+            }
+
+
+            // Load friends list via AJAX
+            function loadFriendsList() {
+                if (!friendsListContainer) return;
+
+                friendsListContainer.innerHTML = '<div class="loading-spinner">Chargement...</div>';
+
+                fetch('/forum/friends/list/')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success && data.friends.length > 0) {
+                            let html = '';
+                            data.friends.forEach(friend => {
+                                const avatarHtml = friend.avatar
+                                    ? `<img src="${friend.avatar}" alt="${friend.nickname}">`
+                                    : `<div class="avatar-placeholder-small">${friend.nickname.charAt(0).toUpperCase()}</div>`;
+
+                                html += `
+                                    <div class="friend-item" data-user-id="${friend.id}">
+                                        <div class="friend-avatar-small">${avatarHtml}</div>
+                                        <div class="friend-info">
+                                            <span class="friend-nickname">${friend.nickname}</span>
+                                            <span class="friend-level">Niveau ${friend.level}</span>
+                                        </div>
+                                    </div>
+                                `;
+                            });
+                            friendsListContainer.innerHTML = html;
+                        } else {
+                            friendsListContainer.innerHTML = '<p class="empty-message">Aucun ami pour le moment.</p>';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading friends:', error);
+                        friendsListContainer.innerHTML = '<p class="error-message">Erreur de chargement</p>';
+                    });
+            }
+
+            // Accept friend request
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('btn-accept-friend')) {
+                    const requestId = e.target.dataset.requestId;
+                    const requestItem = e.target.closest('.friend-request-item');
+
+                    fetch(`/forum/friends/accept/${requestId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Remove request item with animation
+                                requestItem.style.opacity = '0';
+                                setTimeout(() => {
+                                    requestItem.remove();
+                                    // Reload friends list
+                                    loadFriendsList();
+                                    // Update counter (reload page or update manually)
+                                    location.reload();
+                                }, 300);
+                            }
+                        })
+                        .catch(error => console.error('Error accepting friend:', error));
+                }
+            });
+
+            // Reject friend request
+            document.addEventListener('click', function (e) {
+                if (e.target.classList.contains('btn-reject-friend')) {
+                    const requestId = e.target.dataset.requestId;
+                    const requestItem = e.target.closest('.friend-request-item');
+
+                    fetch(`/forum/friends/reject/${requestId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken'),
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                requestItem.style.opacity = '0';
+                                setTimeout(() => {
+                                    requestItem.remove();
+                                    location.reload();
+                                }, 300);
+                            }
+                        })
+                        .catch(error => console.error('Error rejecting friend:', error));
+                }
+            });
+
+            // Helper function to get CSRF token
+            function getCookie(name) {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+
+            // FORCE PROGRESS BAR FIX
+            const progressBar = document.querySelector('.progress-bar-fill');
+            if (progressBar) {
+                const percentValue = parseFloat(progressBar.getAttribute('data-percent') || '0');
+                if (percentValue === 0 || percentValue < 0.1) {
+                    progressBar.style.width = '0';
+                    progressBar.style.opacity = '0';
+                    progressBar.style.visibility = 'hidden';
+                } else {
+                    progressBar.style.width = percentValue + '%';
+                    progressBar.style.opacity = '1';
+                    progressBar.style.visibility = 'visible';
+                }
+            }
         </script>
 
     </div>

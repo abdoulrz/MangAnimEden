@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Créer un compte - MangAnimEDen{% endblock %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% load static %}{% static 'css/auth.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/auth.css' %}?v={{ STATIC_VERSION }}">
 {% endblock %}
 
 {% block content %}

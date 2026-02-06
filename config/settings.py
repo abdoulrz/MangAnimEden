@@ -28,7 +28,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Static files version for cache busting
-STATIC_VERSION = '1.4.14'
+STATIC_VERSION = '1.4.18'
 
 
 # Application definition
@@ -144,3 +144,6 @@ LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'login'
 
+
+# Versioning for cache busting
+STATIC_VERSION = '2.5.5'

@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 
+
 class Group(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True)
@@ -76,3 +77,57 @@ def cleanup_story_file(sender, instance, **kwargs):
     if instance.image:
         if os.path.isfile(instance.image.path):
             os.remove(instance.image.path)
+
+
+class Friendship(models.Model):
+    """
+    Modèle pour gérer les relations d'amitié entre utilisateurs.
+    Phase 2.5.2 - Système Social (Amis)
+    """
+    STATUS_CHOICES = [
+        ('pending', 'En attente'),
+        ('accepted', 'Accepté'),
+    ]
+    
+    requester = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='friendship_requests_sent',
+        on_delete=models.CASCADE,
+        verbose_name="Demandeur"
+    )
+    receiver = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='friendship_requests_received',
+        on_delete=models.CASCADE,
+        verbose_name="Destinataire"
+    )
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='pending',
+        verbose_name="Statut"
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Créé le")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Mis à jour le")
+    
+    class Meta:
+        unique_together = ('requester', 'receiver')
+        ordering = ['-created_at']
+        verbose_name = "Amitié"
+        verbose_name_plural = "Amitiés"
+    
+    def __str__(self):
+        return f"{self.requester.nickname} -> {self.receiver.nickname} ({self.status})"
+    
+    def accept(self):
+        """Accepter la demande d'amitié"""
+        self.status = 'accepted'
+        self.save()
+    
+    def is_pending(self):
+        """Vérifier si la demande est en attente"""
+        return self.status == 'pending'
+    
+    def is_accepted(self):
+        """Vérifier si la demande est acceptée"""
+        return self.status == 'accepted'
