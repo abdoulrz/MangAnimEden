@@ -3,13 +3,16 @@ from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from reader.models import ReadingProgress
 
+from .services import BadgeService
+
 User = get_user_model()
 
 @receiver(post_save, sender=ReadingProgress)
 def award_xp_on_read(sender, instance, created, **kwargs):
     """
     Attribue de l'XP à l'utilisateur lorsqu'il termine un chapitre.
-    Gain : 10 XP par chapitre terminé.
+    Gain : 5 XP par chapitre terminé.
+    Vérifie également l'attribution de badges.
     """
     if instance.completed:
         # Note: Pour une implémentation plus robuste, il faudrait vérifier
@@ -24,8 +27,11 @@ def award_xp_on_read(sender, instance, created, **kwargs):
         # Pour éviter le spam sur chaque save de page (si update progress), 
         # on pourrait limiter, mais ici on reste simple pour la phase 2.5
         
-        # On ajoute 10 XP
-        instance.user.add_xp(10)
+        # On ajoute 5 XP
+        instance.user.add_xp(5)
+        
+        # Vérification des badges (Type: Chapitres Lus)
+        BadgeService.check_badges(instance.user, 'CHAPTERS_READ')
 
 
 @receiver(post_save, sender=User)

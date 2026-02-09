@@ -33,11 +33,13 @@ def demo_view(request, chapter_id=None):
     # Save Reading Progress & Mark as Completed (awards XP via signal)
     if request.user.is_authenticated:
         from reader.models import ReadingProgress
-        progress, created = ReadingProgress.objects.update_or_create(
+        progress, created = ReadingProgress.objects.get_or_create(
             user=request.user,
             chapter=chapter,
-            defaults={'completed': True}  # Mark as completed to award XP
         )
+        if not progress.completed:
+            progress.completed = True
+            progress.save()  # Mark as completed to award XP
     
     # Context
     context = {

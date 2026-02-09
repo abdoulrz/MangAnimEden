@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Catalogue - MangAnimEDen{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
 
 {% block content %}
 <div class="container catalog-container">

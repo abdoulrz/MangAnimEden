@@ -7,9 +7,30 @@ class Group(models.Model):
     description = models.TextField(blank=True)
     icon = models.ImageField(upload_to='group_icons/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='owned_groups', on_delete=models.SET_NULL, null=True)
     
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        if self.owner:
+             # Basic validation, though better handled in forms/views for user feedback
+             pass
+        super().save(*args, **kwargs)
+
+
+class GroupMembership(models.Model):
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='memberships')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='group_memberships')
+    is_banned = models.BooleanField(default=False)
+    banned_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('group', 'user')
+
+    def __str__(self):
+        status = "Banned" if self.is_banned else "Member"
+        return f"{self.user.nickname} in {self.group.name} ({status})"
 
 class Event(models.Model):
     title = models.CharField(max_length=200)

@@ -492,3 +492,197 @@
         height: 180px;
     }
 }
+
+/* ===============================
+   BADGES TIMELINE STYLES
+   =============================== */
+
+.badge-timeline-container {
+    position: relative;
+    padding: 2rem 0.5rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.timeline-line {
+    position: absolute;
+    left: 2rem;
+    top: 2rem;
+    bottom: 2rem;
+    width: 4px;
+    background: linear-gradient(to bottom, #8b5cf6, rgba(34, 211, 238, 0.3));
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.timeline-item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 2.5rem;
+    z-index: 2;
+}
+
+.timeline-item:last-child {
+    margin-bottom: 0;
+}
+
+.timeline-dot {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1.5rem;
+    background: #0f172a;
+    /* Match body bg or dark */
+    border-radius: 50%;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    z-index: 2;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+    /* Center on the 4px line which is at 2rem (approx 32px) */
+    /* 2rem = 32px. Line center at 34px. Dot 40px. 
+       Let's adjust line left to match dot center. */
+}
+
+/* Adjust line position to center with dot (width 40px + margin-left 0.5rem => Center ~ 28px?)
+   Let's keep line at 2rem (32px).
+   Dot 40px. Center at 20px.
+   If margin-left is 0.75rem (12px). Center of dot is 12 + 20 = 32px.
+*/
+.timeline-dot {
+    margin-left: 0.75rem;
+}
+
+.timeline-item.unlocked .timeline-dot {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 15px rgba(139, 92, 246, 0.5);
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(34, 211, 238, 0.2));
+}
+
+.badge-icon-small {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.dot-next {
+    width: 16px;
+    height: 16px;
+    background: #22d3ee;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+}
+
+.dot-locked {
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+}
+
+.timeline-content {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 1.25rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.timeline-item:hover .timeline-content {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+.badge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.badge-header h4 {
+    margin: 0;
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.badge-date {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.badge-condition {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.95rem;
+    margin: 0 0 1rem 0;
+    line-height: 1.4;
+}
+
+.badge-status-label {
+    display: inline-block;
+    padding: 0.35rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    background: rgba(34, 211, 238, 0.15);
+    color: #22d3ee;
+    border: 1px solid rgba(34, 211, 238, 0.3);
+}
+
+.badge-status-label.locked {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.5);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.7);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 10px rgba(34, 211, 238, 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(34, 211, 238, 0);
+    }
+}
+
+/* Mobile Tweaks for Timeline */
+@media (max-width: 600px) {
+    .timeline-line {
+        left: 1.5rem;
+    }
+
+    .timeline-dot {
+        margin-left: 0.25rem;
+        margin-right: 1rem;
+        width: 36px;
+        height: 36px;
+    }
+
+    .timeline-content {
+        padding: 1rem;
+    }
+
+    .badge-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}

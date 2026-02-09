@@ -1,0 +1,107 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <div class="breadcrumb">
+        <a href="{% url 'administration:series_list' %}" class="breadcrumb-link">Séries</a>
+        <span class="breadcrumb-separator">/</span>
+        <h1 class="admin-page-title inline">{{ current_series.title }} - Chapitres</h1>
+    </div>
+
+    <a href="{% url 'administration:chapter_create' current_series.id %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nouveau Chapitre
+    </a>
+</div>
+
+<div class="admin-table-container">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Numéro</th>
+                <th>Titre</th>
+                <th>Fichier Source</th>
+                <th>Pages</th>
+                <th>Date Ajout</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chapter in chapters %}
+            <tr>
+                <td><strong>#{{ chapter.number }}</strong></td>
+                <td>{{ chapter.title|default:"-" }}</td>
+                <td>
+                    {% if chapter.source_file %}
+                    <a href="{{ chapter.source_file.url }}" target="_blank" class="file-badge">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </a>
+                    {% else %}
+                    <span class="file-badge empty">
+                        <i class="fas fa-exclamation-triangle"></i> Vide
+                    </span>
+                    {% endif %}
+                </td>
+                <td>{{ chapter.pages.count }} pages</td>
+                <td>{{ chapter.created_at|date:"d M Y" }}</td>
+                <td>
+                    <a href="{% url 'administration:chapter_edit' chapter.id %}" class="btn-icon" title="Éditer">📝</a>
+                    <form action="{% url 'administration:chapter_delete' chapter.id %}" method="POST"
+                        class="inline-form" onsubmit="return confirm('Supprimer ce chapitre ?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-icon delete" title="Supprimer">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="empty-state">Aucun chapitre pour cette série.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if is_paginated %}
+<div class="admin-pagination">
+    <span class="pagination-info">Page {{ page_obj.number }} sur {{ paginator.num_pages }}</span>
+    <div class="pagination-controls">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}" class="btn-icon" title="Page précédente">⬅️</a>
+        {% endif %}
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}" class="btn-icon" title="Page suivante">➡️</a>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+
+<style>
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb-link {
+        text-decoration: none;
+        color: var(--color-text-secondary);
+        font-weight: 500;
+        transition: color 0.2s;
+    }
+
+    .breadcrumb-link:hover {
+        color: #fff;
+    }
+
+    .breadcrumb-separator {
+        margin: 0 12px;
+        color: var(--color-text-muted);
+        opacity: 0.5;
+    }
+
+    .inline {
+        display: inline;
+    }
+</style>
+
+{% endblock %}

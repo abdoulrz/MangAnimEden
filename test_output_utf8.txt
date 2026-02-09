@@ -1,0 +1,557 @@
+﻿python : Creating test database for alias 
+'default'...
+En línea: 1 Carácter: 1
++ python manage.py test users social > 
+test_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified:  
+   (Creating test d...as 'default'...:Strin  
+  g) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandE 
+   rror
+ 
+
+..FFFF..EEEEEEEEEEEEEFFFF.EEEE
+=============================================
+=========================
+ERROR: test_accept_friendship (social.tests.t
+est_friendship.FriendshipModelTests.test_acce
+pt_friendship)
+Test accepting a friend request.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 17, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_create_friendship_request (social
+.tests.test_friendship.FriendshipModelTests.t
+est_create_friendship_request)
+Test creating a friend request.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 17, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_friendship_string_representation 
+(social.tests.test_friendship.FriendshipModel
+Tests.test_friendship_string_representation)
+Test the string representation of a 
+friendship.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 17, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_unique_constraint (social.tests.t
+est_friendship.FriendshipModelTests.test_uniq
+ue_constraint)
+Test that duplicate friendships cannot be 
+created.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 17, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_bidirectional_friendship (social.
+tests.test_friendship.UserFriendMethodsTests.
+test_bidirectional_friendship)
+Test that friendships work in both 
+directions.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 92, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_get_friend_count (social.tests.te
+st_friendship.UserFriendMethodsTests.test_get
+_friend_count)
+Test getting count of friends.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 92, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_get_friends (social.tests.test_fr
+iendship.UserFriendMethodsTests.test_get_frie
+nds)
+Test getting list of accepted friends.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 92, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_get_pending_requests (social.test
+s.test_friendship.UserFriendMethodsTests.test
+_get_pending_requests)
+Test getting pending friend requests 
+received.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 92, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_get_pending_requests_count (socia
+l.tests.test_friendship.UserFriendMethodsTest
+s.test_get_pending_requests_count)
+Test getting count of pending requests.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 92, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_has_pending_request_from (social.
+tests.test_friendship.UserFriendMethodsTests.
+test_has_pending_request_from)
+Test checking if user has pending request 
+from another user.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 92, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_has_sent_request_to (social.tests
+.test_friendship.UserFriendMethodsTests.test_
+has_sent_request_to)
+Test checking if user has sent request to 
+another user.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 92, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_is_friend_with (social.tests.test
+_friendship.UserFriendMethodsTests.test_is_fr
+iend_with)
+Test checking if two users are friends.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 92, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_no_duplicate_friends (social.test
+s.test_friendship.UserFriendMethodsTests.test
+_no_duplicate_friends)
+Test that get_friends() doesn't return 
+duplicates.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_frie
+ndship.py", line 92, in setUp
+    self.user1 = User.objects.create_user(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: CustomUserManager.create_user() 
+missing 1 required positional argument: 
+'email'
+
+=============================================
+=========================
+ERROR: test_create_story_via_view (social.tes
+ts.test_stories.StoryTests.test_create_story_
+via_view)
+Test submitting a new story via the form
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_stor
+ies.py", line 27, in 
+test_create_story_via_view
+    response = 
+self.client.post(reverse('forum_home'), {
+                                
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\base.py", line 98, 
+in reverse
+    resolved_url = 
+resolver._reverse_with_prefix(view, prefix, 
+*args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\resolvers.py", 
+line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: 
+Reverse for 'forum_home' not found. 
+'forum_home' is not a valid view function or 
+pattern name.
+
+=============================================
+=========================
+ERROR: test_dynamic_views (social.tests.test_
+stories.StoryTests.test_dynamic_views)
+Test that URL parameters switch the 
+active_mode correctly
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_stor
+ies.py", line 74, in test_dynamic_views
+    response = 
+self.client.get(reverse('forum_home'))
+                               
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\base.py", line 98, 
+in reverse
+    resolved_url = 
+resolver._reverse_with_prefix(view, prefix, 
+*args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\resolvers.py", 
+line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: 
+Reverse for 'forum_home' not found. 
+'forum_home' is not a valid view function or 
+pattern name.
+
+=============================================
+=========================
+ERROR: test_story_expiration (social.tests.te
+st_stories.StoryTests.test_story_expiration)
+Test that expired stories are not shown
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_stor
+ies.py", line 49, in test_story_expiration
+    response = 
+self.client.get(reverse('forum_home'))
+                               
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\base.py", line 98, 
+in reverse
+    resolved_url = 
+resolver._reverse_with_prefix(view, prefix, 
+*args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\resolvers.py", 
+line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: 
+Reverse for 'forum_home' not found. 
+'forum_home' is not a valid view function or 
+pattern name.
+
+=============================================
+=========================
+ERROR: test_story_grouping (social.tests.test
+_stories.StoryTests.test_story_grouping)
+Test that multiple stories from same user 
+appear as one bubble
+Found 30 test(s).
+System check identified no issues (0 silenced).
+Successfully deleted 1 expired stories
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_stor
+ies.py", line 60, in test_story_grouping
+    response = 
+self.client.get(reverse('forum_home'))
+                               
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\base.py", line 98, 
+in reverse
+    resolved_url = 
+resolver._reverse_with_prefix(view, prefix, 
+*args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\resolvers.py", 
+line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: 
+Reverse for 'forum_home' not found. 
+'forum_home' is not a valid view function or 
+pattern name.
+
+=============================================
+=========================
+FAIL: test_user_above_level_50_promoted (user
+s.tests.test_models.AutomaticPromotionTests.t
+est_user_above_level_50_promoted)
+Test qu'un utilisateur de niveau > 50 a le 
+r¶le de modÚrateur
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\users\tests\test_model
+s.py", line 93, in 
+test_user_above_level_50_promoted
+    self.assertEqual(user.level, 75)
+AssertionError: 74 != 75
+
+=============================================
+=========================
+FAIL: test_user_at_level_50_promoted (users.t
+ests.test_models.AutomaticPromotionTests.test
+_user_at_level_50_promoted)
+Test qu'un utilisateur atteignant le niveau 
+50 est automatiquement promu
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\users\tests\test_model
+s.py", line 78, in 
+test_user_at_level_50_promoted
+    self.assertEqual(user.level, 50)
+AssertionError: 49 != 50
+
+=============================================
+=========================
+FAIL: test_user_below_level_50_not_promoted (
+users.tests.test_models.AutomaticPromotionTes
+ts.test_user_below_level_50_not_promoted)
+Test qu'un utilisateur de niveau 49 n'est 
+pas promu
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\users\tests\test_model
+s.py", line 60, in 
+test_user_below_level_50_not_promoted
+    self.assertEqual(user.level, 49)
+AssertionError: 48 != 49
+
+=============================================
+=========================
+FAIL: test_xp_progression_triggers_promotion 
+(users.tests.test_models.AutomaticPromotionTe
+sts.test_xp_progression_triggers_promotion)
+Test d'intÚgration : add_xp() doit 
+dÚclencher la promotion Ó niveau 50
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\users\tests\test_model
+s.py", line 152, in 
+test_xp_progression_triggers_promotion
+    self.assertEqual(user.level, 49)
+AssertionError: 48 != 49
+
+=============================================
+=========================
+FAIL: test_ban_user (social.tests.test_group_
+management.GroupManagementTests.test_ban_user
+)
+Test that group owner can ban a user.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_grou
+p_management.py", line 63, in test_ban_user
+    self.assertEqual(response.status_code, 
+200)
+AssertionError: 404 != 200
+
+=============================================
+=========================
+FAIL: test_ban_user_permission_denied (social
+.tests.test_group_management.GroupManagementT
+ests.test_ban_user_permission_denied)
+Test that non-owner cannot ban users.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_grou
+p_management.py", line 80, in 
+test_ban_user_permission_denied
+    self.assertEqual(response.status_code, 
+403) # Forbidden
+    
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 404 != 403
+
+=============================================
+=========================
+FAIL: test_group_creation_permission (social.
+tests.test_group_management.GroupManagementTe
+sts.test_group_creation_permission)
+Test that only Level 50+ users can create 
+groups.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_grou
+p_management.py", line 24, in 
+test_group_creation_permission
+    self.assertRedirects(response, 
+'/social/')
+AssertionError: 404 != 302 : Response didn't 
+redirect as expected: Response code was 404 
+(expected 302)
+
+=============================================
+=========================
+FAIL: test_group_creation_quota (social.tests
+.test_group_management.GroupManagementTests.t
+est_group_creation_quota)
+Test that group creation is limited by level.
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_grou
+p_management.py", line 40, in 
+test_group_creation_quota
+    self.assertRedirects(response, 
+'/social/')
+AssertionError: 404 != 302 : Response didn't 
+redirect as expected: Response code was 404 
+(expected 302)
+
+---------------------------------------------
+-------------------------
+Ran 30 tests in 30.100s
+
+FAILED (failures=8, errors=17)
+Destroying test database for alias 
+'default'...
+

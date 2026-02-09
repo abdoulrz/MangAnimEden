@@ -15,17 +15,17 @@ class FriendshipModelTests(TestCase):
     def setUp(self):
         """Create test users."""
         self.user1 = User.objects.create_user(
-            username='user1',
+            email='user1@test.com',
             nickname='User One',
             password='testpass123'
         )
         self.user2 = User.objects.create_user(
-            username='user2',
+            email='user2@test.com',
             nickname='User Two',
             password='testpass123'
         )
         self.user3 = User.objects.create_user(
-            username='user3',
+            email='user3@test.com',
             nickname='User Three',
             password='testpass123'
         )
@@ -90,22 +90,22 @@ class UserFriendMethodsTests(TestCase):
     def setUp(self):
         """Create test users and friendships."""
         self.user1 = User.objects.create_user(
-            username='user1',
+            email='user1@test.com',
             nickname='User One',
             password='testpass123'
         )
         self.user2 = User.objects.create_user(
-            username='user2',
+            email='user2@test.com',
             nickname='User Two',
             password='testpass123'
         )
         self.user3 = User.objects.create_user(
-            username='user3',
+            email='user3@test.com',
             nickname='User Three',
             password='testpass123'
         )
         self.user4 = User.objects.create_user(
-            username='user4',
+            email='user4@test.com',
             nickname='User Four',
             password='testpass123'
         )

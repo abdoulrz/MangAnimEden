@@ -23,6 +23,7 @@ from core.views import home_view, login_view, register_view, logout_view
 urlpatterns = [
     path('', home_view, name='home'),
     path('', include('core.urls')),
+    path('accounts/', include('allauth.urls')),
     path('admin/', admin.site.urls),
     path('reader/', include('reader.urls')),
     path('catalogue/', include('catalog.urls')),
@@ -31,6 +32,7 @@ urlpatterns = [
     path('deconnexion/', logout_view, name='logout'),
     path('users/', include('users.urls')),
     path('forum/', include('social.urls')),
+    path('admin-panel/', include('administration.urls')),
 ]
 
 # Serve media files in development

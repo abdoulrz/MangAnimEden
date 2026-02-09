@@ -79,17 +79,18 @@ Le cœur de l'expérience utilisateur.
 
 La couche sociale (basée sur vos demandes).
 
-* **Models:** CommunityGroup (Public/Private/Invite-only), DiscussionThread, Post.  
-* **Feature:** Accès basé sur les rôles (Admin de communauté vs Membre).
+* **Models:** CommunityGroup (Public/Private/Invite-only, avec `owner`), GroupMembership (Gestions des bans), DiscussionThread, Post.  
+* **Feature:** Accès basé sur les rôles (Owner du groupe vs Membre vs Banni).
 
 ### **4. apps/users (Gamification)**
 
 Système d'engagement utilisateur via XP et Niveaux.
 
-* **Models:** User (Extended avec `level`, `xp`).
-* **Signals:** `users/signals.py` - Django Signal post_save sur ReadingProgress → Attribution automatique de 10 XP.
-* **Logic:** `calculate_level()` (XP // 100 + 1), `add_xp(amount)`, `get_level_progress()` pour UI.
-* **Integration:** Reader marque `ReadingProgress.completed=True` → Signal fire → XP+.
+* **Models:** User (Extended avec `level`, `xp`), Badge, UserBadge.
+* **Signals:** `users/signals.py` - Django Signal post_save sur ReadingProgress → Attribution automatique de 5 XP + Vérification Badges.
+* **Adapter:** `users/adapter.py` - Surcharge de `django-allauth` pour la génération de `nickname` (Google Auth).
+* **Logic:** `calculate_level()` (XP // 100 + 1), `add_xp(amount)`, `BadgeService.check_badges()`.
+* **Integration:** Reader marque `ReadingProgress.completed=True` → Signal fire → XP+ & Badges.
 
 ## **Gestion des Assets (CSS/JS)**
 

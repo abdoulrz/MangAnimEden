@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans "Sign In" %} - MangAnimEDen{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/auth.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-wrapper">
+        <div class="auth-header">
+            <h1 class="gradient-text auth-brand">MangAnimEDen</h1>
+        </div>
+
+        <div class="card auth-card">
+            <h2 class="auth-title">{% trans "Sign In" %}</h2>
+            <p class="auth-subtitle">{% blocktrans with provider.name as provider %}You are about to connect using a
+                third party account from {{ provider }}.{% endblocktrans %}</p>
+
+            <form method="post" class="auth-form-group">
+                {% csrf_token %}
+                <button type="submit" class="btn-primary auth-submit">
+                    {% trans "Continue" %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

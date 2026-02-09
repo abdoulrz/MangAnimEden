@@ -17,7 +17,7 @@
                 <a href="{% url 'catalog:index' %}"
                     class="nav-link {% if url_name == 'catalog:index' %}active{% endif %}">Catalogue</a>
                 <a href="{% url 'social:forum_home' %}"
-                    class="nav-link {% if url_name == 'forum_home' %}active{% endif %}">Forum</a>
+                    class="nav-link {% if 'social:' in url_name %}active{% endif %}">Forum</a>
                 {% endwith %}
             </div>
         </div>
@@ -61,8 +61,8 @@
                         A propos
                     </a>
 
-                    {% if user.is_staff or user.role_admin %}
-                    <a href="{% url 'users:admin_dashboard' %}" class="dropdown-item">
+                    {% if user.is_staff or user.role_admin or user.role_moderator %}
+                    <a href="{% url 'administration:dashboard' %}" class="dropdown-item">
                         <span class="dropdown-icon">⚡</span>
                         Tableau de bord
                     </a>

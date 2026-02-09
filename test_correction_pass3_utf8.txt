@@ -1,0 +1,14 @@
+﻿python : Creating test database for alias 
+'default'...
+En línea: 1 Carácter: 1
++ python manage.py test users social > 
+test_correction_pass3.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: 
+(Crea    ting test d...as 
+'default'...:String) [], Rem    oteException
+    + FullyQualifiedErrorId : 
+NativeCommandError
+ 
+

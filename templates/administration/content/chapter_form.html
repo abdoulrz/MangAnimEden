@@ -1,0 +1,51 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header centered">
+    <div class="breadcrumb">
+        <a href="{% url 'administration:series_list' %}" class="breadcrumb-link">Séries</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="{% url 'administration:chapter_list' current_series.id %}" class="breadcrumb-link">{{ current_series.title }}</a>
+        <span class="breadcrumb-separator">/</span>
+        <span class="breadcrumb-current">{% if object %}Modifier{% else %}Nouveau{% endif %} Chapitre</span>
+    </div>
+    <h1 class="admin-page-title">{% if object %}Modifier{% else %}Nouveau{% endif %} Chapitre</h1>
+</div>
+
+<div class="form-container">
+    <form method="post" enctype="multipart/form-data" class="admin-form">
+        {% csrf_token %}
+        <input type="hidden" name="series" value="{{ current_series.id }}">
+
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="id_number">🔢 Numéro du Chapitre</label>
+                {{ form.number }}
+                {% if form.number.errors %}<div class="text-danger">{{ form.number.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="id_title">📝 Titre (Optionnel)</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div class="text-danger">{{ form.title.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group span-2">
+                <label for="{{ form.source_file.id_for_label }}"><span>📂 {{ form.source_file.label }}</span></label>
+                <div class="django-file-input">
+                    {{ form.source_file }}
+                </div>
+                {% if form.source_file.errors %}<div class="text-danger">{{ form.source_file.errors }}</div>{% endif %}
+                <small class="form-help-text">Formats supportés : PDF, CBR, CBZ, EPUB.</small>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="{% url 'administration:chapter_list' current_series.id %}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-primary">
+                {% if object %}Modifier{% else %}Créer{% endif %}
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

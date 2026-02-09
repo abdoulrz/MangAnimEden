@@ -1,0 +1,61 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1 class="admin-page-title">Gestion des Séries</h1>
+    <a href="{% url 'administration:series_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nouvelle Série
+    </a>
+</div>
+
+<div class="admin-controls">
+    <form method="get" class="admin-search-form">
+        <input type="text" name="q" placeholder="Rechercher une série..." value="{{ request.GET.q }}">
+        <button type="submit" class="btn btn-secondary">Rechercher</button>
+    </form>
+</div>
+
+<div class="series-grid">
+    {% for series in series_list %}
+    <div class="series-card">
+        <div class="series-cover-container">
+            {% if series.cover %}
+            <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="series-cover-img">
+            {% else %}
+            <div class="no-cover-placeholder">
+                No Cover
+            </div>
+            {% endif %}
+            <span class="series-status-badge">
+                {{ series.get_status_display }}
+            </span>
+        </div>
+
+        <div class="series-info">
+            <h3 class="series-title">{{ series.title }}</h3>
+            <div class="series-meta">
+                {{ series.chapters.count }} chapitres • {{ series.views_count }} vues
+            </div>
+
+            <div class="series-actions">
+                <a href="{% url 'administration:series_edit' series.id %}"
+                    class="btn btn-small btn-primary">Modifier</a>
+                <a href="{% url 'administration:chapter_list' series.id %}"
+                    class="btn btn-small btn-secondary">Chapitres</a>
+                <form action="{% url 'administration:series_delete' series.id %}" method="POST" class="inline-form"
+                    onsubmit="return confirm('⚠️ Êtes-vous sûr ? Supprimer une série supprimera TOUS ses chapitres !');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-small btn-danger">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">
+        Aucune série trouvée.
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Pagination code (reused from user_list or similar) -->
+{% endblock %}

@@ -52,7 +52,7 @@ class AutomaticPromotionTests(TestCase):
             nickname='Level49User',
             password='testpass'
         )
-        user.xp = 4800  # 4800 // 100 + 1 = 49
+        user.xp = 4999  # Level 49
         user.level = user.calculate_level()
         user.save()
         
@@ -67,12 +67,12 @@ class AutomaticPromotionTests(TestCase):
             nickname='Level50User',
             password='testpass'
         )
-        user.xp = 4800  # Niveau 49
+        user.xp = 4900  # Level 49
         user.level = user.calculate_level()
         user.save()
         
         # Ajouter XP pour atteindre le niveau 50
-        user.add_xp(100)  # 4800 + 100 = 4900 = Niveau 50
+        user.add_xp(100)  # 4900 + 100 = 5000 = Niveau 50
         
         user.refresh_from_db()
         self.assertEqual(user.level, 50)
@@ -85,7 +85,7 @@ class AutomaticPromotionTests(TestCase):
             nickname='Level75User',
             password='testpass'
         )
-        user.xp = 7400  # 7400 // 100 + 1 = 75
+        user.xp = 7500  # Level 75
         user.level = user.calculate_level()
         user.save()
         
@@ -144,7 +144,7 @@ class AutomaticPromotionTests(TestCase):
             nickname='XPTest',
             password='testpass'
         )
-        user.xp = 4800  # Niveau 49
+        user.xp = 4900  # Niveau 49
         user.level = user.calculate_level()
         user.save()
         
@@ -153,7 +153,7 @@ class AutomaticPromotionTests(TestCase):
         self.assertFalse(user.role_moderator)
         
         # Ajouter assez d'XP pour atteindre niveau 50
-        user.add_xp(100)  # 4800 + 100 = 4900 = Niveau 50
+        user.add_xp(100)  # 4900 + 100 = 5000 = Niveau 50
         
         user.refresh_from_db()
         self.assertEqual(user.level, 50)

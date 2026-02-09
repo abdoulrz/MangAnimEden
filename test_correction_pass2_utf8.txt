@@ -1,0 +1,146 @@
+﻿python : Creating test database for alias 
+'default'...
+En línea: 1 Carácter: 1
++ python manage.py test users social > 
+test_correction_pass2.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Cr   
+ eating test d...as 'default'...:String) [],     
+RemoteException
+    + FullyQualifiedErrorId : NativeCommandErro   
+ r
+ 
+
+..........................FF.F
+==================================================
+====================
+FAIL: test_create_story_via_view (social.tests.tes
+t_stories.StoryTests.test_create_story_via_view)
+Test submitting a new story via the form
+--------------------------------------------------
+--------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\Proje
+cts\MangaAnimEden\social\tests\test_stories.py", 
+line 32, in test_create_story_via_view
+    self.assertEqual(Story.objects.count(), 1)
+AssertionError: 0 != 1
+
+==================================================
+====================
+FAIL: test_dynamic_views (social.tests.test_storie
+s.StoryTests.test_dynamic_views)
+Test that URL parameters switch the active_mode 
+correctly
+--------------------------------------------------
+--------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\Proje
+cts\MangaAnimEden\social\tests\test_stories.py", 
+line 81, in test_dynamic_views
+    
+self.assertEqual(response.context['active_mode'], 
+'story')
+AssertionError: 'default' != 'story'
+- default
++ story
+
+
+==================================================
+====================
+FAIL: test_story_grouping (social.tests.test_stori
+es.StoryTests.test_story_grouping)
+Test that multiple stories from same user appear 
+as one bubble
+--------------------------------------------------
+--------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\Proje
+cts\MangaAnimEden\social\tests\test_stories.py", 
+line 67, in test_story_grouping
+    self.assertIn('story_users', response.context)
+AssertionError: 'story_users' not found in 
+[[{'True': True, 'False': False, 'None': None}, 
+{'csrf_token': <SimpleLazyObject: 'KN73aOF2jzk9gnw
+Q0vu4IRK5WkcdRAXjydM9R32iorkvB4AGoYewYjLuMDivMQry'
+>, 'request': <WSGIRequest: GET '/forum/'>, 
+'user': <SimpleLazyObject: <User: TestUser>>, 
+'perms': PermWrapper(<SimpleLazyObject: <User: 
+TestUser>>), 'messages': <FallbackStorage: 
+request=<WSGIRequest: GET '/forum/'>>, 
+'DEFAULT_MESSAGE_LEVELS': {'DEBUG': 10, 'INFO': 
+20, 'SUCCESS': 25, 'WARNING': 30, 'ERROR': 40}, 
+'STATIC_URL': '/static/'}, {}, {'groups': 
+<QuerySet []>, 'events': <QuerySet []>, 
+'active_group': None, 'messages': [], 
+'story_groups': [], 'active_mode': 'default', 
+'active_story_group': None, 
+'active_group_stories': None, 'active_event': 
+None, 'can_post_story': False, 'STATIC_VERSION': 
+'2.5.16'}], [{'True': True, 'False': False, 
+'None': None}, {'csrf_token': <SimpleLazyObject: '
+KN73aOF2jzk9gnwQ0vu4IRK5WkcdRAXjydM9R32iorkvB4AGoY
+ewYjLuMDivMQry'>, 'request': <WSGIRequest: GET 
+'/forum/'>, 'user': <SimpleLazyObject: <User: 
+TestUser>>, 'perms': 
+PermWrapper(<SimpleLazyObject: <User: 
+TestUser>>), 'messages': <FallbackStorage: 
+request=<WSGIRequest: GET '/forum/'>>, 
+'DEFAULT_MESSAGE_LEVELS': {'DEBUG': 10, 'INFO': 
+20, 'SUCCESS': 25, 'WARNING': 30, 'ERROR': 40}, 
+'STATIC_URL': '/static/'}, {}, {'groups': 
+<QuerySet []>, 'events': <QuerySet []>, 
+'active_group': None, 'messages': [], 
+'story_groups': [], 'active_mode': 'default', 
+'active_story_group': None, 
+'active_group_stories': None, 'active_event': 
+None, 'can_post_story': False, 'STATIC_VERSION': 
+'2.5.16'}], [{'True': True, 'False': False, 
+'None': None}, {'csrf_token': <SimpleLazyObject: '
+KN73aOF2jzk9gnwQ0vu4IRK5WkcdRAXjydM9R32iorkvB4AGoY
+ewYjLuMDivMQry'>, 'request': <WSGIRequest: GET 
+'/forum/'>, 'user': <SimpleLazyObject: <User: 
+TestUser>>, 'perms': 
+PermWrapper(<SimpleLazyObject: <User: 
+TestUser>>), 'messages': <FallbackStorage: 
+request=<WSGIRequest: GET '/forum/'>>, 
+'DEFAULT_MESSAGE_LEVELS': {'DEBUG': 10, 'INFO': 
+20, 'SUCCESS': 25, 'WARNING': 30, 'ERROR': 40}, 
+'STATIC_URL': '/static/'}, {}, {'groups': 
+<QuerySet []>, 'events': <QuerySet []>, 
+'active_group': None, 'messages': [], 
+'story_groups': [], 'active_mode': 'default', 
+'active_story_group': None, 
+'active_group_stories': None, 'active_event': 
+None, 'can_post_story': False, 'STATIC_VERSION': 
+'2.5.16'}, {}], [{'True': True, 'False': False, 
+'None': None}, {'csrf_token': <SimpleLazyObject: '
+KN73aOF2jzk9gnwQ0vu4IRK5WkcdRAXjydM9R32iorkvB4AGoY
+ewYjLuMDivMQry'>, 'request': <WSGIRequest: GET 
+'/forum/'>, 'user': <SimpleLazyObject: <User: 
+TestUser>>, 'perms': 
+PermWrapper(<SimpleLazyObject: <User: 
+TestUser>>), 'messages': <FallbackStorage: 
+request=<WSGIRequest: GET '/forum/'>>, 
+'DEFAULT_MESSAGE_LEVELS': {'DEBUG': 10, 'INFO': 
+20, 'SUCCESS': 25, 'WARNING': 30, 'ERROR': 40}, 
+'STATIC_URL': '/static/'}, {}, {'groups': 
+<QuerySet []>, 'events': <QuerySet []>, 
+'active_group': None, 'messages': [], 
+'story_groups': [], 'active_mode': 'default', 
+'active_story_group': None, 
+'active_group_stories': None, 'active_event': 
+None, 'can_post_story': False, 'STATIC_VERSION': 
+'2.5.16'}, {}]]
+
+--------------------------------------------------
+--------------------
+Ran 30 tests in 71.106s
+
+FAILED (failures=3)
+Destroying test database for alias 'default'...
+
+Found 30 test(s).
+System check identified no issues (0 silenced).
+Successfully deleted 1 expired stories

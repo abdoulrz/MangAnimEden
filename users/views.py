@@ -124,6 +124,43 @@ def profile_view(request):
     ).values_list('chapter__series', flat=True).distinct()
     context['scans'] = Series.objects.filter(id__in=user_series_ids)
 
+    # --- Badges (Phase 2.5.3) ---
+    from .models import Badge, UserBadge
+    
+    # All badges sorted by threshold to form the timeline
+    # Note: This simple sort assumes all badges are comparable (e.g. all CHAPTERS_READ).
+    # For mixed types, we might want to group them or sort by complex logic.
+    # For now, we assume primary path is Reading.
+    
+    all_badges = Badge.objects.all().order_by('threshold')
+    user_badges_qs = UserBadge.objects.filter(user=request.user).select_related('badge')
+    user_badges_map = {ub.badge.id: ub for ub in user_badges_qs}
+    
+    timeline_badges = []
+    first_locked_found = False
+    
+    for badge in all_badges:
+        if badge.id in user_badges_map:
+            status = 'unlocked'
+            obtained_at = user_badges_map[badge.id].obtained_at
+        else:
+            if not first_locked_found:
+                status = 'next'
+                first_locked_found = True
+            else:
+                status = 'locked'
+            obtained_at = None
+            
+        timeline_badges.append({
+            'badge': badge,
+            'status': status,
+            'obtained_at': obtained_at
+        })
+        
+    context['timeline_badges'] = timeline_badges
+    context['user_badges_count'] = len(user_badges_map)
+    context['total_badges_count'] = len(timeline_badges)
+
     # Default active mode for the view (can be ignored by JS if we toggle all)
     context['active_mode'] = 'overview' 
 

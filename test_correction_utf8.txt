@@ -1,0 +1,174 @@
+﻿python : Creating test database for alias 
+'default'...
+En línea: 1 Carácter: 1
++ python manage.py test users social > 
+test_correction_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: 
+(Crea    ting test d...as 
+'default'...:String) [], Rem    oteException
+    + FullyQualifiedErrorId : 
+NativeCommandError
+ 
+
+..........................EEEE
+=============================================
+=========================
+ERROR: test_create_story_via_view (social.tes
+ts.test_stories.StoryTests.test_create_story_
+via_view)
+Test submitting a new story via the form
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_stor
+ies.py", line 27, in 
+test_create_story_via_view
+    response = 
+self.client.post(reverse('forum_home'), {
+                                
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\base.py", line 98, 
+in reverse
+    resolved_url = 
+resolver._reverse_with_prefix(view, prefix, 
+*args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\resolvers.py", 
+line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: 
+Reverse for 'forum_home' not found. 
+'forum_home' is not a valid view function or 
+pattern name.
+
+=============================================
+=========================
+ERROR: test_dynamic_views (social.tests.test_
+stories.StoryTests.test_dynamic_views)
+Test that URL parameters switch the 
+active_mode correctly
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_stor
+ies.py", line 74, in test_dynamic_views
+    response = 
+self.client.get(reverse('forum_home'))
+                               
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\base.py", line 98, 
+in reverse
+    resolved_url = 
+resolver._reverse_with_prefix(view, prefix, 
+*args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\resolvers.py", 
+line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: 
+Reverse for 'forum_home' not found. 
+'forum_home' is not a valid view function or 
+pattern name.
+
+=============================================
+=========================
+ERROR: test_story_expiration (social.tests.te
+st_stories.StoryTests.test_story_expiration)
+Test that expired stories are not shown
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_stor
+ies.py", line 49, in test_story_expiration
+    response = 
+self.client.get(reverse('forum_home'))
+                               
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\base.py", line 98, 
+in reverse
+    resolved_url = 
+resolver._reverse_with_prefix(view, prefix, 
+*args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\resolvers.py", 
+line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: 
+Reverse for 'forum_home' not found. 
+'forum_home' is not a valid view function or 
+pattern name.
+
+=============================================
+=========================
+ERROR: test_story_grouping (social.tests.test
+_stories.StoryTests.test_story_grouping)
+Test that multiple stories from same user 
+appear as one bubble
+---------------------------------------------
+-------------------------
+Traceback (most recent call last):
+  File "C:\Users\Usuario\Documents\Developer\
+Projects\MangaAnimEden\social\tests\test_stor
+ies.py", line 60, in test_story_grouping
+    response = 
+self.client.get(reverse('forum_home'))
+                               
+^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\base.py", line 98, 
+in reverse
+    resolved_url = 
+resolver._reverse_with_prefix(view, prefix, 
+*args, **kwargs)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Usuario\AppData\Local\Packag
+es\PythonSoftwareFoundation.Python.3.11_qbz5n
+2kfra8p0\LocalCache\local-packages\Python311\
+site-packages\django\urls\resolvers.py", 
+line 831, in _reverse_with_prefix
+    raise NoReverseMatch(msg)
+django.urls.exceptions.NoReverseMatch: 
+Reverse for 'forum_home' not found. 
+'forum_home' is not a valid view function or 
+pattern name.
+
+---------------------------------------------
+-------------------------
+Ran 30 tests in 72.034s
+
+FAILED (errors=4)
+Found 30 test(s).
+System check identified no issues (0 silenced).
+Successfully deleted 1 expired stories
+Destroying test database for alias 
+'default'...
+

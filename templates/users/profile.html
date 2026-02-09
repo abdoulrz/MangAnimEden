@@ -92,7 +92,7 @@
                         </div>
                     </div>
 
-                    <div class="stat-glass-card">
+                    <a href="{% url 'users:domaine' %}?mode=badges" class="stat-glass-card stat-clickable">
                         <div class="stat-icon-wrapper icon-pink">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -103,10 +103,10 @@
                             </svg>
                         </div>
                         <div class="stat-content">
-                            <span class="stat-value">12</span>
+                            <span class="stat-value">{{ user_badges_count }} / {{ total_badges_count }}</span>
                             <span class="stat-label">Badges</span>
                         </div>
-                    </div>
+                    </a>
 
                     <div class="stat-glass-card">
                         <div class="stat-icon-wrapper icon-blue">
@@ -321,6 +321,46 @@
                 </div>
             </div>
 
+            <!-- Badges Block (Phase 2.5.3) -->
+            <div id="content-badges" class="content-block content-hidden">
+                <h2 class="panel-title">🏆 Mes Badges</h2>
+                <div class="badge-timeline-container">
+                    <div class="timeline-line"></div>
+
+                    {% for item in timeline_badges %}
+                    <div class="timeline-item {{ item.status }}">
+                        <div class="timeline-dot">
+                            {% if item.status == 'unlocked' and item.badge.icon %}
+                            <img src="{{ item.badge.icon.url }}" alt="{{ item.badge.name }}" class="badge-icon-small">
+                            {% elif item.status == 'next' %}
+                            <div class="dot-next"></div>
+                            {% else %}
+                            <div class="dot-locked"></div>
+                            {% endif %}
+                        </div>
+
+                        <div class="timeline-content">
+                            <div class="badge-header">
+                                <h4>{{ item.badge.name }}</h4>
+                                {% if item.obtained_at %}
+                                <span class="badge-date">{{ item.obtained_at|date:"d M Y" }}</span>
+                                {% endif %}
+                            </div>
+                            <p class="badge-condition">{{ item.badge.description }}</p>
+                            {% if item.status == 'next' %}
+                            <span class="badge-status-label">Prochain Objectif</span>
+                            {% elif item.status == 'locked' %}
+                            <span class="badge-status-label locked">Verrouillé</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="empty-message">Aucun badge disponible.</p>
+                    {% endfor %}
+
+                </div>
+            </div>
+
         </div>
 
         <script>
@@ -328,41 +368,76 @@
                 const sidebarLinks = document.querySelectorAll('.profile-sidebar .block-item');
                 const contentBlocks = document.querySelectorAll('.content-block');
                 const contentArea = document.getElementById('domaine-content-area');
+                const badgesCard = document.querySelector('a[href*="mode=badges"]'); // Select the Glass Card
 
-                sidebarLinks.forEach(link => {
-                    link.addEventListener('click', function (e) {
-                        e.preventDefault();
+                // Function to switch content mode
+                function switchToMode(mode) {
+                    if (!mode) return;
 
-                        // EXTRACT TARGET ID
-                        let targetId = 'overview';
-                        const url = new URL(this.href, window.location.origin);
-                        const mode = url.searchParams.get('mode');
-                        if (mode) targetId = mode;
+                    // 1. HIDE ALL BLOCKS
+                    contentBlocks.forEach(block => {
+                        block.style.display = 'none';
+                        block.classList.add('content-hidden');
+                    });
 
-                        // 1. HIDE ALL BLOCKS FORCEFULLY
-                        contentBlocks.forEach(block => {
-                            block.style.display = 'none'; // Force inline hide
-                            block.classList.add('content-hidden'); // Backup class
+                    // 2. RESET ACTIVE STATE ON SIDEBAR
+                    sidebarLinks.forEach(l => l.classList.remove('active'));
+
+                    // 3. SHOW TARGET BLOCK
+                    const targetBlock = document.getElementById('content-' + mode);
+                    if (targetBlock) {
+                        targetBlock.style.display = 'block';
+                        targetBlock.classList.remove('content-hidden');
+
+                        // Update active state in sidebar if matching link exists
+                        sidebarLinks.forEach(link => {
+                            if (link.href.includes('mode=' + mode)) {
+                                link.classList.add('active');
+                            }
                         });
 
-                        // 2. RESET ACTIVE STATE ON SIDEBAR
-                        sidebarLinks.forEach(l => l.classList.remove('active'));
-
-                        // 3. SHOW TARGET BLOCK
-                        const targetBlock = document.getElementById('content-' + targetId);
-                        if (targetBlock) {
-                            targetBlock.style.display = 'block'; // Force inline show
-                            targetBlock.classList.remove('content-hidden');
-                            this.classList.add('active'); // Add active class to clicked link
-
-                            // 4. SCROLL TO CONTENT CENTERED
-                            if (contentArea) {
-                                requestAnimationFrame(() => {
-                                    contentArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                });
-                            }
+                        // 4. SCROLL TO CONTENT CENTERED
+                        if (contentArea) {
+                            requestAnimationFrame(() => {
+                                contentArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            });
                         }
-                    });
+                    }
+                }
+
+                // Generic Click Handler
+                function handleNavigationClick(e) {
+                    e.preventDefault();
+                    const url = new URL(this.href, window.location.origin);
+                    const mode = url.searchParams.get('mode');
+                    if (mode) {
+                        // Update URL without reload (History API)
+                        window.history.pushState({ mode: mode }, '', url);
+                        switchToMode(mode);
+                    }
+                }
+
+                // Attach to Sidebar Links
+                sidebarLinks.forEach(link => {
+                    link.addEventListener('click', handleNavigationClick);
+                });
+
+                // Attach to Badges Card if it exists
+                if (badgesCard) {
+                    badgesCard.addEventListener('click', handleNavigationClick);
+                }
+
+                // Handle Page Load / Back Button
+                const urlParams = new URLSearchParams(window.location.search);
+                const initialMode = urlParams.get('mode');
+                if (initialMode) {
+                    switchToMode(initialMode);
+                }
+
+                // Handle Browser Back/Forward buttons
+                window.addEventListener('popstate', function (event) {
+                    const mode = event.state ? event.state.mode : (new URLSearchParams(window.location.search).get('mode') || 'overview');
+                    switchToMode(mode);
                 });
 
                 // FORCE PROGRESS BAR FIX - Read from data attribute

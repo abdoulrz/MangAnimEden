@@ -322,3 +322,77 @@ def user_search_view(request):
     
     return render(request, 'social/user_search.html', context)
 
+
+# ========== GROUP MANAGEMENT (Phase 2.5.4 & 2.5.5) ==========
+
+@login_required
+def create_group(request):
+    """
+    Vue pour créer un nouveau groupe.
+    Restreint aux utilisateurs de niveau >= 50 ou Modérateurs.
+    """
+    from .forms import GroupCreateForm
+    from django.contrib import messages
+    
+    # 1. Level / Role Check
+    if request.user.level < 50 and not request.user.role_moderator and not request.user.is_staff:
+        messages.error(request, "Vous devez atteindre le niveau 50 pour créer un groupe.")
+        return redirect('social:forum_home')
+        
+    # 2. Quota Check
+    owned_groups_count = Group.objects.filter(owner=request.user).count()
+    max_allowed = request.user.level // 50
+    if not request.user.is_staff and owned_groups_count >= max_allowed:
+        messages.error(request, f"Vous avez atteint la limite de création de groupes ({max_allowed}). Montez de niveau pour en créer plus !")
+        return redirect('social:forum_home')
+
+    if request.method == 'POST':
+        form = GroupCreateForm(request.POST, request.FILES)
+        if form.is_valid():
+            group = form.save(commit=False)
+            group.owner = request.user
+            group.save()
+            messages.success(request, f"Le groupe '{group.name}' a été créé avec succès !")
+            return redirect('social:forum_home')
+    else:
+        form = GroupCreateForm()
+    
+    return render(request, 'social/group_create.html', {'form': form})
+
+
+@login_required
+def ban_user(request, group_id, user_id):
+    """
+    Vue pour bannir/débannir un utilisateur d'un groupe.
+    Seul le propriétaire du groupe peut effectuer cette action.
+    """
+    from .models import GroupMembership
+    from django.http import JsonResponse
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Méthode non autorisée'}, status=405)
+        
+    group = get_object_or_404(Group, id=group_id)
+    
+    # Permission Check: Only Owner
+    if group.owner != request.user and not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Non autorisé'}, status=403)
+        
+    target_user = get_object_or_404(User, id=user_id)
+    
+    # Cannot ban owner
+    if target_user == group.owner:
+        return JsonResponse({'success': False, 'error': 'Impossible de bannir le propriétaire'}, status=400)
+        
+    membership, created = GroupMembership.objects.get_or_create(group=group, user=target_user)
+    
+    # Toggle Ban Status
+    membership.is_banned = not membership.is_banned
+    if membership.is_banned:
+        membership.banned_at = timezone.now()
+    else:
+        membership.banned_at = None
+    membership.save()
+    
+    action = "banni" if membership.is_banned else "débanni"
+    return JsonResponse({'success': True, 'message': f"{target_user.nickname} a été {action} du groupe.", 'is_banned': membership.is_banned})

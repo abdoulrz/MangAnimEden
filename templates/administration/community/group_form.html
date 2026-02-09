@@ -1,0 +1,38 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1 class="admin-page-title">
+        Modifier le Groupe: {{ form.instance.name }}
+    </h1>
+    <a href="{% url 'administration:group_list' %}" class="btn btn-secondary">Retour</a>
+</div>
+
+<div class="form-container">
+    <form method="post" enctype="multipart/form-data" class="admin-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="id_name">Nom du Groupe</label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="error">{{ form.name.errors }}</div>{% endif %}
+        </div>
+
+        <div class="form-group">
+            <label for="id_description">Description</label>
+            {{ form.description }}
+        </div>
+
+        <div class="form-group">
+            <label for="id_icon">Icône</label>
+            {{ form.icon }}
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Enregistrer les modifications</button>
+            <button type="button" class="btn btn-danger"
+                onclick="alert('Fonctionnalité de fermeture/bannissement à implémenter')">Fermer le Groupe</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

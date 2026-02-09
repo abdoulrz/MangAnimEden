@@ -142,10 +142,23 @@
     border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
+.btn-google {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .field-error {
     color: #ef4444;
     font-size: var(--font-size-xs);
     margin-top: 4px;
+}
+
+.auth-submit-link {
+    text-decoration: none;
+    display: block;
+    text-align: center;
 }
 
 .auth-help-text {

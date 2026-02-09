@@ -18,7 +18,7 @@ Ex: Les utilisateurs veulent discuter des "spoilers" du dernier chapitre de *Sol
 
 ## **3\. Description du Produit ("The What")**
 
-*À quoi cela ressemble-t-il ? (Référencez les screenshots si possible)*
+**À quoi cela ressemble-t-il ? (Référencez les screenshots si possible)*
 
 ### **User Stories**
 
@@ -57,3 +57,5 @@ class Community(models.Model):
 * \[ \] Un test unitaire couvre la création de groupe.  
 * \[ \] Un test d'intégration vérifie qu'un non-membre ne peut pas voir le contenu privé.  
 * \[ \] L'interface est responsive (Mobile first).
+
+---

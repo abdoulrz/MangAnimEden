@@ -1,0 +1,73 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1 class="admin-page-title">
+        {% if form.instance.pk %}Modifier {{ form.instance.title }}{% else %}Nouvelle Série{% endif %}
+    </h1>
+    <a href="{% url 'administration:series_list' %}" class="btn btn-secondary">Retour</a>
+</div>
+
+<div class="form-container">
+    <form method="post" enctype="multipart/form-data" class="admin-form">
+        {% csrf_token %}
+
+        <div class="form-grid">
+            <div class="form-group span-2">
+                <label for="id_title">Titre</label>
+                {{ form.title }}
+                {% if form.title.errors %}<div class="error">{{ form.title.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group span-2">
+                <label for="id_slug">Slug (laisser vide pour auto-générer)</label>
+                {{ form.slug }}
+            </div>
+
+            <div class="form-group span-2">
+                <label for="id_description">Description</label>
+                {{ form.description }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_cover">Couverture</label>
+                {{ form.cover }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_type">Type</label>
+                {{ form.type }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_author">Auteur</label>
+                {{ form.author }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_artist">Artiste</label>
+                {{ form.artist }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_status">Statut</label>
+                {{ form.status }}
+            </div>
+
+            <div class="form-group">
+                <label for="id_release_date">Date de Sortie</label>
+                {{ form.release_date }}
+            </div>
+
+            <div class="form-group span-2">
+                <label for="id_genres">Genres (Maintenir Ctrl pour sélectionner plusieurs)</label>
+                {{ form.genres }}
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

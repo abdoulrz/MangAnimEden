@@ -11,6 +11,25 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Phase 2.5.3: Système de Badges (Achievements)
 - Phase 2.5.4: Système de Création de Groupes
 
+## [1.6.0] - 2026-02-08 ([Phase 3.1 - Google Auth & Integrity Roadmap])
+
+### Added Auth
+
+- **Google Authentication (OAuth2)** :
+  - Intégration de `django-allauth` pour l'authentification sociale.
+  - Configuration du provider Google avec scopes (email, profile).
+  - **Custom Adapter** : `users/adapter.py` pour générer automatiquement un `nickname` unique à partir de l'email/nom Google (requis par notre modèle User).
+  - Gestion des erreurs : Page `authentication_error.html` stylisée.
+  - Simplification UX : `SOCIALACCOUNT_LOGIN_ON_GET = True` pour éviter l'écran intermédiaire.
+
+### Added Documentation
+
+- **Roadmap Refinement** :
+  - Ajout de la **Phase 3.5 (Intégrité)** : Système de Signalement, Pages Légales, Vérification Email.
+  - Ajout de la **Phase 5.3 (Passation Client)** : Checklist complète de transfert de propriété (Clés, Hébergement, Admin).
+  - Ajout des tâches SEO (Sitemap) et Maintenance.
+- **Scripts Utility** : `scripts/update_google_credentials.py` pour faciliter la mise à jour des clés API sans toucher au code ou à l'admin.
+
 ## [1.4.18] - 2026-02-06 ([Phase 2.5.2 - Friendship System])
 
 ### Added - Système Social (Amis)
@@ -51,6 +70,48 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Barre XP apparaissant pleine à faibles pourcentages sur profils publics
 - Pseudos chat affichant texte littéral template (problème variable template multiligne)
 - Problèmes cache template résolus avec mises à jour STATIC_VERSION
+
+## [1.5.5] - 2026-02-07 ([Phase 2.5.3 - Badges System])
+
+### Added Badges
+
+- **Système de Badges (Achievements)** :
+  - **Backend** : Modèles `Badge` et `UserBadge` pour gérer les succès.
+  - **Service** : `BadgeService.check_badges()` évalue les conditions (ex: "Chapitres Lus").
+  - **Automation** : Intégration dans `users/signals.py` pour déblocage temps réel.
+  - **UI Profil** : Timeline verticale (Glassmorphism) interfacée avec le système "Domaine".
+  - **Design** : Icônes "Bulb" (64px) et indicateurs d'état (Verrouillé/Débloqué/Prochain).
+
+### Changed XP
+
+- **Rééquilibrage** : Gain d'XP réduit de 10 à **5 XP** par chapitre pour une progression plus durable.
+
+### Fixed Duplication XP
+
+- **Duplication XP** : Correction d'un bug dans le lecteur où rafraîchir la page attribuait l'XP plusieurs fois.
+- **Navigation Profil** : Correction du Routing JS pour les onglets du Domaine (Badges, Stats, etc.) fonctionnant comme une SPA.
+
+## [1.5.4] - 2026-02-07 ([Phase 2.5.4 & 2.5.5 - Group Logic & UI])
+
+### Added Groups
+
+- **Création de Groupe (Restriction)** :
+  - Limité aux utilisateurs de **Niveau 50+** (500 chapitres lus).
+  - Quota de création : 1 groupe tous les 50 niveaux (`level // 50`).
+  - Validation backend stricte dans `GroupCreateView`.
+- **Modération de Groupe** :
+  - Le créateur du groupe est désigné automatiquement comme **Propriétaire**.
+  - Possibilité pour le propriétaire de **bannir/débannir** des membres via le chat.
+  - Modèle `GroupMembership` pour gérer les statuts (banni, membre).
+- **UI Premium** :
+  - **Page Création** : Refonte totale avec design "Glassmorphism Premium", upload d'image stylisé et prévisualisation.
+  - **Sidebar Forum** : Nouveau bouton "+" stylisé pour l'ajout de groupe (visible uniquement si éligible).
+  - **Formulaires** : Création de `forms.css` pour une stylisation unifiée et moderne des inputs.
+
+### Changed
+
+- **Forum Sidebar** : Affichage conditionnel du bouton de création de groupe.
+- **Chat** : Bouton de bannissement visible uniquement pour le propriétaire du groupe sur les messages des autres membres.
 
 ## [1.5.2] - 2026-02-06 ([Phase 2.5.1 - Automatic Promotion])
 
@@ -184,7 +245,7 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - **Page Profil** : Edition du profil avec prévisualisation live de l'avatar.
 - **Catalogue** : Grille de mangas avec cartes stylisées (Cover, Badges, Rating).
 
-### Changed
+### Changed Designs
 
 - Remplacement de tout le CSS inline par des fichiers CSS externes (`auth.css`, `admin.css`, `pages.css`).
 - Architecture des templates Django : Meilleure utilisation de `base.html` et des blocks.

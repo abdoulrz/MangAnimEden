@@ -97,7 +97,7 @@ class Chapter(models.Model):
         verbose_name="Numéro"
     )
     title = models.CharField(max_length=200, blank=True, verbose_name="Titre")
-    pdf_file = models.FileField(upload_to='mangas/pdfs/', blank=True, null=True, verbose_name="Fichier PDF")
+    source_file = models.FileField(upload_to='scans/', blank=True, null=True, verbose_name="Fichier Source")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

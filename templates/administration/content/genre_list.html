@@ -1,0 +1,32 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1 class="admin-page-title">Gestion des Genres</h1>
+    <a href="{% url 'administration:genre_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nouveau Genre
+    </a>
+</div>
+
+<div class="genres-grid">
+    {% for genre in genres %}
+    <div class="genre-card">
+        <div class="genre-info">
+            <h3 class="genre-name">{{ genre.name }}</h3>
+            <span class="genre-slug">slug: {{ genre.slug }}</span>
+            <span class="genre-count">{{ genre.series.count }} séries</span>
+        </div>
+        <div class="genre-actions">
+            <a href="{% url 'administration:genre_edit' genre.id %}" class="btn-icon" title="Éditer">📝</a>
+            <form action="{% url 'administration:genre_delete' genre.id %}" method="POST" class="inline-form"
+                onsubmit="return confirm('Supprimer ce genre ?');">
+                {% csrf_token %}
+                <button type="submit" class="btn-icon delete" title="Supprimer">🗑️</button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <div class="empty-state">Aucun genre trouvé.</div>
+    {% endfor %}
+</div>
+{% endblock %}

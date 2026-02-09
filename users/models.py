@@ -44,13 +44,13 @@ class User(AbstractUser):
     
     # Gamification (Optionnel mais suggéré pour l'engagement communautaire)
     level = models.PositiveIntegerField(default=1)
-    xp = models.PositiveIntegerField(default=0)
+    xp = models.PositiveIntegerField(default=100)
 
     def calculate_level(self):
         """
         Calcule le niveau basé sur l'XP total.
         Formule simple : Niveau = XP // 100
-        (5000 XP = Niveau 50)
+        (100 XP = Niveau 1, 5000 XP = Niveau 50)
         """
         return self.xp // 100
 
@@ -210,3 +210,33 @@ class User(AbstractUser):
     class Meta:
         verbose_name = "Lecteur"
         verbose_name_plural = "Lecteurs"
+
+
+class Badge(models.Model):
+    name = models.CharField(max_length=100)
+    slug = models.SlugField(unique=True)
+    description = models.TextField()
+    icon = models.ImageField(upload_to='badges/')
+    
+    CONDITION_CHOICES = [
+        ('CHAPTERS_READ', 'Chapitres Lus'),
+        ('SERIES_COMPLETED', 'Séries Terminées'),
+        ('COMMENTS_POSTED', 'Commentaires Postés'),
+        ('ACCOUNT_AGE', 'Ancienneté (Jours)'),
+        ('GROUP_JOINED', 'Groupes Rejoints'),
+    ]
+    condition_type = models.CharField(max_length=50, choices=CONDITION_CHOICES)
+    threshold = models.PositiveIntegerField(help_text="Valeur cible pour débloquer (ex: 100 pour 100 chapitres)")
+    
+    def __str__(self):
+        return self.name
+
+
+class UserBadge(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='badges')
+    badge = models.ForeignKey(Badge, on_delete=models.CASCADE)
+    obtained_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        unique_together = ('user', 'badge')
+

@@ -78,7 +78,14 @@
 
         <!-- Left Column: Groups -->
         <div class="sidebar-container groups-sidebar">
-            <h2 class="section-title">Groupes</h2>
+            <h2 class="section-title">
+                Groupes
+                {% if user.level >= 50 or user.role_moderator or user.is_staff %}
+                <a href="{% url 'social:create_group' %}" class="btn-group-add" title="Créer un groupe">
+                    <span>+</span>
+                </a>
+                {% endif %}
+            </h2>
             <div class="glass-panel sidebar-content">
                 <div class="groups-list">
                     {% for group in groups %}
@@ -112,6 +119,9 @@
                 <div class="chat-header">
                     <h3>{{ active_group.name }}</h3>
                     <p class="group-desc">{{ active_group.description|truncatechars:50 }}</p>
+                    {% if active_group.owner == user %}
+                    <span class="badge bg-primary">Propriétaire</span>
+                    {% endif %}
                 </div>
 
                 <div class="chat-messages" id="chatMessages">
@@ -120,9 +130,13 @@
                         <div class="message-bubble">
                             <div class="message-info">
                                 <a href="{% url 'users:public_profile' message.sender.id %}" class="sender-name"
-                                    style="color: inherit; text-decoration: none; transition: opacity 0.3s;">{{
-                                    message.sender.nickname }}</a>
+                                    style="color: inherit; text-decoration: none; transition: opacity 0.3s;">{{ message.sender.nickname }}</a>
                                 <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
+
+                                {% if active_group.owner == user and message.sender != user %}
+                                <button class="btn-ban"onclick="banUser({{ active_group.id }}, {{ message.sender.id }}, '{{ message.sender.nickname }}')"
+                                    title="Bannir ce membre">🚫</button>
+                                {% endif %}
                             </div>
                             <p class="message-text">{{ message.content }}</p>
                         </div>
@@ -277,6 +291,29 @@
         if (event.target == modal) {
             modal.style.display = "none";
         }
+    }
+
+    function banUser(groupId, userId, nickname) {
+        if (!confirm(`Voulez-vous vraiment bannir/débannir ${nickname} de ce groupe ?`)) return;
+
+        fetch(`/social/groups/${groupId}/ban/${userId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    // Reload page to reflect changes (or remove messages from DOM)
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Error:', error));
     }
 </script>
 {% endblock %}
