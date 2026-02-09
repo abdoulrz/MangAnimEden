@@ -193,6 +193,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 - [ ] **Validateur** : Magic Bytes check pour les images.
 - [ ] **Quotas** : Limites de taille par user.
+- [ ] **Optimisation Upload** : Implémenter l'upload par morceaux (Chunked Uploads) pour supporter les très gros fichiers (>1GB) de manière fiable, comme Google Drive.
 
 ### 3.4 Recherche Avancée
 
@@ -277,6 +278,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [ ] **Maintenance Mode** : Page statique 503 pour les mises à jour.
 - [ ] **Lazy Loading** : Vérification finale.
 - [ ] **Images** : Format WebP.
+- [ ] **Serveur Windows (rappel)** : Utiliser la commande Waitress pour gérer les gros uploads (>1GB) : `waitress-serve --port=8000 --channel-timeout=1200 --max-request-body-size=2147483648 config.wsgi:application`
 
 ### 5.3 Passation Client (Checklist de Transfert)
 

@@ -34,6 +34,15 @@
                 {{ form.cover }}
             </div>
 
+            <div class="form-group span-2">
+                <label for="id_folder_upload">Dossier Chapitres (Upload en masse)</label>
+                <!-- Manual input to bypass Django validation issues with folder uploads -->
+                <input type="file" name="folder_upload" id="id_folder_upload" class="form-control-file" webkitdirectory
+                    directory multiple>
+                <small class="form-text text-muted">Sélectionnez un dossier pour importer automatiquement les
+                    chapitres.</small>
+            </div>
+
             <div class="form-group">
                 <label for="id_type">Type</label>
                 {{ form.type }}

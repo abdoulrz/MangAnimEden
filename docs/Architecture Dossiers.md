@@ -92,6 +92,16 @@ Système d'engagement utilisateur via XP et Niveaux.
 * **Logic:** `calculate_level()` (XP // 100 + 1), `add_xp(amount)`, `BadgeService.check_badges()`.
 * **Integration:** Reader marque `ReadingProgress.completed=True` → Signal fire → XP+ & Badges.
 
+### **5. apps/administration (Custom Admin)**
+
+Interface métier pour la gestion du contenu et des utilisateurs.
+
+* **Uploads de Dossiers** :
+  * **Contournement Formulaire** : Utilisation d'un `<input type="file" webkitdirectory>` manuel dans le template pour supporter l'envoi de dossiers (listes de fichiers), que les `forms.FileField` Django gèrent mal par défaut.
+  * **Traitement en Masse** : Service `bulk_create_chapters_from_folder` qui itère sur les fichiers, extrait le numéro de chapitre via Regex, et déclenche le `FileProcessor`.
+* **Infrastructure (Windows)** :
+  * Utilisation de **Waitress** comme serveur WSGI pour supporter les timeouts longs (20min) et les gros corps de requête (>1GB) nécessaires pour l'upload de séries complètes.
+
 ## **Gestion des Assets (CSS/JS)**
 
 Pour respecter le design de vos images (moderne, sombre, propre), utilisez une architecture CSS **ITCSS** (Inverted Triangle CSS) ou **Tailwind** configuré avec vos propres couleurs.

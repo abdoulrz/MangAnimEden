@@ -142,6 +142,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# Data Upload Settings
+DATA_UPLOAD_MAX_NUMBER_FILES = 10000  # Increased limit for bulk chapter uploads
+DATA_UPLOAD_MAX_MEMORY_SIZE = 2147483648  # 2 GB
+
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
 
@@ -189,4 +193,4 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Versioning for cache busting
-STATIC_VERSION = '2.5.30'
+STATIC_VERSION = '2.5.42'

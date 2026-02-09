@@ -11,9 +11,38 @@ from django.conf import settings
 from PIL import Image
 import pypdf
 
-from .models import Page
+from .models import Page, Chapter, Series
+from .utils import extract_chapter_number
 
 logger = logging.getLogger(__name__)
+
+def bulk_create_chapters_from_folder(series, files):
+    """
+    Takes a list of uploaded files (from request.FILES.getlist),
+    creates Chapter objects for the given Series, and processes the files.
+    Returns count of successfully processed chapters.
+    """
+    for f in files:
+        chapter_num = extract_chapter_number(f.name)
+        if chapter_num is not None:
+             # Create chapter
+            chapter, created = Chapter.objects.get_or_create(
+                series=series,
+                number=chapter_num,
+                defaults={'title': f"Chapitre {chapter_num}"}
+            )
+            
+            # Save file to chapter
+            chapter.source_file.save(f.name, f, save=True)
+            
+            # Process file
+            try:
+                if processor.process_chapter(chapter):
+                    processed_count += 1
+            except Exception as e:
+                logger.error(f"Error processing chapter {chapter_num}: {e}")
+                
+    return processed_count
 
 class FileProcessor:
     def __init__(self):

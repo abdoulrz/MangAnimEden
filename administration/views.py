@@ -114,15 +114,29 @@ class AdminSeriesListView(ListView):
             queryset = queryset.filter(title__icontains=query)
         return queryset
 
+from catalog.services import bulk_create_chapters_from_folder
+from .forms import SeriesForm
+
 @method_decorator(requires_admin, name='dispatch')
 class AdminSeriesCreateView(CreateView):
     model = Series
+    form_class = SeriesForm
     template_name = 'administration/content/series_form.html'
-    fields = ['title', 'slug', 'description', 'cover', 'type', 'genres', 'author', 'artist', 'status', 'release_date']
     success_url = reverse_lazy('administration:series_list')
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        
+        # Handle folder upload
+        files = self.request.FILES.getlist('folder_upload')
+        
+        if files:
+            count = bulk_create_chapters_from_folder(self.object, files)
+            if count > 0:
+                messages.success(self.request, f"{count} chapitres importés.")
+            else:
+                messages.warning(self.request, "Aucun chapitre n'a pu être traité du dossier.")
+                
         create_system_log(self.request, 'SERIES_CREATE', details=f"Série créée : {self.object.title}")
         messages.success(self.request, "Série créée avec succès.")
         return response
@@ -130,12 +144,22 @@ class AdminSeriesCreateView(CreateView):
 @method_decorator(requires_admin, name='dispatch')
 class AdminSeriesUpdateView(UpdateView):
     model = Series
+    form_class = SeriesForm
     template_name = 'administration/content/series_form.html'
-    fields = ['title', 'slug', 'description', 'cover', 'type', 'genres', 'author', 'artist', 'status', 'release_date']
     success_url = reverse_lazy('administration:series_list')
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        
+        # Handle folder upload
+        files = self.request.FILES.getlist('folder_upload')
+        if files:
+            count = bulk_create_chapters_from_folder(self.object, files)
+            if count > 0:
+                messages.success(self.request, f"{count} chapitres importés.")
+            else:
+                messages.warning(self.request, "Aucun chapitre n'a pu être traité du dossier.")
+
         create_system_log(self.request, 'SERIES_UPDATE', details=f"Série modifiée : {self.object.title}")
         messages.success(self.request, "Série mise à jour avec succès.")
         return response

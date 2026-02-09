@@ -11,6 +11,18 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Phase 2.5.3: Système de Badges (Achievements)
 - Phase 2.5.4: Système de Création de Groupes
 
+## [1.7.0] - 2026-02-09 ([Phase 3.3 - Upload Management & integrity])
+
+### Added Upload
+
+- **Series Folder Upload** : Possibilité d'uploader un dossier entier de chapitres lors de la création/édition d'une série.
+- **Bulk Processing** : Création automatique des objets `Chapter` et extraction des pages via `FileProcessor`.
+- **Large File Support** : Configuration optimisée pour supporter des uploads >1GB (via Waitress sur Windows).
+
+### Changed Admin
+
+- **Custom Admin Form** : Implementation d'un input HTML manuel pour contourner les limitations de validation Django sur les uploads de dossiers.
+
 ## [1.6.0] - 2026-02-08 ([Phase 3.1 - Google Auth & Integrity Roadmap])
 
 ### Added Auth

@@ -1,0 +1,47 @@
+{% load static %}
+
+<div class="custom-file-input-wrapper">
+    {% if widget.is_initial %}
+    <div class="current-file-display">
+        <div class="file-info">
+            <span class="file-icon">📄</span>
+            <a href="{{ widget.value.url }}" target="_blank" class="file-link">{{ widget.value }}</a>
+        </div>
+
+        {% if not widget.required %}
+        <div class="file-clear-option">
+            <input type="checkbox" name="{{ widget.checkbox_name }}" id="{{ widget.checkbox_id }}"
+                class="clear-checkbox">
+            <label for="{{ widget.checkbox_id }}" class="clear-label btn-danger btn-small">
+                <i class="fas fa-trash-alt"></i> Effacer
+            </label>
+        </div>
+        {% endif %}
+    </div>
+    <div class="modification-indicator">
+        <span class="text-muted">Remplacer le fichier :</span>
+    </div>
+    {% endif %}
+
+    <div class="new-file-input">
+        <label for="{{ widget.name }}" class="file-input-label">
+            <span class="file-icon-large">📂</span>
+            <span class="file-label-text">Choisir un fichier...</span>
+        </label>
+        <input type="{{ widget.type }}" name="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}class="hidden-file-input" onchange="updateFileLabel(this)">
+        <span class="selected-filename" id="filename-{{ widget.name }}">Aucun fichier sélectionné</span>
+    </div>
+</div>
+
+<script>
+    function updateFileLabel(input) {
+        const filenameDisplay = document.getElementById('filename-' + input.name);
+        if (input.files && input.files.length > 0) {
+            filenameDisplay.textContent = input.files[0].name;
+            filenameDisplay.classList.add('has-file');
+        } else {
+            filenameDisplay.textContent = 'Aucun fichier sélectionné';
+            filenameDisplay.classList.remove('has-file');
+        }
+    }
+</script>
