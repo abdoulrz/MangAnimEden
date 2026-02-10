@@ -39,6 +39,21 @@ jobs:
             --allow-unauthenticated \
             --set-env-vars "DEBUG=False"
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies for Static Files
+        run: |
+          pip install django whitenoise dj-database-url Pillow requests django-allauth pypdf python-decouple google-auth PyJWT cryptography psycopg2-binary
+          
+      - name: Collect static files
+        run: |
+          python manage.py collectstatic --noinput
+        env:
+          DJANGO_SECRET_KEY: build-time-dummy
+
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
