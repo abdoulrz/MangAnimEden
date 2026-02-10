@@ -9,3 +9,5 @@ python-decouple==3.8
 google-auth==2.40.3
 PyJWT==2.11.0
 cryptography==40.0.2
+dj-database-url==2.3.0
+psycopg2-binary==2.9.10
