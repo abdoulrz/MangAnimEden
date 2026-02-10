@@ -33,6 +33,11 @@ ALLOWED_HOSTS = [
     'manganimeden--manganimeden-374d1.europe-west4.hosted.app'
 ]
 
+CSRF_TRUSTED_ORIGINS = [
+    'https://manganimeden.web.app',
+    'https://manganimeden.firebaseapp.com'
+]
+
 # Static files version for cache busting
 # EMAIL CONFIGURATION
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Dev only

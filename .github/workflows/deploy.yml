@@ -1,0 +1,48 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  PROJECT_ID: manganimeden-374d1
+  REGION: europe-west4
+  SERVICE_NAME: manganimeden-backend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Build and Push Container
+        run: |
+          gcloud auth configure-docker --quiet
+          gcloud builds submit --tag gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy $SERVICE_NAME \
+            --image gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA \
+            --region $REGION \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-env-vars "DEBUG=False"
+
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_MANGANIMEDEN_374D1 }}
+          channelId: live
+          projectId: manganimeden-374d1

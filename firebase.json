@@ -25,6 +25,23 @@
       "functions"
     ]
   },
+  "hosting": {
+    "public": "staticfiles",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "run": {
+          "serviceId": "manganimeden-backend",
+          "region": "europe-west4"
+        }
+      }
+    ]
+  },
   "emulators": {
     "apphosting": {
       "port": 9000,
