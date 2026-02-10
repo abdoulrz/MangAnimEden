@@ -27,20 +27,19 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-l=yy7+4k^aw!u^
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = [
-    'manganimeden.web.app',
-    'manganimeden.firebaseapp.com',
-    'manganimeden-374d1.web.app',
-    'manganimeden-374d1.firebaseapp.com',
+    '.web.app',
+    '.firebaseapp.com',
+    '.a.run.app',
     '127.0.0.1',
     'localhost',
-    'manganimeden--manganimeden-374d1.europe-west4.hosted.app'
 ]
 
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 CSRF_TRUSTED_ORIGINS = [
-    'https://manganimeden.web.app',
-    'https://manganimeden.firebaseapp.com',
-    'https://manganimeden-374d1.web.app',
-    'https://manganimeden-374d1.firebaseapp.com'
+    'https://*.web.app',
+    'https://*.firebaseapp.com',
+    'https://*.a.run.app'
 ]
 
 # Static files version for cache busting
