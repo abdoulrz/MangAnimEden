@@ -25,8 +25,9 @@ COPY . /app/
 # Collect static files (requires a dummy secret key for build time)
 RUN DJANGO_SECRET_KEY=build-time-dummy python manage.py collectstatic --noinput
 
-# Run migrations (ensure tables exist in the container)
-RUN python manage.py migrate --noinput && python manage.py init_prod
+# Copy entrypoint script and make it executable
+COPY docker-entrypoint.sh /app/
+RUN chmod +x /app/docker-entrypoint.sh
 
-# Run gunicorn
-CMD exec gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0
+# Entrypoint handles migrations and gunicorn startup
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
