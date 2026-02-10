@@ -25,9 +25,11 @@ COPY . /app/
 # Collect static files (requires a dummy secret key for build time)
 RUN DJANGO_SECRET_KEY=build-time-dummy python manage.py collectstatic --noinput
 
-# Copy entrypoint script and make it executable
+# Copy entrypoint script and fix line endings (important for Windows users)
 COPY docker-entrypoint.sh /app/
-RUN chmod +x /app/docker-entrypoint.sh
+RUN apt-get update && apt-get install -y sed && \
+    sed -i 's/\r$//' /app/docker-entrypoint.sh && \
+    chmod +x /app/docker-entrypoint.sh
 
 # Entrypoint handles migrations and gunicorn startup
 ENTRYPOINT ["/app/docker-entrypoint.sh"]
