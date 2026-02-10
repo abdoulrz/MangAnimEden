@@ -1,9 +1,9 @@
 from django.conf import settings
 
-def firebase_config(request):
+def static_version(request):
     """
-    Injects Firebase configuration into the template context.
+    Context processor that adds STATIC_VERSION to the context.
     """
     return {
-        'FIREBASE_CONFIG': settings.FIREBASE_CONFIG
+        'STATIC_VERSION': getattr(settings, 'STATIC_VERSION', '1.0.0')
     }
