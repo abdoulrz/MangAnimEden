@@ -22,8 +22,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project
 COPY . /app/
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Collect static files (requires a dummy secret key for build time)
+RUN DJANGO_SECRET_KEY=build-time-dummy python manage.py collectstatic --noinput
 
 # Run gunicorn
 CMD exec gunicorn config.wsgi:application --bind 0.0.0.0:$PORT --workers 1 --threads 8 --timeout 0
