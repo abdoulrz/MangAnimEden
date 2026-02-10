@@ -12,7 +12,7 @@
 
     <div class="notification-menu" id="notificationDropdown">
         <div class="notification-header">
-            <h6 class="m-0 fw-bold text-white" style="font-size: 0.9rem;">Notifications</h6>
+            <h6 class="dropdown-title">Notifications</h6>
             {% if notification_count > 0 %}
             <form action="{% url 'social:notifications_list' %}" method="post" class="d-inline">
                 {% csrf_token %}
@@ -54,9 +54,9 @@
                     notifications</a>
             </div>
             {% else %}
-            <li class="p-4 text-center text-muted">
-                <i class="fas fa-bell-slash fa-2x mb-2 opacity-50"></i>
-                <p class="mb-0 small">Aucune nouvelle notification</p>
+            <li class="empty-notif-item">
+                <i class="fas fa-bell-slash"></i>
+                <p class="empty-state-text">Aucune nouvelle notification</p>
             </li>
             {% endif %}
         </ul>
