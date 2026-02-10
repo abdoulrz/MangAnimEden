@@ -558,6 +558,7 @@
     align-items: center;
     justify-content: center;
 }
+
 /* ==================== TOAST NOTIFICATIONS ==================== */
 .toast-container {
     position: fixed;
@@ -593,10 +594,22 @@
     flex-shrink: 0;
 }
 
-.toast-success .toast-icon { color: #10b981; }
-.toast-error .toast-icon, .toast-danger .toast-icon { color: #ef4444; }
-.toast-warning .toast-icon { color: #f59e0b; }
-.toast-info .toast-icon { color: var(--color-purple-primary); }
+.toast-success .toast-icon {
+    color: #10b981;
+}
+
+.toast-error .toast-icon,
+.toast-danger .toast-icon {
+    color: #ef4444;
+}
+
+.toast-warning .toast-icon {
+    color: #f59e0b;
+}
+
+.toast-info .toast-icon {
+    color: var(--color-purple-primary);
+}
 
 .toast-content {
     flex-grow: 1;
@@ -628,6 +641,7 @@
         transform: translateX(100%);
         opacity: 0;
     }
+
     to {
         transform: translateX(0);
         opacity: 1;
@@ -647,6 +661,7 @@
         right: 1rem;
         left: 1rem;
     }
+
     .toast {
         min-width: 0;
     }
@@ -668,3 +683,60 @@
     justify-content: center;
 }
 
+/* --- MOBILE NAVIGATION OVERRIDES --- */
+.navbar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--color-text-primary);
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: var(--space-xs);
+    transition: transform 0.2s ease;
+}
+
+.navbar-toggle:active {
+    transform: scale(0.9);
+}
+
+@media (max-width: 768px) {
+    .navbar-toggle {
+        display: block;
+    }
+
+    .navbar-menu {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 80%;
+        max-width: 300px;
+        height: 100vh;
+        background: var(--color-bg-secondary);
+        flex-direction: column;
+        padding: 100px var(--space-lg) var(--space-lg);
+        gap: var(--space-lg);
+        transition: right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+        border-left: 1px solid var(--color-border);
+        z-index: var(--z-overlay);
+    }
+
+    .navbar-menu.active {
+        right: 0;
+    }
+
+    .nav-link {
+        font-size: 1.1rem;
+        padding: var(--space-sm) 0;
+        width: 100%;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .navbar-search {
+        display: none !important;
+    }
+
+    .navbar-brand {
+        margin-right: 0 !important;
+    }
+}

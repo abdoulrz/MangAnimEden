@@ -200,6 +200,11 @@ body {
     box-shadow: 0 12px 40px rgba(139, 92, 246, 0.35);
 }
 
+.btn:active {
+    transform: translateY(0) scale(0.98);
+    opacity: 0.9;
+}
+
 .btn-secondary {
     background: var(--color-bg-card);
     color: var(--color-text-primary);
@@ -340,6 +345,14 @@ a:hover {
     .container,
     .container-wide {
         padding: 0 var(--space-md);
+    }
+
+    :root {
+        --space-lg: 16px;
+        --space-xl: 24px;
+        --space-2xl: 32px;
+        --font-size-3xl: 1.75rem;
+        --font-size-4xl: 2rem;
     }
 
     .section-header {

@@ -80,4 +80,34 @@ document.addEventListener('DOMContentLoaded', () => {
         // Optional: Cycle wisdom on click (Easter Egg)
         document.getElementById('wisdom-container').addEventListener('click', () => renderWisdom());
     }
+
+    // Mobile Menu Toggle logic
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const navbarMenu = document.querySelector('.navbar-menu');
+
+    if (mobileMenuToggle && navbarMenu) {
+        mobileMenuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navbarMenu.classList.toggle('active');
+
+            // Toggle Icon
+            const icon = mobileMenuToggle.querySelector('i');
+            if (icon) {
+                if (navbarMenu.classList.contains('active')) {
+                    icon.classList.replace('fa-bars', 'fa-times');
+                } else {
+                    icon.classList.replace('fa-times', 'fa-bars');
+                }
+            }
+        });
+
+        // Close sidebar when clicking outside
+        document.addEventListener('click', (e) => {
+            if (navbarMenu.classList.contains('active') && !navbarMenu.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+                navbarMenu.classList.remove('active');
+                const icon = mobileMenuToggle.querySelector('i');
+                if (icon) icon.classList.replace('fa-times', 'fa-bars');
+            }
+        });
+    }
 });
