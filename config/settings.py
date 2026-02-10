@@ -112,7 +112,6 @@ TEMPLATES = [
                 'django.template.context_processors.static',
                 'core.context_processors.static_version',
                 'social.context_processors.notifications', # Phase 3.2 Notifications
-                'core.context_processors.firebase_config', # Firebase Configuration
             ],
         },
     },
