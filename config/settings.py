@@ -24,8 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-l=yy7+4k^aw!u^b5v)!^b_*!sjx6*1wrocj^h=faz7n!rp=jnv')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# Temporarily enabled to see the 500 error traceback in logs/browser
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     '.web.app',
@@ -40,7 +39,7 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_TRUSTED_ORIGINS = [
     'https://*.web.app',
     'https://*.firebaseapp.com',
-    'https://*.a.run.app'
+    'https://*.run.app'
 ]
 
 # Static files version for cache busting
@@ -209,6 +208,11 @@ SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
 # Provider specific settings
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
+        'APP': {
+            'client_id': '998805449587-mvkim50ag8mqpqba2q3cn5p9uobbjk43q.apps.googleusercontent.com',
+            'secret': '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',
+            'key': ''
+        },
         'SCOPE': [
             'profile',
             'email',
