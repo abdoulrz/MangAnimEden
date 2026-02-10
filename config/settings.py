@@ -218,7 +218,7 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Versioning for cache busting
-STATIC_VERSION = '2.6.3'
+STATIC_VERSION = '2.6.4'
 
 # Firebase Configuration
 FIREBASE_CONFIG = {
