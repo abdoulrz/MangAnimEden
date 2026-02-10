@@ -227,6 +227,11 @@ SOCIALACCOUNT_PROVIDERS = {
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
+# Session settings for Serverless (Stateless Cloud Run)
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = True  # Required for HTTPS
+
 # Versioning for cache busting
 STATIC_VERSION = '2.6.4'
 
