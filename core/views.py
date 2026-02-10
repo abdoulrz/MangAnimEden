@@ -52,12 +52,17 @@ def login_view(request):
         return redirect('home')
 
     if request.method == 'POST':
+        print(f"[DEBUG] Login attempt for: {request.POST.get('username')}")
         form = CustomAuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
+            print(f"[DEBUG] Form valid. User found: {user.email}")
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)
+            print(f"[DEBUG] Login successful for: {user.email}")
             return redirect('home')
+        else:
+            print(f"[DEBUG] Form invalid: {form.errors.as_json()}")
     else:
         form = CustomAuthenticationForm()
 
