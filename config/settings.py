@@ -32,6 +32,7 @@ ALLOWED_HOSTS = [
     '.run.app',
     '127.0.0.1',
     'localhost',
+    '.pythonanywhere.com',
 ]
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
@@ -40,7 +41,8 @@ CSRF_TRUSTED_ORIGINS = [
     'https://*.web.app',
     'https://*.firebaseapp.com',
     'https://*.run.app',
-    'https://*.a.run.app'
+    'https://*.a.run.app',
+    'https://*.pythonanywhere.com',
 ]
 
 # Static files version for cache busting
