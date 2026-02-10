@@ -208,11 +208,13 @@ SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
 # Provider specific settings
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'APP': {
-            'client_id': '998805449587-mvkim50ag8mqpqba2q3cn5p9uobbjk43q.apps.googleusercontent.com',
-            'secret': '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',
-            'key': ''
-        },
+        'APPS': [
+            {
+                'client_id': '998805449587-mvkim50ag8mqpqba2q3cn5p9uobbjk43q.apps.googleusercontent.com',
+                'secret': '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',
+                'key': ''
+            },
+        ],
         'SCOPE': [
             'profile',
             'email',
