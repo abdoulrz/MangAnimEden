@@ -24,12 +24,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-l=yy7+4k^aw!u^b5v)!^b_*!sjx6*1wrocj^h=faz7n!rp=jnv')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'True') == 'True'
+# Temporarily enabled to see the 500 error traceback in logs/browser
+DEBUG = True
 
 ALLOWED_HOSTS = [
     '.web.app',
     '.firebaseapp.com',
-    '.a.run.app',
+    '.run.app',
     '127.0.0.1',
     'localhost',
 ]
@@ -222,6 +223,34 @@ SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Versioning for cache busting
 STATIC_VERSION = '2.6.4'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
 
 # Firebase Configuration
 FIREBASE_CONFIG = {
