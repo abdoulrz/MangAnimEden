@@ -39,7 +39,8 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 CSRF_TRUSTED_ORIGINS = [
     'https://*.web.app',
     'https://*.firebaseapp.com',
-    'https://*.run.app'
+    'https://*.run.app',
+    'https://*.a.run.app'
 ]
 
 # Static files version for cache busting

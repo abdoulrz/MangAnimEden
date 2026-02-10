@@ -13,3 +13,16 @@ class Command(BaseCommand):
         site.save()
         
         self.stdout.write(self.style.SUCCESS(f'Successfully initialized Site: {site.domain}'))
+
+        # Create a test user for production testing (since SQLite is ephemeral)
+        from users.models import User
+        test_email = 'test@manganimeden.com'
+        if not User.objects.filter(email=test_email).exists():
+            User.objects.create_superuser(
+                nickname='TestAdmin',
+                email=test_email,
+                password='Password123!'
+            )
+            self.stdout.write(self.style.SUCCESS(f'Created test admin: {test_email} / Password123!'))
+        else:
+            self.stdout.write(self.style.SUCCESS('Test user already exists.'))
