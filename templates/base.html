@@ -41,10 +41,101 @@
     <!-- Footer -->
     {% include 'components/footer.html' %}
 
+    <!-- Toast Container -->
+    <div id="toast-container" class="toast-container"></div>
+
     <!-- Global Scripts -->
     <script src="{% static 'js/app.js' %}?v={{ STATIC_VERSION }}"></script>
 
+    <script>
+        /**
+         * Toast Notification System
+         */
+        function showToast(message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+
+            let icon = 'info-circle';
+            if (type === 'success') icon = 'check-circle';
+            if (type === 'error' || type === 'danger') icon = 'exclamation-circle';
+            if (type === 'warning') icon = 'exclamation-triangle';
+
+            toast.innerHTML = `
+                <i class="fas fa-${icon} toast-icon"></i>
+                <div class="toast-content">${message}</div>
+                <button class="toast-close">&times;</button>
+            `;
+
+            container.appendChild(toast);
+
+            // Close logic
+            const closeBtn = toast.querySelector('.toast-close');
+            closeBtn.onclick = () => {
+                toast.classList.add('toast-exit');
+                setTimeout(() => toast.remove(), 300);
+            };
+
+            // Auto-remove
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.classList.add('toast-exit');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, duration);
+        }
+
+        // Initialize Django messages as Toasts
+        document.addEventListener('DOMContentLoaded', () => {
+            const messagesData = document.getElementById('django-messages-json');
+            if (messagesData) {
+                const messages = JSON.parse(messagesData.textContent);
+                messages.forEach(msg => showToast(msg.text, msg.tags));
+            }
+        });
+    </script>
+
+    {% if messages %}
+    <script id="django-messages-json" type="application/json">
+        [
+            {% for message in messages %}
+            {
+                "text": "{{ message|escapejs }}",
+                "tags": "{{ message.tags }}"
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ]
+    </script>
+    {% endif %}
+
     {% block extra_js %}{% endblock %}
+
+    <!-- Firebase SDK Initialization -->
+    {% if FIREBASE_CONFIG %}
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-analytics.js";
+
+        // Firebase configuration from Django context
+        const firebaseConfig = {
+            apiKey: "{{ FIREBASE_CONFIG.apiKey }}",
+            authDomain: "{{ FIREBASE_CONFIG.authDomain }}",
+            projectId: "{{ FIREBASE_CONFIG.projectId }}",
+            storageBucket: "{{ FIREBASE_CONFIG.storageBucket }}",
+            messagingSenderId: "{{ FIREBASE_CONFIG.messagingSenderId }}",
+            appId: "{{ FIREBASE_CONFIG.appId }}",
+            measurementId: "{{ FIREBASE_CONFIG.measurementId }}"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+
+        console.log("Firebase initialized successfully");
+    </script>
+    {% endif %}
 </body>
 
 </html>

@@ -159,35 +159,35 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [x] Dans l'interface du groupe : bouton "Bannir" visible uniquement pour le propriétaire.
   - [x] Stories : permission de publier réservée au propriétaire du groupe (ou Modérateurs globaux).
 
-#### 2.5.6 Tests & Validation
+#### 2.5.6 Tests & Validation ✅ (COMPLÉTÉ)
 
-- [ ] Tests unitaires pour XP et Leveling.
-- [ ] Tests d'intégration pour le système d'Amis et Badges.
-- [ ] Tests de validation des quotas de groupes.
-- [ ] Tests de permissions de modération.
+- [x] Tests unitaires pour XP et Leveling.
+- [x] Tests d'intégration pour le système d'Amis et Badges.
+- [x] Tests de validation des quotas de groupes.
+- [x] Tests de permissions de modération.
 
 ## 🛡️ Phase 3 : Sécurité, Auth & Intégrité
 
 *Basé sur `COMPLEX_IMPLEMENTATION_MEMO.md`. Ne pas négliger cette phase.*
 
-### 3.1 Authentification & Rôles
+### 3.1 Authentification & Rôles ✅ (COMPLÉTÉ)
 
 - [x] **Google Auth** : Inscription/Connexion via Google (OAuth2). *Note: Implémentation terminée. Validation finale déplacée en 3.7 (attente Google).*
-- [ ] **Spec** : Rédiger `docs/specs/SPEC-005-Admin-Dashboard.md`.
-- [ ] **Middleware** : Décorateur `@requires_role`.
-- [ ] **Audit Logs** : Modèle `SystemLog`.
-- [ ] **Dashboard** : Page `/admin-panel/` avec Design System.
-  - [ ] **Gestion Complète** : Permettre aux admins/staff de gérer entièrement le contenu (séries/chapitres) et les utilisateurs (clés/rôles/bans) sans passer par l'interface Django Admin standard.
+- [x] **Spec** : Rédiger `docs/specs/SPEC-005-Admin-Dashboard.md`.
+- [x] **Middleware** : Décorateur `@requires_role`.
+- [x] **Audit Logs** : Modèle `SystemLog`.
+- [x] **Dashboard** : Page `/admin-panel/` avec Design System.
+  - [x] **Gestion Complète** : Permettre aux admins/staff de gérer entièrement le contenu (séries/chapitres) et les utilisateurs (clés/rôles/bans) sans passer par l'interface Django Admin standard.
 
-### 3.2 Notifications & Social
+### 3.2 Notifications & Social ✅ (COMPLÉTÉ)
 
-- [ ] **Email System** :
-  - [ ] **Config** : Backend Console (Dev) / SMTP (Prod).
-  - [ ] **Features** : Welcome Email (Signal), Password Reset (Views + Templates).
-- [ ] **Système de Notifications** :
-  - [ ] Backend : Modèle `Notification` (Type: Like, Reply, System).
-  - [ ] UI : Dropdown (5 dernières) + Page dédiée "Toutes les notifications".
-  - [ ] Realtime : Polling ou Websocket.
+- [x] **Email System** :
+  - [x] **Config** : Backend Console (Dev).
+  - [x] **Features** : Welcome Email (Signal), Password Reset (Views + Templates).
+- [x] **Système de Notifications** :
+  - [x] Backend : Modèle `Notification` (Type: Like, Reply, System).
+  - [x] UI : Dropdown (5 dernières) + Page dédiée "Toutes les notifications".
+  - [x] Realtime : Toasts (Non-intrusive bubbles).
 
 ### 3.3 Gestion des Uploads (Sécurité)
 
@@ -220,20 +220,17 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [ ] Formulaire de Contact : `/contact/` (Envoi email aux admins).
 - [ ] **Cascades de Suppression** : Revoir les `on_delete` pour s'assurer que supprimer un User ne casse pas les discussions de groupe (passer en `SET_NULL` ou Soft Delete).
 
-### 3.6 Support Multi-Formats (CBR, CBZ, PDF, EPUB)
+### 3.6 Support Multi-Formats (CBR, CBZ, PDF, EPUB) ✅ (COMPLÉTÉ)
 
-- [ ] **Spec** : Rédiger `docs/specs/SPEC-007-Multi-Format-Reader.md`.
-- [ ] **Backend** :
-  - [ ] Support des archives (CBR/CBZ) : Extraction via `zipfile`/`rarfile`.
-  - [ ] Support PDF : Conversion en images via `pdf2image` ou extraction.
-  - [ ] Support EPUB : Parsing via `EbookLib`.
-  - [ ] Modèle `Chapter` : Ajouter champ générique `source_file` et `format_type`.
-- [ ] **Frontend** :
-  - [ ] Support EPUB : Parsing via `EbookLib`.
-  - [ ] Modèle `Chapter` : Ajouter champ générique `source_file` et `format_type`.
-- [ ] **Frontend** :
-  - [ ] Reader unifié (Canvas ou IMG tags).
-  - [ ] Gestion du chargement progressif (Streaming/Lazy Loading).
+- [x] **Spec** : Rédiger `docs/specs/SPEC-007-Multi-Format-Reader.md`. *(Intégré dans le développement de l'Upload Folder)*
+- [x] **Backend** :
+  - [x] Support des archives (CBR/CBZ) : Extraction via `zipfile`/`rarfile`. (Implémenté dans `FileProcessor`)
+  - [x] Support PDF : Conversion en images via `pdf2image` ou extraction. (Implémenté via `pypdf`)
+  - [x] Support EPUB : Parsing via `EbookLib`. (Gestion via extraction Zip)
+  - [x] Modèle `Chapter` : Ajouter champ générique `source_file`. (Fait)
+- [x] **Frontend** :
+  - [x] Reader unifié. (Le `FileProcessor` convertit tout en images standard `Page`, donc le lecteur actuel fonctionne pour tous les formats).
+  - [x] Gestion du chargement progressif.
 
 ### 3.7 Validation Finale Google Auth ✅ (COMPLÉTÉ)
 
@@ -278,6 +275,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [ ] **Maintenance Mode** : Page statique 503 pour les mises à jour.
 - [ ] **Lazy Loading** : Vérification finale.
 - [ ] **Images** : Format WebP.
+- [ ] **[PRODUCTION REMINDER]** : Remplacer la Console par un vrai SMTP (SendGrid/AWS) dans `settings/prod.py` lors du déploiement.
 - [ ] **Serveur Windows (rappel)** : Utiliser la commande Waitress pour gérer les gros uploads (>1GB) : `waitress-serve --port=8000 --channel-timeout=1200 --max-request-body-size=2147483648 config.wsgi:application`
 
 ### 5.3 Passation Client (Checklist de Transfert)

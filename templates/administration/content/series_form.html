@@ -34,13 +34,22 @@
                 {{ form.cover }}
             </div>
 
+            <!-- Folder Upload (Progressive) -->
             <div class="form-group span-2">
-                <label for="id_folder_upload">Dossier Chapitres (Upload en masse)</label>
-                <!-- Manual input to bypass Django validation issues with folder uploads -->
-                <input type="file" name="folder_upload" id="id_folder_upload" class="form-control-file" webkitdirectory
+                <label for="folder_upload">Importer un dossier de chapitres (Optionnel)</label>
+                <input type="file" name="folder_upload" id="folder_upload" class="form-control" webkitdirectory
                     directory multiple>
-                <small class="form-text text-muted">Sélectionnez un dossier pour importer automatiquement les
-                    chapitres.</small>
+                <div id="upload-progress-container" class="upload-progress-container"
+                    style="display: none; margin-top: 10px;">
+                    <div class="progress-bar-bg"
+                        style="height: 10px; background: rgba(255,255,255,0.1); border-radius: 5px; overflow: hidden;">
+                        <div id="upload-progress-bar" class="progress-bar-fill"
+                            style="width: 0%; height: 100%; background: var(--accent-primary); transition: width 0.3s;">
+                        </div>
+                    </div>
+                    <small id="upload-status-text"
+                        style="color: rgba(255,255,255,0.6); margin-top: 5px; display: block;">Préparation...</small>
+                </div>
             </div>
 
             <div class="form-group">
@@ -69,8 +78,10 @@
             </div>
 
             <div class="form-group span-2">
-                <label for="id_genres">Genres (Maintenir Ctrl pour sélectionner plusieurs)</label>
-                {{ form.genres }}
+                <label for="id_genres">Genres</label>
+                <div class="genres-selection-container">
+                    {{ form.genres }}
+                </div>
             </div>
         </div>
 
@@ -79,4 +90,110 @@
         </div>
     </form>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('.admin-form');
+        const folderInput = document.getElementById('folder_upload');
+        const progressContainer = document.getElementById('upload-progress-container');
+        const progressBar = document.getElementById('upload-progress-bar');
+        const statusText = document.getElementById('upload-status-text');
+
+        if (!form || !folderInput) return;
+
+        form.addEventListener('submit', async function (e) {
+            const files = folderInput.files;
+            if (files.length === 0) return; // Standard submission
+
+            e.preventDefault();
+
+            progressContainer.style.display = 'block';
+
+            try {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const overallProgress = Math.round((i / files.length) * 100);
+                    progressBar.style.width = `${overallProgress}%`;
+                    statusText.innerText = `Préparation de ${file.name}...`;
+
+                    await uploadFileInChunks(file);
+                }
+
+                progressBar.style.width = '100%';
+                statusText.innerText = "Upload terminé ! Finalisation de la sauvegarde...";
+
+                // Allow a brief moment for user to see the 100%
+                setTimeout(() => {
+                    form.submit();
+                }, 500);
+
+            } catch (error) {
+                console.error(error);
+                statusText.innerText = "Erreur lors de l'upload : " + error.message;
+                statusText.style.color = "#ff4d4d";
+
+                // Re-enable submit or show error
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) submitBtn.disabled = false;
+            }
+        });
+
+        async function uploadFileInChunks(file) {
+            const chunkSize = 5 * 1024 * 1024; // 5MB
+            const totalChunks = Math.ceil(file.size / chunkSize);
+
+            // 1. Init
+            const initData = new FormData();
+            initData.append('filename', file.webkitRelativePath || file.name);
+            initData.append('total_chunks', totalChunks);
+            initData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            const initRes = await fetch('{% url "administration:upload_init" %}', {
+                method: 'POST',
+                body: initData
+            });
+
+            if (!initRes.ok) throw new Error("Impossible d'initialiser l'upload");
+
+            const { upload_id } = await initRes.json();
+
+            // 2. Chunks
+            for (let index = 0; index < totalChunks; index++) {
+                const start = index * chunkSize;
+                const end = Math.min(start + chunkSize, file.size);
+                const chunk = file.slice(start, end);
+
+                const chunkData = new FormData();
+                chunkData.append('upload_id', upload_id);
+                chunkData.append('chunk_index', index);
+                chunkData.append('chunk', chunk, file.name);
+                chunkData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                const chunkRes = await fetch('{% url "administration:upload_chunk" %}', {
+                    method: 'POST',
+                    body: chunkData
+                });
+
+                if (!chunkRes.ok) throw new Error(`Échec de l'envoi du morceau ${index + 1}`);
+
+                const chunkPercent = Math.round(((index + 1) / totalChunks) * 100);
+                statusText.innerText = `Envoi de ${file.name} : ${chunkPercent}%`;
+            }
+
+            // 3. Complete
+            const completeData = new FormData();
+            completeData.append('upload_id', upload_id);
+            completeData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+            const completeRes = await fetch('{% url "administration:upload_complete" %}', {
+                method: 'POST',
+                body: completeData
+            });
+
+            if (!completeRes.ok) throw new Error("Erreur lors de l'assemblage final");
+        }
+    });
+</script>
 {% endblock %}

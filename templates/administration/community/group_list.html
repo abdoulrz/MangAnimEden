@@ -36,8 +36,7 @@
             </td>
             <td>
                 {% if group.owner %}
-                <a href="{% url 'administration:user_list' %}?q={{ group.owner.nickname }}">{{ group.owner.nickname
-                    }}</a>
+                <a href="{% url 'administration:user_list' %}?q={{ group.owner.nickname }}">{{ group.owner.nickname }}</a>
                 {% else %}
                 <span class="text-muted">Système</span>
                 {% endif %}

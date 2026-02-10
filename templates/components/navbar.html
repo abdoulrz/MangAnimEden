@@ -35,11 +35,12 @@
             <!-- Dark Mode Toggle -->
             <button id="theme-toggle" class="btn-ghost navbar-icon-btn">🌙</button>
 
-            <!-- Notification Bell -->
-            <button class="btn-ghost navbar-icon-btn">🔔</button>
-
             <!-- User Profile Avatar or Login -->
             {% if user.is_authenticated %}
+
+            <!-- Notification Bell -->
+            {% include 'social/includes/notification_dropdown.html' %}
+
             <div class="navbar-profile-container">
                 <div class="navbar-profile" id="profileDropdownTrigger">
                     <div class="user-avatar">{{ user.nickname|default:user.email|make_list|first|upper }}</div>
@@ -91,11 +92,40 @@
                         trigger.addEventListener('click', function (e) {
                             e.stopPropagation();
                             dropdown.classList.toggle('active');
+
+                            // Close notification dropdown if open
+                            const notifDropdown = document.getElementById('notificationDropdown');
+                            if (notifDropdown && notifDropdown.classList.contains('active')) {
+                                notifDropdown.classList.remove('active');
+                            }
                         });
 
                         document.addEventListener('click', function (e) {
                             if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
                                 dropdown.classList.remove('active');
+                            }
+                        });
+                    }
+
+                    // Notification Dropdown
+                    const notifTrigger = document.getElementById('notificationDropdownTrigger');
+                    const notifDropdown = document.getElementById('notificationDropdown');
+
+                    if (notifTrigger && notifDropdown) {
+                        notifTrigger.addEventListener('click', function (e) {
+                            e.stopPropagation();
+                            notifDropdown.classList.toggle('active');
+
+                            // Close profile dropdown if open
+                            const profileDropdown = document.getElementById('profileDropdown');
+                            if (profileDropdown && profileDropdown.classList.contains('active')) {
+                                profileDropdown.classList.remove('active');
+                            }
+                        });
+
+                        document.addEventListener('click', function (e) {
+                            if (!notifDropdown.contains(e.target) && !notifTrigger.contains(e.target)) {
+                                notifDropdown.classList.remove('active');
                             }
                         });
                     }

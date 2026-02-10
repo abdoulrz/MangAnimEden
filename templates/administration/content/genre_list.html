@@ -13,15 +13,21 @@
     <div class="genre-card">
         <div class="genre-info">
             <h3 class="genre-name">{{ genre.name }}</h3>
-            <span class="genre-slug">slug: {{ genre.slug }}</span>
-            <span class="genre-count">{{ genre.series.count }} séries</span>
+            <div class="genre-meta">
+                <span class="genre-slug">{{ genre.slug }}</span>
+                <span class="genre-count">{{ genre.series.count }} séries</span>
+            </div>
         </div>
         <div class="genre-actions">
-            <a href="{% url 'administration:genre_edit' genre.id %}" class="btn-icon" title="Éditer">📝</a>
+            <a href="{% url 'administration:genre_edit' genre.id %}" class="btn-icon" title="Éditer">
+                <i class="fas fa-edit"></i>
+            </a>
             <form action="{% url 'administration:genre_delete' genre.id %}" method="POST" class="inline-form"
                 onsubmit="return confirm('Supprimer ce genre ?');">
                 {% csrf_token %}
-                <button type="submit" class="btn-icon delete" title="Supprimer">🗑️</button>
+                <button type="submit" class="btn-icon delete" title="Supprimer">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
             </form>
         </div>
     </div>

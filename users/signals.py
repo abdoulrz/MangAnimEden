@@ -5,7 +5,18 @@ from reader.models import ReadingProgress
 
 from .services import BadgeService
 
+from core.services.email_service import EmailService
+
 User = get_user_model()
+
+@receiver(post_save, sender=User)
+def send_welcome_email_signal(sender, instance, created, **kwargs):
+    """
+    Envoie un email de bienvenue à l'utilisateur lors de sa création.
+    Phase 3.2 - Email System
+    """
+    if created and instance.email:
+        EmailService.send_welcome_email(instance)
 
 @receiver(post_save, sender=ReadingProgress)
 def award_xp_on_read(sender, instance, created, **kwargs):

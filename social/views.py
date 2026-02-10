@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.conf import settings
 from .models import Group, Event, Message, Story
 from django.contrib.auth import get_user_model
@@ -65,12 +66,34 @@ def forum_home(request):
         # 3. Chat Logic
         elif active_group and 'content' in request.POST:
             content = request.POST.get('content')
+            parent_id = request.POST.get('parent_id')
+            parent_message = None
+            
+            if parent_id:
+                try:
+                    parent_message = Message.objects.get(id=parent_id)
+                except Message.DoesNotExist:
+                    pass
+            
             if content:
-                Message.objects.create(
+                msg = Message.objects.create(
                     group=active_group,
                     sender=request.user,
-                    content=content
+                    content=content,
+                    parent=parent_message
                 )
+                
+                # Notification: Reply
+                from .services import NotificationService
+                if parent_message and parent_message.sender != request.user:
+                    NotificationService.create_notification(
+                        recipient=parent_message.sender,
+                        actor=request.user,
+                        verb="a répondu à votre message",
+                        type='reply',
+                        target=msg
+                    )
+                    
             return redirect(f'/forum/?group_id={active_group.id}')
 
     # 4. Fetch Active Stories & Group by Group
@@ -161,6 +184,15 @@ def send_friend_request(request, user_id):
         status='pending'
     )
     
+    # Notification: Friend Request
+    from .services import NotificationService
+    NotificationService.create_notification(
+        recipient=receiver,
+        actor=request.user,
+        verb="vous a envoyé une demande d'ami",
+        type='friend_request'
+    )
+    
     return JsonResponse({'success': True, 'message': 'Demande envoyée'})
 
 
@@ -177,6 +209,15 @@ def accept_friend_request(request, request_id):
     
     friendship = get_object_or_404(Friendship, id=request_id, receiver=request.user, status='pending')
     friendship.accept()
+    
+    # Notification: Request Accepted (Notify the requester)
+    from .services import NotificationService
+    NotificationService.create_notification(
+        recipient=friendship.requester,
+        actor=request.user,
+        verb="a accepté votre demande d'ami",
+        type='friend_accept'
+    )
     
     return JsonResponse({'success': True, 'message': f'Vous êtes maintenant ami avec {friendship.requester.nickname}'})
 
@@ -396,3 +437,119 @@ def ban_user(request, group_id, user_id):
     
     action = "banni" if membership.is_banned else "débanni"
     return JsonResponse({'success': True, 'message': f"{target_user.nickname} a été {action} du groupe.", 'is_banned': membership.is_banned})
+
+
+# ========== NOTIFICATION VIEWS (Phase 3.2.1) ==========
+
+@login_required
+def notifications_list(request):
+    """
+    Page affichant toutes les notifications de l'utilisateur.
+    """
+    from .models import Notification
+    from .services import NotificationService
+    
+    # Check if user wants to mark specific notification as read via GET param (simple redirect implementation)
+    # Ideally use AJAX for individual, but this is fallback
+    notif_id = request.GET.get('read')
+    if notif_id:
+        NotificationService.mark_as_read(request.user, notif_id)
+        return redirect('social:notifications_list')
+
+    # Mark all as read logic
+    if request.method == 'POST' and 'mark_all_read' in request.POST:
+        NotificationService.mark_as_read(request.user) # Mark all
+        messages.success(request, "Toutes les notifications ont été marquées comme lues.")
+        return redirect('social:notifications_list')
+        
+    notifications = Notification.objects.filter(recipient=request.user).select_related('actor', 'content_type')
+    
+    context = {
+        'notifications': notifications,
+    }
+    return render(request, 'social/notifications.html', context)
+
+@login_required
+def mark_notification_read(request, notification_id):
+    """
+    Marque une notification spécifique comme lue (AJAX/HTMX).
+    """
+    from .services import NotificationService
+    from django.http import JsonResponse
+    
+    if request.method == 'POST':
+        NotificationService.mark_as_read(request.user, notification_id)
+        return JsonResponse({'success': True})
+        
+    return JsonResponse({'success': False}, status=400)
+
+
+@login_required
+def like_message(request, message_id):
+    """
+    Toggle Like on a message.
+    """
+    from .models import Message
+    from .services import NotificationService
+    from django.http import JsonResponse
+    
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+        
+    message = get_object_or_404(Message, id=message_id)
+    
+    if request.user in message.likes.all():
+        message.likes.remove(request.user)
+        liked = False
+    else:
+        message.likes.add(request.user)
+        liked = True
+        
+        # Notification: Like
+        if message.sender != request.user:
+            NotificationService.create_notification(
+                recipient=message.sender,
+                actor=request.user,
+                verb="a aimé votre message",
+                type='like',
+                target=message
+            )
+            
+    return JsonResponse({
+        'success': True, 
+        'liked': liked, 
+        'count': message.like_count
+    })
+
+@login_required
+def reply_message(request, message_id):
+    """
+    Reply to a message.
+    """
+    from .models import Message
+    from .services import NotificationService
+    
+    parent_message = get_object_or_404(Message, id=message_id)
+    group_id = parent_message.group.id
+    
+    if request.method == 'POST':
+        content = request.POST.get('content')
+        if content:
+            reply = Message.objects.create(
+                group=parent_message.group,
+                sender=request.user,
+                content=content,
+                parent=parent_message
+            )
+            
+            # Notification: Reply
+            if parent_message.sender != request.user:
+                NotificationService.create_notification(
+                    recipient=parent_message.sender,
+                    actor=request.user,
+                    verb="a répondu à votre message",
+                    type='reply',
+                    target=reply
+                )
+                
+    return redirect(f'/forum/?group_id={group_id}')

@@ -114,6 +114,11 @@ class AdminSeriesListView(ListView):
             queryset = queryset.filter(title__icontains=query)
         return queryset
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'series'
+        return context
+
 from catalog.services import bulk_create_chapters_from_folder
 from .forms import SeriesForm
 
@@ -141,6 +146,16 @@ class AdminSeriesCreateView(CreateView):
         messages.success(self.request, "Série créée avec succès.")
         return response
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'series'
+        return context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'series'
+        return context
+
 @method_decorator(requires_admin, name='dispatch')
 class AdminSeriesUpdateView(UpdateView):
     model = Series
@@ -164,6 +179,11 @@ class AdminSeriesUpdateView(UpdateView):
         messages.success(self.request, "Série mise à jour avec succès.")
         return response
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'series'
+        return context
+
 @method_decorator(requires_admin, name='dispatch')
 class AdminSeriesDeleteView(DeleteView):
     model = Series
@@ -183,6 +203,14 @@ class AdminChapterListView(ListView):
     template_name = 'administration/content/chapter_list.html'
     context_object_name = 'chapters'
     paginate_by = 500
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'series'
+        series_id = self.kwargs.get('series_id')
+        if series_id:
+            context['current_series'] = get_object_or_404(Series, id=series_id)
+        return context
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -237,6 +265,7 @@ class AdminChapterUpdateView(UpdateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'series'
         # For update, we get the series from the object
         context['current_series'] = self.object.series
         return context
@@ -272,6 +301,11 @@ class AdminGenreListView(ListView):
     context_object_name = 'genres'
     paginate_by = 50
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'genres'
+        return context
+
 @method_decorator(requires_admin, name='dispatch')
 class AdminGenreCreateView(CreateView):
     model = Genre
@@ -285,6 +319,16 @@ class AdminGenreCreateView(CreateView):
         messages.success(self.request, "Genre créé avec succès.")
         return response
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'genres'
+        return context
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'genres'
+        return context
+
 @method_decorator(requires_admin, name='dispatch')
 class AdminGenreUpdateView(UpdateView):
     model = Genre
@@ -297,6 +341,11 @@ class AdminGenreUpdateView(UpdateView):
         create_system_log(self.request, 'GENRE_UPDATE', details=f"Genre modifié : {self.object.name}")
         messages.success(self.request, "Genre mis à jour avec succès.")
         return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'genres'
+        return context
 
 @method_decorator(requires_admin, name='dispatch')
 class AdminGenreDeleteView(DeleteView):
@@ -319,12 +368,22 @@ class AdminGroupListView(ListView):
     paginate_by = 20
     ordering = ['-created_at']
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'groups'
+        return context
+
 @method_decorator(requires_moderator, name='dispatch')
 class AdminGroupUpdateView(UpdateView):
     model = Group
     template_name = 'administration/community/group_form.html'
     fields = ['name', 'description', 'icon'] # Add status field if available, for now just basic edit
     success_url = reverse_lazy('administration:group_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'groups'
+        return context
     
     # Note: Banning/Closing logic is ideally a dedicated action view like UserActionView
     # But for MVP, simple edit access allows cleaning description/name.
@@ -345,3 +404,60 @@ class AdminGroupDeleteView(DeleteView):
         create_system_log(request, 'GROUP_DELETE', details=f"Groupe supprimé : {obj.name}")
         messages.success(request, f"Groupe '{obj.name}' supprimé.")
         return super().delete(request, *args, **kwargs)
+
+from django.http import JsonResponse
+from .models import ChunkedUpload
+from .upload_service import ChunkedUploadService
+
+@method_decorator(requires_admin, name='dispatch')
+class InitChunkedUploadView(View):
+    def post(self, request, *args, **kwargs):
+        filename = request.POST.get('filename')
+        total_chunks = request.POST.get('total_chunks')
+        
+        if not filename or not total_chunks:
+            return JsonResponse({'error': 'Missing parameters'}, status=400)
+            
+        upload = ChunkedUpload.objects.create(
+            user=request.user,
+            filename=filename,
+            total_chunks=int(total_chunks)
+        )
+        
+        return JsonResponse({
+            'upload_id': str(upload.upload_id),
+            'status': 'initiated'
+        })
+
+@method_decorator(requires_admin, name='dispatch')
+class UploadChunkView(View):
+    def post(self, request, *args, **kwargs):
+        upload_id = request.POST.get('upload_id')
+        chunk_index = request.POST.get('chunk_index')
+        chunk_file = request.FILES.get('chunk')
+        
+        if not upload_id or chunk_index is None or not chunk_file:
+            return JsonResponse({'error': 'Missing parameters'}, status=400)
+            
+        try:
+            ChunkedUploadService.save_chunk(upload_id, chunk_file, int(chunk_index))
+            return JsonResponse({'status': 'chunk_saved'})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+@method_decorator(requires_admin, name='dispatch')
+class CompleteChunkedUploadView(View):
+    def post(self, request, *args, **kwargs):
+        upload_id = request.POST.get('upload_id')
+        
+        if not upload_id:
+            return JsonResponse({'error': 'Missing upload_id'}, status=400)
+            
+        try:
+            final_path = ChunkedUploadService.assemble_file(upload_id)
+            return JsonResponse({
+                'status': 'completed',
+                'final_path': final_path
+            })
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)

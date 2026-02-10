@@ -19,14 +19,16 @@ class BadgeServiceTests(TestCase):
             slug='novice-reader',
             description='Read 1 chapter',
             condition_type='CHAPTERS_READ',
-            threshold=1
+            threshold=1,
+            icon='badges/novice.png'
         )
         self.badge_expert = Badge.objects.create(
             name='Expert Reader',
             slug='expert-reader',
             description='Read 10 chapters',
             condition_type='CHAPTERS_READ',
-            threshold=10
+            threshold=10,
+            icon='badges/expert.png'
         )
         self.series = Series.objects.create(title="Test Series")
         self.chapters = []
@@ -35,7 +37,7 @@ class BadgeServiceTests(TestCase):
                 series=self.series,
                 number=i+1,
                 title=f"Chapter {i+1}",
-                pdf_file=f"chapter_{i+1}.pdf"
+                source_file=f"chapter_{i+1}.pdf"
             ))
 
     def test_service_awards_badge(self):

@@ -21,5 +21,13 @@ urlpatterns = [
     # Group Management (Phase 2.5.4 & 2.5.5)
     path('groups/create/', views.create_group, name='create_group'),
     path('groups/<int:group_id>/ban/<int:user_id>/', views.ban_user, name='ban_user'),
+
+    # Notifications (Phase 3.2)
+    path('notifications/', views.notifications_list, name='notifications_list'),
+    path('notifications/read/<int:notification_id>/', views.mark_notification_read, name='mark_notification_read'),
+    
+    # Interactions (Phase 3.2)
+    path('messages/<int:message_id>/like/', views.like_message, name='like_message'),
+    path('messages/<int:message_id>/reply/', views.reply_message, name='reply_message'),
 ]
 

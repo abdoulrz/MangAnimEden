@@ -34,5 +34,5 @@ class SeriesForm(forms.ModelForm):
             'type': forms.Select(attrs={'class': 'form-control'}),
             'status': forms.Select(attrs={'class': 'form-control'}),
             'release_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
-            'genres': forms.SelectMultiple(attrs={'class': 'form-control', 'style': 'height: 150px;'}),
+            'genres': forms.CheckboxSelectMultiple(),
         }

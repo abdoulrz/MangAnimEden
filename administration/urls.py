@@ -33,4 +33,9 @@ urlpatterns = [
     path('community/groups/', views.AdminGroupListView.as_view(), name='group_list'),
     path('community/groups/<int:pk>/edit/', views.AdminGroupUpdateView.as_view(), name='group_edit'),
     path('community/groups/<int:pk>/delete/', views.AdminGroupDeleteView.as_view(), name='group_delete'),
+
+    # Chunked Upload API
+    path('upload/init/', views.InitChunkedUploadView.as_view(), name='upload_init'),
+    path('upload/chunk/', views.UploadChunkView.as_view(), name='upload_chunk'),
+    path('upload/complete/', views.CompleteChunkedUploadView.as_view(), name='upload_complete'),
 ]

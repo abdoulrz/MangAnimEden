@@ -1,0 +1,64 @@
+{% load static %}
+<div class="navbar-notification-container" style="position: relative;">
+    <button class="btn-ghost navbar-icon-btn position-relative" type="button" id="notificationDropdownTrigger">
+        🔔
+        {% if notification_count > 0 %}
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+            style="font-size: 0.6rem; padding: 0.25em 0.5em;">
+            {{ notification_count }}
+        </span>
+        {% endif %}
+    </button>
+
+    <div class="notification-menu" id="notificationDropdown">
+        <div class="notification-header">
+            <h6 class="m-0 fw-bold text-white" style="font-size: 0.9rem;">Notifications</h6>
+            {% if notification_count > 0 %}
+            <form action="{% url 'social:notifications_list' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" name="mark_all_read" class="btn-link"
+                    style="font-size: 0.75rem; background: none; border: none; color: var(--color-purple-primary); cursor: pointer; padding: 0;">Tout
+                    marquer lu</button>
+            </form>
+            {% endif %}
+        </div>
+
+        <ul class="notification-list">
+            {% if navbar_notifications %}
+            {% for notif in navbar_notifications %}
+            <li>
+                <a class="notification-item {% if not notif.is_read %}unread{% endif %}"
+                    href="{% url 'social:notifications_list' %}?read={{ notif.id }}">
+                    <div class="flex-shrink-0">
+                        {% if notif.actor and notif.actor.avatar %}
+                        <img src="{{ notif.actor.avatar.url }}" alt="{{ notif.actor.nickname }}"
+                            class="notification-actor-avatar">
+                        {% else %}
+                        <div class="notification-placeholder-avatar">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="notification-content">
+                        <p class="notification-verb">
+                            {% if notif.actor %}<strong>{{ notif.actor.nickname }}</strong>{% endif %}
+                            {{ notif.verb }}
+                        </p>
+                        <span class="notification-time">{{ notif.created_at|timesince }}</span>
+                    </div>
+                </a>
+            </li>
+            {% endfor %}
+            <div class="notification-footer">
+                <a href="{% url 'social:notifications_list' %}" class="notification-footer-link">Voir toutes les
+                    notifications</a>
+            </div>
+            {% else %}
+            <li class="p-4 text-center text-muted">
+                <i class="fas fa-bell-slash fa-2x mb-2 opacity-50"></i>
+                <p class="mb-0 small">Aucune nouvelle notification</p>
+            </li>
+            {% endif %}
+        </ul>
+    </div>
+</div>

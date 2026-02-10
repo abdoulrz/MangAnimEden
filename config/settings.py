@@ -28,6 +28,15 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 # Static files version for cache busting
+# EMAIL CONFIGURATION
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Dev only
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'  # Prod
+# EMAIL_HOST = os.environ.get('EMAIL_HOST')
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+# DEFAULT_FROM_EMAIL = 'MangaAnimEden <noreply@manganimeden.com>'
 
 
 
@@ -81,6 +90,8 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.static',
+                'social.context_processors.notifications', # Phase 3.2 Notifications
+                'core.context_processors.firebase_config', # Firebase Configuration
             ],
         },
     },
@@ -193,4 +204,15 @@ SOCIALACCOUNT_PROVIDERS = {
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Versioning for cache busting
-STATIC_VERSION = '2.5.42'
+STATIC_VERSION = '2.6.3'
+
+# Firebase Configuration
+FIREBASE_CONFIG = {
+    "apiKey": "AIzaSyAW1KvY2jf4yVvD0-frmYeVBuvA23nyqYI",
+    "authDomain": "manganimeden-374d1.firebaseapp.com",
+    "projectId": "manganimeden-374d1",
+    "storageBucket": "manganimeden-374d1.firebasestorage.app",
+    "messagingSenderId": "173234261867",
+    "appId": "1:173234261867:web:18e844c8608ef67df2c62e",
+    "measurementId": "G-ZJ9WN24N76"
+}

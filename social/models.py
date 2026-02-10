@@ -52,12 +52,72 @@ class Message(models.Model):
     sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='messages', on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
+    
+    # New Fields for Social Features (Phase 3.2)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_messages', blank=True)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='replies', on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ['timestamp']
         
     def __str__(self):
         return f"{self.sender} in {self.group}: {self.content[:20]}"
+    
+    @property
+    def like_count(self):
+        return self.likes.count()
+
+
+# ========== NOTIFICATIONS (Phase 3.2) ==========
+
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+
+class Notification(models.Model):
+    """
+    Système de notification unifié.
+    Types: System, Like, Reply, Friend Request.
+    """
+    TYPE_CHOICES = [
+        ('system', 'Système'),
+        ('like', 'J\'aime'),
+        ('reply', 'Réponse'),
+        ('friend_request', 'Demande d\'ami'),
+        ('friend_accept', 'Ami accepté'),
+    ]
+    
+    recipient = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        related_name='notifications', 
+        on_delete=models.CASCADE
+    )
+    actor = models.ForeignKey(
+        settings.AUTH_USER_MODEL, 
+        related_name='triggered_notifications', 
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    verb = models.CharField(max_length=255)  # e.g., "a aimé votre message", "vous a envoyé une demande"
+    notification_type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='system')
+    
+    # Generic Relation to target object (Message, User, Chapter, etc.)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    object_id = models.PositiveIntegerField(null=True, blank=True)
+    target = GenericForeignKey('content_type', 'object_id')
+    
+    is_read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['recipient', 'is_read']),
+        ]
+        
+    def __str__(self):
+        actor_name = self.actor.nickname if self.actor else "System"
+        return f"Notif for {self.recipient}: {actor_name} {self.verb}"
 
 
 from django.utils import timezone

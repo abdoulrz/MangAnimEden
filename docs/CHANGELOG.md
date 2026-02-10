@@ -11,6 +11,28 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Phase 2.5.3: Système de Badges (Achievements)
 - Phase 2.5.4: Système de Création de Groupes
 
+## [1.8.0] - 2026-02-10 ([Phase 3.2 - Notifications & Admin UI Polish])
+
+### Added Notifications
+
+- **Universal Notification System** :
+  - **Backend** : Modèle `Notification` avec types (Like, Reply, System), service d'envoi et intégration des signaux.
+  - **Universal Toast System** : Système de notifications flottantes (Toasts) non-intrusives avec glassmorphism et auto-dismiss.
+  - **UI Dediee** : Page `/social/notifications/` redessinée et dropdown temps-réel dans la navbar.
+- **Email System** : Intégration de `django.core.mail` pour l'envoi d'emails de bienvenue (Welcome Email) et réinitialisation de mot d'ordre (Password Reset).
+
+### Changed Admin UI
+
+- **Redesign des Genres** :
+  - Cartes de genres avec glassmorphism, icônes FontAwesome et layout flexbox épuré.
+  - Sélection des genres (Série) transformée en grille de "Chips" interactifs avec conteneur défilant.
+- **Sidebar Navigation** : Correction de l'illumination de l'onglet actif pour toutes les vues d'administration.
+- **Series List** : Suppression des badges redondants pour une interface plus propre.
+
+### Fixed
+
+- Correction des erreurs `NoReverseMatch` et `NameError` dans le système de notifications.
+
 ## [1.7.0] - 2026-02-09 ([Phase 3.3 - Upload Management & integrity])
 
 ### Added Upload
