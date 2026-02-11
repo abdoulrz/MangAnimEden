@@ -100,8 +100,11 @@ class Chapter(models.Model):
     source_file = models.FileField(upload_to='scans/', blank=True, null=True, verbose_name="Fichier Source")
     
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
+    @property
+    def is_pdf(self):
+        """Checks if the source file is a PDF."""
+        return self.source_file and self.source_file.name.lower().endswith('.pdf')
+
     def __str__(self):
         return f"{self.series.title} - Chapitre {self.number}"
     

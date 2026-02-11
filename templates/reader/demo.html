@@ -44,9 +44,9 @@
         {% endif %}
     </div>
 
-    {% if chapter.pdf_file %}
+    {% if chapter.is_pdf %}
     <!-- PDF MODE -->
-    <div id="pdf-render-container" data-url="{{ chapter.pdf_file.url }}">
+    <div id="pdf-render-container" data-url="{{ chapter.source_file.url }}">
         <!-- Canvas elements will be injected here -->
     </div>
     {% elif pages %}

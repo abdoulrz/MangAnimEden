@@ -101,16 +101,22 @@ class FileProcessor:
             
         print(f"Processing {chapter} ({ext})...")
 
-        # Clear existing pages to avoid duplicates if re-processing
-        chapter.pages.all().delete()
+        print(f"Processing {chapter} ({ext})...")
 
         try:
             if ext == '.pdf':
                 self._extract_from_pdf(chapter, file_path)
             elif ext in ['.cbz', '.zip', '.epub']:
                 self._extract_from_zip(chapter, file_path)
+            elif ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                # If it's a direct image file, just save it as a single page
+                # We don't delete all pages here as multiple image uploads might be targeting the same chapter
+                # But for our iterative flow, we usually want to clear if it's the first time 
+                # Actually, let's just append if it's an image, or use a better strategy.
+                page_count = chapter.pages.count()
+                self._save_page_image(chapter, chapter.source_file.read(), page_count + 1, os.path.basename(file_path))
             
-            print(f"Successfully processed {chapter}. Created {chapter.pages.count()} pages.")
+            logger.info(f"Successfully processed {chapter}. Total pages: {chapter.pages.count()}")
             return True
         except Exception as e:
             print(f"Error processing {chapter}: {e}")
@@ -126,6 +132,9 @@ class FileProcessor:
         page.image.save(final_filename, ContentFile(image_data), save=True)
 
     def _extract_from_pdf(self, chapter, file_path):
+        # Clear existing pages for archives to avoid duplicates
+        chapter.pages.all().delete()
+        
         reader = pypdf.PdfReader(file_path)
         
         count = 0 
@@ -138,6 +147,9 @@ class FileProcessor:
 
 
     def _extract_from_zip(self, chapter, file_path):
+        # Clear existing pages for archives to avoid duplicates
+        chapter.pages.all().delete()
+        
         # ZIP, CBZ, and EPUB are all zip-based
         with zipfile.ZipFile(file_path, 'r') as zf:
             # Filter for images
