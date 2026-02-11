@@ -16,12 +16,47 @@ from .utils import extract_chapter_number
 
 logger = logging.getLogger(__name__)
 
+def process_single_chapter_from_temp(series_id, temp_file_path):
+    """
+    Processes a single chapter file from temp_uploads and links it to a series.
+    Returns the Chapter object.
+    """
+    series = Series.objects.get(id=series_id)
+    filename = os.path.basename(temp_file_path)
+    chapter_num = extract_chapter_number(filename)
+    
+    if chapter_num is None:
+        raise ValueError(f"Impossible d'extraire le numéro de chapitre du fichier : {filename}")
+
+    # Create chapter
+    chapter, created = Chapter.objects.get_or_create(
+        series=series,
+        number=chapter_num,
+        defaults={'title': f"Chapitre {chapter_num}"}
+    )
+    
+    # Save file to chapter ImageField/FileField
+    # chapter.source_file.save(filename, File(open(temp_file_path, 'rb')), save=True)
+    # Actually, we need to pass a File object correctly
+    from django.core.files import File
+    with open(temp_file_path, 'rb') as f:
+        chapter.source_file.save(filename, File(f), save=True)
+    
+    # Process file to extract pages
+    processor = FileProcessor()
+    processor.process_chapter(chapter)
+    
+    return chapter
+
 def bulk_create_chapters_from_folder(series, files):
     """
     Takes a list of uploaded files (from request.FILES.getlist),
     creates Chapter objects for the given Series, and processes the files.
     Returns count of successfully processed chapters.
     """
+    processed_count = 0
+    processor = FileProcessor()
+
     for f in files:
         chapter_num = extract_chapter_number(f.name)
         if chapter_num is not None:

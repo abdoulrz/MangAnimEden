@@ -38,4 +38,5 @@ urlpatterns = [
     path('upload/init/', views.InitChunkedUploadView.as_view(), name='upload_init'),
     path('upload/chunk/', views.UploadChunkView.as_view(), name='upload_chunk'),
     path('upload/complete/', views.CompleteChunkedUploadView.as_view(), name='upload_complete'),
+    path('upload/process/', views.ProcessChapterFromUploadView.as_view(), name='upload_process'),
 ]

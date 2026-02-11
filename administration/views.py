@@ -130,26 +130,24 @@ class AdminSeriesCreateView(CreateView):
     success_url = reverse_lazy('administration:series_list')
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        
-        # Handle folder upload
-        files = self.request.FILES.getlist('folder_upload')
-        
-        if files:
-            count = bulk_create_chapters_from_folder(self.object, files)
-            if count > 0:
-                messages.success(self.request, f"{count} chapitres importés.")
-            else:
-                messages.warning(self.request, "Aucun chapitre n'a pu être traité du dossier.")
-                
+        self.object = form.save()
         create_system_log(self.request, 'SERIES_CREATE', details=f"Série créée : {self.object.title}")
-        messages.success(self.request, "Série créée avec succès.")
-        return response
+        
+        # If it's an AJAX request (for our iterative chunking flow)
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'success',
+                'series_id': self.object.id,
+                'message': 'Série créée avec succès.'
+            })
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['active_tab'] = 'series'
-        return context
+        # Standard flow (backward compatibility)
+        files = self.request.FILES.getlist('folder_upload')
+        if files:
+            bulk_create_chapters_from_folder(self.object, files)
+            
+        messages.success(self.request, "Série créée avec succès.")
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -164,20 +162,22 @@ class AdminSeriesUpdateView(UpdateView):
     success_url = reverse_lazy('administration:series_list')
 
     def form_valid(self, form):
-        response = super().form_valid(form)
+        self.object = form.save()
+        create_system_log(self.request, 'SERIES_UPDATE', details=f"Série modifiée : {self.object.title}")
         
-        # Handle folder upload
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'success',
+                'series_id': self.object.id,
+                'message': 'Série mise à jour.'
+            })
+
         files = self.request.FILES.getlist('folder_upload')
         if files:
-            count = bulk_create_chapters_from_folder(self.object, files)
-            if count > 0:
-                messages.success(self.request, f"{count} chapitres importés.")
-            else:
-                messages.warning(self.request, "Aucun chapitre n'a pu être traité du dossier.")
+            bulk_create_chapters_from_folder(self.object, files)
 
-        create_system_log(self.request, 'SERIES_UPDATE', details=f"Série modifiée : {self.object.title}")
         messages.success(self.request, "Série mise à jour avec succès.")
-        return response
+        return super().form_valid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -460,4 +460,43 @@ class CompleteChunkedUploadView(View):
                 'final_path': final_path
             })
         except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+
+from catalog.services import process_single_chapter_from_temp
+
+@method_decorator(requires_admin, name='dispatch')
+class ProcessChapterFromUploadView(View):
+    def post(self, request, *args, **kwargs):
+        upload_id = request.POST.get('upload_id')
+        series_id = request.POST.get('series_id')
+        
+        if not upload_id or not series_id:
+            return JsonResponse({'error': 'Paramètres manquants'}, status=400)
+            
+        try:
+            upload = ChunkedUpload.objects.get(upload_id=upload_id)
+            # Find the assembled file path
+            temp_path = os.path.join(settings.MEDIA_ROOT, 'temp_uploads', upload.filename)
+            
+            if not os.path.exists(temp_path):
+                # Try assembled path with safe filename if logic assembly used it
+                safe_filename = os.path.basename(upload.filename)
+                temp_path = os.path.join(settings.MEDIA_ROOT, 'temp_uploads', safe_filename)
+                
+            if not os.path.exists(temp_path):
+                 return JsonResponse({'error': 'Fichier assemblé introuvable'}, status=404)
+            
+            chapter = process_single_chapter_from_temp(series_id, temp_path)
+            
+            # Clean up assembled file after processing
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+                
+            return JsonResponse({
+                'status': 'processed',
+                'chapter_id': chapter.id,
+                'chapter_number': chapter.number
+            })
+        except Exception as e:
+            logger.error(f"Error in ProcessChapterFromUploadView: {e}")
             return JsonResponse({'error': str(e)}, status=500)
