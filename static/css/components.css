@@ -683,9 +683,31 @@
     justify-content: center;
 }
 
+/* --- NOTIFICATION BADGE COUNTER --- */
+.navbar-notification-container {
+    position: relative;
+}
+
+.notif-count-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.6rem;
+    font-weight: 700;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 999px;
+    pointer-events: none;
+}
+
 /* --- MOBILE NAVIGATION OVERRIDES --- */
 .navbar-toggle {
-    display: none !important;
+    display: none;
     background: none;
     border: none;
     color: var(--color-text-primary);
@@ -701,7 +723,7 @@
 
 @media (max-width: 768px) {
     .navbar-toggle {
-        display: block;
+        display: block !important;
     }
 
     .navbar-menu {

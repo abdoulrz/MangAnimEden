@@ -237,7 +237,7 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True  # Required for HTTPS
 
 # Versioning for cache busting
-STATIC_VERSION = '2.7.0'
+STATIC_VERSION = '2.8.0'
 
 LOGGING = {
     'version': 1,

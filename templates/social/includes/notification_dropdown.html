@@ -1,12 +1,9 @@
 {% load static %}
-<div class="navbar-notification-container" style="position: relative;">
-    <button class="btn-ghost navbar-icon-btn position-relative" type="button" id="notificationDropdownTrigger">
+<div class="navbar-notification-container">
+    <button class="btn-ghost navbar-icon-btn" type="button" id="notificationDropdownTrigger">
         🔔
         {% if notification_count > 0 %}
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-            style="font-size: 0.6rem; padding: 0.25em 0.5em;">
-            {{ notification_count }}
-        </span>
+        <span class="notif-count-badge">{{ notification_count }}</span>
         {% endif %}
     </button>
 
