@@ -576,8 +576,8 @@
     min-width: 300px;
     max-width: 450px;
     background: rgba(25, 25, 30, 0.85);
-    backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-lg);
     padding: 1rem 1.25rem;
@@ -685,7 +685,7 @@
 
 /* --- MOBILE NAVIGATION OVERRIDES --- */
 .navbar-toggle {
-    display: none;
+    display: none !important;
     background: none;
     border: none;
     color: var(--color-text-primary);

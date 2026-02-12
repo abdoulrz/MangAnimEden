@@ -128,15 +128,12 @@
                         id="msg-{{ message.id }}">
                         <div class="message-bubble">
                             <div class="message-info">
-                                <a href="{% url 'users:public_profile' message.sender.id %}" class="sender-name"
-                                    style="color: inherit; text-decoration: none; transition: opacity 0.3s;">{{
+                                <a href="{% url 'users:public_profile' message.sender.id %}" class="sender-name" style="color: inherit; text-decoration: none; transition: opacity 0.3s;">{{
                                     message.sender.nickname }}</a>
                                 <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
 
                                 {% if active_group.owner == user and message.sender != user %}
-                                <button class="btn-ban"
-                                    onclick="banUser({{ active_group.id }}, {{ message.sender.id }}, '{{ message.sender.nickname }}')"
-                                    title="Bannir ce membre">🚫</button>
+                                <button class="btn-ban"onclick="banUser({{ active_group.id }}, {{ message.sender.id }}, '{{ message.sender.nickname }}')" title="Bannir ce membre">🚫</button>
                                 {% endif %}
                             </div>
 
@@ -151,14 +148,11 @@
 
                             <!-- Interactions -->
                             <div class="message-actions">
-                                <button class="action-btn like-btn {% if user in message.likes.all %}liked{% endif %}"
-                                    data-message-id="{{ message.id }}" onclick="toggleLike(this, {{ message.id }})">
-                                    <i
-                                        class="{% if user in message.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                                <button class="action-btn like-btn {% if user in message.likes.all %}liked{% endif %}"data-message-id="{{ message.id }}"onclick="toggleLike(this,{{ message.id }})">
+                                    <i class="{% if user in message.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
                                     <span class="like-count">{{ message.like_count }}</span>
                                 </button>
-                                <button class="action-btn reply-btn"
-                                    onclick="startReply({{ message.id }}, '{{ message.sender.nickname }}')">
+                                <button class="action-btn reply-btn"onclick="startReply({{ message.id }}, '{{ message.sender.nickname }}')">
                                     <i class="fas fa-reply"></i>
                                 </button>
                             </div>

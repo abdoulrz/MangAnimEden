@@ -108,7 +108,7 @@
                         </div>
                     </a>
 
-                    <a href="{% url 'users:domaine' %}" class="stat-glass-card stat-clickable">
+                    <a href="?mode=overview" class="stat-glass-card stat-clickable">
                         <div class="stat-icon-wrapper icon-blue">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -321,43 +321,44 @@
                 </div>
             </div>
 
-            <!-- Badges Block (Phase 2.5.3) -->
+            <!-- Badges Block (Premium Grid) -->
             <div id="content-badges" class="content-block content-hidden">
                 <h2 class="panel-title">🏆 Mes Badges</h2>
-                <div class="badge-timeline-container">
-                    <div class="timeline-line"></div>
-
+                <div class="badges-grid-premium">
                     {% for item in timeline_badges %}
-                    <div class="timeline-item {{ item.status }}">
-                        <div class="timeline-dot">
-                            {% if item.status == 'unlocked' and item.badge.icon %}
-                            <img src="{{ item.badge.icon.url }}" alt="{{ item.badge.name }}" class="badge-icon-small">
-                            {% elif item.status == 'next' %}
-                            <div class="dot-next"></div>
+                    <div class="badge-card-premium {{ item.status }}">
+                        <div class="badge-icon-wrapper-large">
+                            {% if item.badge.icon %}
+                            <img src="{{ item.badge.icon.url }}" alt="{{ item.badge.name }}" class="badge-icon-img">
                             {% else %}
-                            <div class="dot-locked"></div>
+                            <div class="badge-icon-placeholder">
+                                {% if item.status == 'locked' %}🔒{% else %}🏆{% endif %}
+                            </div>
                             {% endif %}
                         </div>
 
-                        <div class="timeline-content">
-                            <div class="badge-header">
-                                <h4>{{ item.badge.name }}</h4>
-                                {% if item.obtained_at %}
-                                <span class="badge-date">{{ item.obtained_at|date:"d M Y" }}</span>
-                                {% endif %}
-                            </div>
-                            <p class="badge-condition">{{ item.badge.description }}</p>
-                            {% if item.status == 'next' %}
-                            <span class="badge-status-label">Prochain Objectif</span>
-                            {% elif item.status == 'locked' %}
-                            <span class="badge-status-label locked">Verrouillé</span>
+                        <div class="badge-info">
+                            <h4>{{ item.badge.name }}</h4>
+                            <p>{{ item.badge.description }}</p>
+
+                            {% if item.status == 'unlocked' %}
+                            <span class="badge-status-pill">Débloqué</span>
+                            {% elif item.status == 'next' %}
+                            <span class="badge-status-pill">Prochain</span>
+                            {% else %}
+                            <span class="badge-status-pill">Verrouillé</span>
                             {% endif %}
                         </div>
+
+                        {% if item.obtained_at %}
+                        <div class="badge-date-footer">
+                            Obtenu le {{ item.obtained_at|date:"d M Y" }}
+                        </div>
+                        {% endif %}
                     </div>
                     {% empty %}
                     <p class="empty-message">Aucun badge disponible.</p>
                     {% endfor %}
-
                 </div>
             </div>
 

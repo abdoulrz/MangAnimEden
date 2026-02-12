@@ -905,9 +905,9 @@
 .message-bubble {
     transition: transform 0.2s ease, background 0.3s ease;
     position: relative;
-    user-select: none;
     /* Prevent text selection during long press/touch */
     -webkit-user-select: none;
+    user-select: none;
 }
 
 .message-bubble.pressing {
