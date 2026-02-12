@@ -1,0 +1,67 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1 class="admin-page-title">
+        {% if form.instance.pk %}Modifier le Badge{% else %}Nouveau Badge{% endif %}
+    </h1>
+    <a href="{% url 'administration:badge_list' %}" class="btn btn-secondary">
+        ← Retour
+    </a>
+</div>
+
+<div class="admin-form-container glass-panel">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group mb-3">
+            <label for="{{ form.name.id_for_label }}">Nom du Badge</label>
+            {{ form.name }}
+            {% if form.name.errors %}<div class="error">{{ form.name.errors }}</div>{% endif %}
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="{{ form.slug.id_for_label }}">Slug (Identifiant unique)</label>
+            {{ form.slug }}
+            <small class="form-text text-muted">Laisser vide pour auto-générer.</small>
+            {% if form.slug.errors %}<div class="error">{{ form.slug.errors }}</div>{% endif %}
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="{{ form.description.id_for_label }}">Description</label>
+            {{ form.description }}
+            {% if form.description.errors %}<div class="error">{{ form.description.errors }}</div>{% endif %}
+        </div>
+
+        <div class="form-group mb-3">
+            <label for="{{ form.icon.id_for_label }}">Icône</label>
+            {{ form.icon }}
+            {% if form.instance.icon %}
+            <div class="current-icon mt-2">
+                <img src="{{ form.instance.icon.url }}" alt="Icône actuelle" width="50">
+                <small>Actuelle</small>
+            </div>
+            {% endif %}
+            {% if form.icon.errors %}<div class="error">{{ form.icon.errors }}</div>{% endif %}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 form-group mb-3">
+                <label for="{{ form.condition_type.id_for_label }}">Condition d'obtention</label>
+                {{ form.condition_type }}
+                {% if form.condition_type.errors %}<div class="error">{{ form.condition_type.errors }}</div>{% endif %}
+            </div>
+            <div class="col-md-6 form-group mb-3">
+                <label for="{{ form.threshold.id_for_label }}">Seuil (Quantité)</label>
+                {{ form.threshold }}
+                <small class="form-text text-muted">Ex: 100 pour 100 chapitres.</small>
+                {% if form.threshold.errors %}<div class="error">{{ form.threshold.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-actions mt-4 text-end">
+            <button type="submit" class="btn btn-primary btn-lg">Enregistrer</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -63,7 +63,11 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 - [x] **Suppression Page Domaine** : Rediriger `/domaine/` vers `/profile/` (section intégrée). Supprimer le code mort.
 - [x] **Profil** : Supprimer le bloc "Paramètres du profil" (doublon ou inutile).
+- [ ] **Profil Cleanup** : Supprimer la barre de recherche "Rechercher un manga" de la page profil.
+- [ ] **Profil UX** : Le bloc "Compléter mon profil" doit disparaître une fois le profil terminé.
 - [x] **Profil Redesign** : Refondre le bloc "Info Utilisateur" (Niveau, Amis) pour un look plus premium.
+- [ ] **Redesign `edit_profile`** : Changer "Chapter" en "Domaine" pour le regroupement thématique.
+- [ ] **Otaku Card** : Implémentation de la "Carte Otaku" sur le profil.
 
 #### 2.4.2 Navigation & Footer
 
@@ -79,7 +83,13 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 #### 2.4.3 Fonctionnalités "Quick Wins"
 
 - [x] **Forum** : Réparer le bouton "Ajouter une Story".
+- [ ] **Forum UX** : Changer placeholder recherche manga -> "Rechercher un groupe".
+- [ ] **Forum Fix** : Corriger les images de profil des groupes cassées.
+- [ ] **Forum Permissions** : Restreindre le chat aux membres du groupe.
 - [x] **Thème** : Activer la logique du Theme Switcher (bouton existant).
+- [ ] **Thème Visibilité** : Ajuster les couleurs de texte en mode clair (ex: noir sur blanc).
+- [ ] **Search Bar** : Rendre l'icône loupe fonctionnelle (pas seulement Entrée).
+- [ ] **Quotes** : Utiliser la collection de citations originales en français.
 
 ### 2.5 Gamification & Système de Gestion de Groupes
 
@@ -107,6 +117,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [x] **Frontend - UI Sociale** :
   - [x] Profil Public : Bouton "Ajouter en ami" / "Demande envoyée".
   - [x] Profil Privé : Liste des amis et compteur dans la "Glass Card".
+  - [ ] **Friend Links** : Cliquer sur l'icone d'un ami doit mener à son profil public (avec liens sociaux).
   - [x] Nicknames cliquables : Forum/Chat messages link to public profiles.
 - [x] **Tests** : Unit tests pour Friendship model (13 tests).
 
@@ -166,18 +177,31 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [x] Tests de validation des quotas de groupes.
 - [x] Tests de permissions de modération.
 
+#### 2.5.7 Nouvelles Interactions Sociales
+
+- [ ] **Système de Réponse** : Pouvoir répondre à un message par un appui long (2s).
+- [ ] **Gestion d'Événements** :
+  - [ ] Admins/Modérateurs peuvent ajouter des événements.
+  - [ ] Empêcher la répétition d'événements.
+- [ ] **Stories UX** : Améliorer le design normal et hover du bouton "Ajouter une Story".
+
 ## 🛡️ Phase 3 : Sécurité, Auth & Intégrité
 
 *Basé sur `COMPLEX_IMPLEMENTATION_MEMO.md`. Ne pas négliger cette phase.*
 
 ### 3.1 Authentification & Rôles ✅ (COMPLÉTÉ)
 
-- [x] **Google Auth** : Inscription/Connexion via Google (OAuth2). *Note: Implémentation terminée. Validation finale déplacée en 3.7 (attente Google).*
+- [x] **Google Auth** : Inscription/Connexion via Google (OAuth2).
+  - [ ] **Fix** : Vérifier l'intégration OAuth, la connexion automatique et la redirection.
+- [ ] **Auth UX** :
+  - [ ] Icone "œil" pour afficher/masquer le mot de passe sur tous les navigateurs.
+  - [ ] **Navbar Simplifiée** : Pendant l'inscription, ne laisser que Logo, Thème et Connexion.
 - [x] **Spec** : Rédiger `docs/specs/SPEC-005-Admin-Dashboard.md`.
 - [x] **Middleware** : Décorateur `@requires_role`.
 - [x] **Audit Logs** : Modèle `SystemLog`.
 - [x] **Dashboard** : Page `/admin-panel/` avec Design System.
   - [x] **Gestion Complète** : Permettre aux admins/staff de gérer entièrement le contenu (séries/chapitres) et les utilisateurs (clés/rôles/bans) sans passer par l'interface Django Admin standard.
+- [ ] **Admin Fixes** : Réparer la checkbox et le bouton "Effacer" dans l'administration.
 
 ### 3.2 Notifications & Social ✅ (COMPLÉTÉ)
 
@@ -212,9 +236,14 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [ ] **Legal Consent** :
   - [ ] Checkbox "J'accepte les CGU" à l'inscription.
 - [ ] **Reporting System** :
-  - [ ] Backend : Modèle `Report` (Target: User/Comment, Reason, Status).
-  - [ ] UI : Bouton "Signaler" (Flag icon).
+  - [x] Backend : Modèle `Report` (Target: User/Comment, Reason, Status).
+  - [x] UI : Bouton "Signaler" (Flag icon).
   - [ ] Admin : Vue de modération des signalements.
+- [ ] **Accès Limité (Stratégie de Conversion)** :
+  - [ ] Permettre 2-3 chapitres gratuits max aux nouveaux utilisateurs.
+  - [ ] Bloquer la lecture et forcer l'inscription après la limite.
+- [ ] **Système d'Avis & Notes** :
+  - [ ] Permettre de noter et laisser un avis sur un scan (Page Détail).
 - [ ] **Pages Légales & Support** :
   - [ ] Templates : `terms.html`, `privacy.html`, `dmca.html`.
   - [ ] Formulaire de Contact : `/contact/` (Envoi email aux admins).
@@ -232,13 +261,11 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [x] Reader unifié. (Le `FileProcessor` convertit tout en images standard `Page`, donc le lecteur actuel fonctionne pour tous les formats).
   - [x] Gestion du chargement progressif.
 
-### 3.7 Validation Finale Google Auth ✅ (COMPLÉTÉ)
+### 3.7 Monétisation & Publicité
 
-*Validé avec les credentials développeur du client.*
-
-- [x] **Implémentation** : django-allauth installé, configuré, UI/UX intégré.
-- [x] **Credentials** : Obtenir Client ID / Secret valides (Google Cloud Console).
-- [x] **Test Final** : Vérifier le flux complet (Connexion -> Redirection -> Création Compte).
+- [ ] **Ajustement "Espace Publicitaire"** : Trouver un meilleur substitut visuel/textuel.
+- [ ] **Publicités PC/Mobile** : Bouton de fermeture fonctionnel et affichage cohérent.
+- [ ] **Ads Vidéo** : Intégrer une publicité vidéo obligatoire toutes les 10 minutes pendant la lecture.
 
 ---
 
@@ -246,18 +273,21 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 *Le "Wow Factor" demandé dans le `DESIGN_SYSTEM.md`.*
 
-### 4.1 Unification Visuelle
+### 4.1 Unification Visuelle & Catalogue
 
 - [ ] **Refactor** : Remplacer tout hexadécimal hardcodé par `var(--color-...)`.
 - [ ] **Animation** : Hover effects (Glassmorphism), Transitions de page.
+- [ ] **Animations Trending** : Flamme dynamique et numéros de classement animés au chargement.
+- [ ] **Catalogue Organization** : Grouper les éléments par thème ou genre.
 - [ ] **Feedback** : Tests pour succès/erreur.
 
 ### 4.2 Mobile Experience (Prioritaire)
 
-- [ ] **Responsive Check** : Vérification des grilles et tailles de police sur < 400px.
+- [ ] **Responsive Check** : Vérification des grilles et tailles de police sur < 400px (Phones & Tablettes).
 - [ ] **Touch Targets** : Audit des boutons trop petits.
 - [ ] **Navigation** : Test du menu sur mobile (Burger ou Bottom Nav).
 - [ ] **Mobile Touch** : Feedback visuel au tap (:active), Swipe gestures.
+- [ ] **Scan Reading Fix** : Corriger la lecture des scans (actuellement impossible).
 
 ---
 

@@ -10,6 +10,7 @@ from .decorators import requires_admin, requires_moderator, log_admin_action, cr
 from .models import SystemLog
 from catalog.models import Series, Chapter, Genre
 from social.models import Group  # Import Group model
+from users.models import Badge
 
 User = get_user_model()
 
@@ -120,7 +121,8 @@ class AdminSeriesListView(ListView):
         return context
 
 from catalog.services import bulk_create_chapters_from_folder
-from .forms import SeriesForm
+from catalog.services import bulk_create_chapters_from_folder
+from .forms import SeriesForm, BadgeForm
 
 @method_decorator(requires_admin, name='dispatch')
 class AdminSeriesCreateView(CreateView):
@@ -500,3 +502,64 @@ class ProcessChapterFromUploadView(View):
         except Exception as e:
             logger.error(f"Error in ProcessChapterFromUploadView: {e}")
             return JsonResponse({'error': str(e)}, status=500)
+
+
+# --- Gamification Management (Badges) ---
+@method_decorator(requires_admin, name='dispatch')
+class AdminBadgeListView(ListView):
+    model = Badge
+    template_name = 'administration/gamification/badge_list.html'
+    context_object_name = 'badges'
+    ordering = ['name']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'badges'
+        return context
+
+@method_decorator(requires_admin, name='dispatch')
+class AdminBadgeCreateView(CreateView):
+    model = Badge
+    form_class = BadgeForm
+    template_name = 'administration/gamification/badge_form.html'
+    success_url = reverse_lazy('administration:badge_list')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        create_system_log(self.request, 'BADGE_CREATE', details=f"Badge créé : {self.object.name}")
+        messages.success(self.request, "Badge créé avec succès.")
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'badges'
+        return context
+
+@method_decorator(requires_admin, name='dispatch')
+class AdminBadgeUpdateView(UpdateView):
+    model = Badge
+    form_class = BadgeForm
+    template_name = 'administration/gamification/badge_form.html'
+    success_url = reverse_lazy('administration:badge_list')
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        create_system_log(self.request, 'BADGE_UPDATE', details=f"Badge modifié : {self.object.name}")
+        messages.success(self.request, "Badge mis à jour avec succès.")
+        return response
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'badges'
+        return context
+
+@method_decorator(requires_admin, name='dispatch')
+class AdminBadgeDeleteView(DeleteView):
+    model = Badge
+    success_url = reverse_lazy('administration:badge_list')
+    
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        create_system_log(request, 'BADGE_DELETE', details=f"Badge supprimé : {obj.name}")
+        messages.success(request, f"Badge '{obj.name}' supprimé.")
+        return super().delete(request, *args, **kwargs)

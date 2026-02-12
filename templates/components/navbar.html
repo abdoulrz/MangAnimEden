@@ -24,13 +24,19 @@
 
         <!-- 3. Right: Search + Icons + Profile -->
         <div class="navbar-right">
-            <!-- Search Bar -->
-            {% if request.resolver_match.view_name != 'catalog:index' %}
+            <!-- Search Bar Navigation Logic -->
+            {% with view_name=request.resolver_match.view_name namespace=request.resolver_match.namespace %}
+            {% if view_name != 'catalog:index' and view_name != 'users:profile' and namespace != 'administration' %}
             <div class="navbar-search">
+                {% if namespace == 'social' %}
+                <input type="text" placeholder="Rechercher un groupe..." class="input navbar-search-input">
+                {% else %}
                 <input type="text" placeholder="Rechercher un manga..." class="input navbar-search-input">
+                {% endif %}
                 <span class="navbar-search-icon">🔍</span>
             </div>
             {% endif %}
+            {% endwith %}
 
             <!-- Dark Mode Toggle -->
             <button id="theme-toggle" class="btn-ghost navbar-icon-btn">🌙</button>

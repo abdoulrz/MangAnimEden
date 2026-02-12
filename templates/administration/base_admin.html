@@ -39,6 +39,12 @@
                 class="admin-nav-item {% if active_tab == 'groups' %}active{% endif %}">
                 <i class="fas fa-users-cog"></i> Groupes
             </a>
+
+            <div class="admin-nav-header">Gamification</div>
+            <a href="{% url 'administration:badge_list' %}"
+                class="admin-nav-item {% if active_tab == 'badges' %}active{% endif %}">
+                <i class="fas fa-trophy"></i> Badges
+            </a>
         </aside>
 
         <!-- Main Content Area -->

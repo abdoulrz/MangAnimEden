@@ -273,6 +273,17 @@
     font-size: 1.5rem;
     color: white;
     font-weight: 300;
+    transition: transform 0.2s ease;
+}
+
+.story-add:hover .story-ring {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.story-add:hover .story-add-icon {
+    transform: scale(1.2);
 }
 
 .story-upload-label {
@@ -797,6 +808,132 @@
     height: 100%;
     object-fit: cover;
     border-radius: 25px;
+}
+
+/* Review System & Message Actions */
+.message-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.message:hover .message-actions {
+    opacity: 1;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    color: inherit;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+    border-radius: 12px;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--color-purple-primary, #8b5cf6);
+}
+
+.action-btn.liked {
+    color: #e74c3c;
+}
+
+.action-btn.liked i {
+    transform: scale(1.1);
+}
+
+/* Reply Banner */
+.reply-banner {
+    background: rgba(108, 92, 231, 0.15);
+    padding: 10px 15px;
+    border-left: 4px solid var(--color-purple-primary, #8b5cf6);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(10px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.reply-context {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(0, 0, 0, 0.2);
+    padding: 4px 8px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    display: inline-block;
+    border-left: 2px solid var(--color-purple-primary, #8b5cf6);
+}
+
+.btn-close-small {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.btn-close-small:hover {
+    opacity: 1;
+}
+
+/* Long Press Feedback */
+.message-bubble {
+    transition: transform 0.2s ease, background 0.3s ease;
+    position: relative;
+    user-select: none;
+    /* Prevent text selection during long press/touch */
+    -webkit-user-select: none;
+}
+
+.message-bubble.pressing {
+    transform: scale(0.98);
+    background: rgba(108, 92, 231, 0.3);
+    /* Visual feedback color */
+}
+
+/* Add a progress indicator for long press if desired */
+.message-bubble.pressing::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: #00cec9;
+    width: 0%;
+    animation: loadProgress 1s linear forwards;
+    /* 1s duration matches JS */
+    border-radius: 0 0 15px 15px;
+}
+
+@keyframes loadProgress {
+    to {
+        width: 100%;
+    }
 }
 
 .event-meta-centered {

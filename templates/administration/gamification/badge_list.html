@@ -1,0 +1,45 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1 class="admin-page-title">Gestion des Badges</h1>
+    <a href="{% url 'administration:badge_create' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Nouveau Badge
+    </a>
+</div>
+
+<div class="badge-grid">
+    {% for badge in badges %}
+    <div class="badge-card glass-panel">
+        <div class="badge-icon-wrapper">
+            {% if badge.icon %}
+            <img src="{{ badge.icon.url }}" alt="{{ badge.name }}">
+            {% else %}
+            <span>🏆</span>
+            {% endif %}
+        </div>
+
+        <h3 class="badge-name">{{ badge.name }}</h3>
+        <p class="badge-desc">{{ badge.description|truncatechars:60 }}</p>
+
+        <div class="badge-meta">
+            <strong>Condition:</strong> {{ badge.get_condition_type_display }} <br>
+            <strong>Seuil:</strong> {{ badge.threshold }}
+        </div>
+
+        <div class="badge-actions">
+            <a href="{% url 'administration:badge_edit' badge.id %}" class="btn btn-small btn-secondary">Modifier</a>
+            <form action="{% url 'administration:badge_delete' badge.id %}" method="POST" class="inline-form"
+                onsubmit="return confirm('⚠️ Êtes-vous sûr de vouloir supprimer ce badge ?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-small btn-danger">Supprimer</button>
+            </form>
+        </div>
+    </div>
+    {% empty %}
+    <div class="badge-empty-state">
+        <p>Aucun badge trouvé. Créez-en un nouveau !</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

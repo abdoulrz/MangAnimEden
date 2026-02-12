@@ -36,3 +36,17 @@ class SeriesForm(forms.ModelForm):
             'release_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'genres': forms.CheckboxSelectMultiple(),
         }
+
+from users.models import Badge
+
+class BadgeForm(forms.ModelForm):
+    class Meta:
+        model = Badge
+        fields = ['name', 'slug', 'description', 'icon', 'condition_type', 'threshold']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Nom du badge'}),
+            'slug': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Slug (auto-généré si vide)'}),
+            'description': forms.Textarea(attrs={'class': 'form-input', 'rows': 3, 'placeholder': 'Description du badge'}),
+            'condition_type': forms.Select(attrs={'class': 'form-select'}),
+            'threshold': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Valeur cible'}),
+        }

@@ -39,4 +39,10 @@ urlpatterns = [
     path('upload/chunk/', views.UploadChunkView.as_view(), name='upload_chunk'),
     path('upload/complete/', views.CompleteChunkedUploadView.as_view(), name='upload_complete'),
     path('upload/process/', views.ProcessChapterFromUploadView.as_view(), name='upload_process'),
+
+    # Gamification Management - Badges
+    path('gamification/badges/', views.AdminBadgeListView.as_view(), name='badge_list'),
+    path('gamification/badges/create/', views.AdminBadgeCreateView.as_view(), name='badge_create'),
+    path('gamification/badges/<int:pk>/edit/', views.AdminBadgeUpdateView.as_view(), name='badge_edit'),
+    path('gamification/badges/<int:pk>/delete/', views.AdminBadgeDeleteView.as_view(), name='badge_delete'),
 ]
