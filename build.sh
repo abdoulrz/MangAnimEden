@@ -4,5 +4,13 @@ set -o errexit
 
 pip install -r requirements.txt
 
+
+echo "--- DEBUG: Current Directory ---"
+pwd
+ls -la
+
+echo "--- DEBUG: Static Directory Content ---"
+ls -R static || echo "Static directory not found"
+
 python manage.py collectstatic --no-input
 python manage.py migrate
