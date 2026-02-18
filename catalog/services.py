@@ -10,6 +10,12 @@ from django.conf import settings
 from PIL import Image
 import pypdf
 
+# Try to import requests for downloading files if needed
+try:
+    import requests
+except ImportError:
+    requests = None
+
 try:
     import rarfile
     # Configure rarfile to find UnRAR.exe on Windows
@@ -105,8 +111,8 @@ class FileProcessor:
             logger.warning(f"Chapter {chapter} has no source file.")
             return False
 
-        file_path = chapter.source_file.path
-        ext = os.path.splitext(file_path)[1].lower()
+        # Determine extension from the file field name (URL or path)
+        ext = os.path.splitext(chapter.source_file.name)[1].lower()
 
         if ext not in self.supported_extensions:
             logger.warning(f"Unsupported file extension: {ext}")
@@ -114,27 +120,60 @@ class FileProcessor:
             
         logger.info(f"Processing {chapter} ({ext})...")
 
+        # Create a temporary file to work with, verifying safe for cloud storage
         try:
+            with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp_file:
+                # Write file content to temp file
+                # Use chunks to handle large files efficiently
+                if hasattr(chapter.source_file, 'open'):
+                     chapter.source_file.open('rb')
+                
+                for chunk in chapter.source_file.chunks():
+                    tmp_file.write(chunk)
+                
+                # Close explicitly to ensure flush
+                tmp_file.close()
+                temp_path = tmp_file.name
+
+            # Now process using the local temp path
+            result = False
             if ext == '.pdf':
-                self._extract_from_pdf(chapter, file_path)
+                self._extract_from_pdf(chapter, temp_path)
+                result = True
             elif ext == '.cbr':
-                self._extract_from_rar(chapter, file_path)
+                self._extract_from_rar(chapter, temp_path)
+                result = True
             elif ext in ['.cbz', '.zip', '.epub']:
-                self._extract_from_zip(chapter, file_path)
+                self._extract_from_zip(chapter, temp_path)
+                result = True
             elif ext in ['.jpg', '.jpeg', '.png', '.webp']:
-                page_count = chapter.pages.count()
-                self._save_page_image(chapter, chapter.source_file.read(), page_count + 1, os.path.basename(file_path))
+                # If single image, just save it.
+                with open(temp_path, 'rb') as f:
+                    page_count = chapter.pages.count()
+                    self._save_page_image(chapter, f.read(), page_count + 1, os.path.basename(chapter.source_file.name))
+                result = True
             
-            logger.info(f"Successfully processed {chapter}. Total pages: {chapter.pages.count()}")
-            return True
+            if result:
+                logger.info(f"Successfully processed {chapter}. Total pages: {chapter.pages.count()}")
+            return result
+
         except Exception as e:
             logger.error(f"Error processing {chapter}: {e}")
             return False
+        finally:
+            # Clean up temporary file
+            if 'temp_path' in locals() and os.path.exists(temp_path):
+                try:
+                    os.unlink(temp_path)
+                except OSError as e:
+                    logger.warning(f"Failed to delete temp file {temp_path}: {e}")
 
     def _save_page_image(self, chapter, image_data, page_number, filename):
         """Create a Page object and save the image data."""
         page = Page(chapter=chapter, page_number=page_number)
         final_filename = f"{chapter.id}_{page_number}_{filename}"
+        PAGE_IMAGE_FIELD_NAME = 'image' # Assuming the field name is 'image' in Page model
+        # Check if we should use save=True. Usually yes.
         page.image.save(final_filename, ContentFile(image_data), save=True)
 
     def _extract_from_pdf(self, chapter, file_path):
