@@ -67,14 +67,16 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    # Third party apps
+    'cloudinary_storage', # Must be above django.contrib.staticfiles
     'django.contrib.staticfiles',
     'django.contrib.sites', # Added back as it was in original and not explicitly removed
 
-    # Third party apps
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
+    'cloudinary',
 
     # Local apps
     'users',
@@ -170,9 +172,15 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
-# Media files (User uploads)
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+# Media files (Cloudinary)
+MEDIA_URL = '/media/'  # Or use full URL if preferred, but usually '/media/' works fine with storage backend
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
+    'API_KEY': config('CLOUDINARY_API_KEY', default=''),
+    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
+}
 
 # Data Upload Settings
 DATA_UPLOAD_MAX_NUMBER_FILES = 10000  # Increased limit for bulk chapter uploads
