@@ -69,9 +69,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     # Third party apps
-    'cloudinary_storage', # Must be above django.contrib.staticfiles
     'django.contrib.staticfiles',
     'django.contrib.sites', # Added back as it was in original and not explicitly removed
+    'cloudinary_storage', # Moved below staticfiles to prevent collectstatic hijack
 
     'allauth',
     'allauth.account',

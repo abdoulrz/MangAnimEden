@@ -12,5 +12,5 @@ ls -la
 echo "--- DEBUG: Static Directory Content ---"
 ls -R static || echo "Static directory not found"
 
-python manage.py collectstatic --no-input
+python manage.py collectstatic --no-input -v 2
 python manage.py migrate
