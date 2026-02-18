@@ -1,0 +1,490 @@
+/**
+ * EDIT PROFILE PAGE STYLES
+ * Dedicated styles for edit profile page
+ */
+
+/* ==================== PAGE CONTAINER ==================== */
+.page-container {
+    max-width: 800px;
+    /* Centered, reduced width */
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    min-height: 80vh;
+}
+
+/* ==================== HEADER ==================== */
+.edit-page-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Center header */
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    position: relative;
+    text-align: center;
+}
+
+.edit-back-link {
+    position: absolute;
+    /* Absolute positioning for back button */
+    left: 0;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 1.25rem;
+    transition: all 0.3s ease;
+}
+
+.edit-back-link:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(-3px);
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+}
+
+.edit-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    /* Bolder title */
+    color: white;
+    margin: 0 0 0.5rem 0;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, #fff 0%, #a5a5a5 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.edit-subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+    margin: 0;
+    font-weight: 500;
+}
+
+/* ==================== LAYOUT ==================== */
+.edit-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.edit-form-column {
+    width: 100%;
+}
+
+/* ==================== CARDS ==================== */
+.edit-card {
+    background: rgba(30, 30, 30, 0.6);
+    /* Darker glass */
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    /* Subtler border */
+    border-radius: 24px;
+    /* Really round corners */
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow:
+        0 4px 24px -1px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    /* Inner highlight */
+}
+
+.edit-section-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.edit-section-title svg {
+    filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.4));
+}
+
+.edit-section-subtitle {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.9rem;
+    margin: 1rem 0 2rem 0;
+}
+
+/* ==================== FORM ELEMENTS ==================== */
+.form-group {
+    margin-bottom: 2rem;
+}
+
+.form-label {
+    display: block;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.02em;
+}
+
+.input,
+.form-group input[type="text"],
+.form-group input[type="url"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    transition: all 0.2s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.input:focus,
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    background: rgba(0, 0, 0, 0.4);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.edit-helper-text {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 0.75rem;
+}
+
+/* ==================== AVATAR UPLOAD ==================== */
+.edit-upload-group {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 16px;
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.edit-current-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: #2a2a2a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    background-size: cover;
+    background-position: center;
+}
+
+.edit-upload-wrapper {
+    flex: 1;
+}
+
+.edit-upload-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    padding: 0.875rem 2rem;
+    background: rgba(255, 255, 255, 0.08);
+    /* Clean button */
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    font-weight: 600;
+}
+
+.edit-upload-label:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.edit-upload-label input[type="file"] {
+    position: absolute;
+    opacity: 0;
+    width: 0.1px;
+    height: 0.1px;
+    overflow: hidden;
+    z-index: -1;
+}
+
+/* ==================== SOCIAL GRID ==================== */
+.social-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.edit-linkedin-group {
+    grid-column: 1 / -1;
+}
+
+.social-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+/* ==================== FORM ACTIONS ==================== */
+.form-actions {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+    /* Center actions */
+    margin-top: 3rem;
+}
+
+.btn-cancel {
+    padding: 1rem 2.5rem;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-cancel:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: white;
+    border-color: white;
+}
+
+.btn-save {
+    padding: 1rem 3rem;
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+}
+
+.btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(139, 92, 246, 0.4);
+    filter: brightness(1.1);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .page-container {
+        padding: 1.5rem 1rem;
+    }
+
+    .edit-page-header {
+        flex-direction: column;
+        margin-bottom: 2rem;
+    }
+
+    .edit-back-link {
+        position: static;
+        /* Stack on mobile */
+        margin-bottom: 1rem;
+    }
+
+    .social-grid {
+        grid-template-columns: 1fr;
+    }
+
+    @media (max-width: 480px) {
+        .form-actions {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+            /* Ensure centering on mobile S-L */
+        }
+
+        .btn-cancel,
+        .btn-save {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .edit-title {
+            font-size: 1.75rem;
+        }
+    }
+}
+
+/* ==================== LIGHT MODE OVERRIDES ==================== */
+@media (prefers-color-scheme: light) {
+    .edit-card {
+        background: rgba(255, 255, 255, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+    }
+
+    .edit-title {
+        background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: none;
+    }
+
+    .edit-subtitle,
+    .edit-section-subtitle,
+    .edit-helper-text {
+        color: #64748b;
+        /* Slate 500 */
+    }
+
+    .edit-section-title {
+        color: #1e3a8a;
+        border-bottom-color: rgba(0, 0, 0, 0.05);
+    }
+
+    .form-label {
+        color: #1e3a8a !important;
+        /* Force Midnight Blue */
+        font-weight: 700;
+    }
+
+    .input,
+    .form-group input[type="text"],
+    .form-group input[type="url"],
+    .form-group select,
+    .form-group textarea {
+        background: rgba(255, 255, 255, 0.5);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: #1e293b;
+        /* Slate 800 */
+    }
+
+    .input:focus,
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+        background: white;
+        border-color: #8b5cf6;
+        color: #1e293b;
+    }
+
+    /* Placeholder Color for Light Mode */
+    ::placeholder {
+        color: #94a3b8;
+        /* Slate 400 */
+        opacity: 1;
+    }
+
+    /* Input Text specifically */
+    input,
+    textarea,
+    select {
+        color: #1e293b !important;
+    }
+
+    .edit-current-avatar {
+        background: #f1f5f9;
+        color: #1e3a8a;
+        border-color: rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .edit-upload-label {
+        background: rgba(255, 255, 255, 0.6);
+        border-color: rgba(0, 0, 0, 0.1);
+        color: #1e3a8a !important;
+    }
+
+    .edit-upload-label span {
+        color: #1e3a8a;
+    }
+
+    .edit-upload-label:hover {
+        background: white;
+    }
+
+    .edit-back-link {
+        background: rgba(255, 255, 255, 0.8);
+        color: #1e3a8a;
+        border-color: rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .social-label {
+        color: #1e3a8a !important;
+        /* Force Midnight Blue */
+        font-weight: 600;
+    }
+
+    /* ACTION BUTTONS REFINEMENT */
+    .btn-cancel {
+        color: #1e3a8a !important;
+        border-color: rgba(30, 58, 138, 0.3);
+        display: flex;
+        /* Ensure flex for centering */
+        align-items: center;
+        justify-content: center;
+        width: 180px;
+        /* Reduced proportions */
+        padding: 0.8rem 1rem;
+        box-sizing: border-box;
+    }
+
+    .btn-cancel:hover {
+        background: rgba(30, 58, 138, 0.05);
+        border-color: #1e3a8a;
+    }
+
+    .btn-save {
+        /* Lighter background for proper contrast with midnight blue text */
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.2), rgba(236, 72, 153, 0.2));
+        color: #1e3a8a !important;
+        border: 1px solid rgba(139, 92, 246, 0.2);
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.15);
+        justify-content: center;
+        /* Center text */
+        width: 180px;
+        /* Reduced proportions */
+        padding: 0.8rem 1rem;
+        box-sizing: border-box;
+    }
+
+    .btn-save:hover {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.3), rgba(236, 72, 153, 0.3));
+        transform: translateY(-2px);
+    }
+
+    .btn-save svg {
+        stroke: #1e3a8a;
+        /* Icon color */
+    }
+}
