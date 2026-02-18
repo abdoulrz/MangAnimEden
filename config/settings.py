@@ -173,6 +173,14 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
 
+# DEBUG PATHS
+print(f"--- DEBUG SETTINGS ---")
+print(f"BASE_DIR: {BASE_DIR}")
+print(f"STATICFILES_DIRS: {STATICFILES_DIRS}")
+print(f"Does static exist? {(BASE_DIR / 'static').exists()}")
+print(f"Contents of static: {list((BASE_DIR / 'static').glob('*')) if (BASE_DIR / 'static').exists() else 'NotFound'}")
+print(f"----------------------")
+
 # Media files (Cloudinary)
 MEDIA_URL = '/media/'  # Or use full URL if preferred, but usually '/media/' works fine with storage backend
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
