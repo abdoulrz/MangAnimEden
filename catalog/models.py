@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings  # Import settings for AUTH_USER_MODEL
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from cloudinary_storage.storage import RawMediaCloudinaryStorage
 
 
 
@@ -97,7 +98,7 @@ class Chapter(models.Model):
         verbose_name="Numéro"
     )
     title = models.CharField(max_length=200, blank=True, verbose_name="Titre")
-    source_file = models.FileField(upload_to='scans/', blank=True, null=True, verbose_name="Fichier Source")
+    source_file = models.FileField(upload_to='scans/', blank=True, null=True, verbose_name="Fichier Source", storage=RawMediaCloudinaryStorage())
     
     created_at = models.DateTimeField(auto_now_add=True)
     @property
