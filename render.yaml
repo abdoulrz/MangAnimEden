@@ -10,7 +10,7 @@ services:
     runtime: python
     plan: free # Explicitly use the Free Tier
     buildCommand: "./build.sh"
-    startCommand: "gunicorn config.wsgi:application"
+    startCommand: "./render_start.sh"
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.9
