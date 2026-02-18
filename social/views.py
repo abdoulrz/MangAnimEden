@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
-from .models import Group, Event, Message, Story
+from .models import Group, Event, Message, Story, GroupMembership
 from django.contrib.auth import get_user_model
 from django.db import models
 User = get_user_model()
@@ -22,33 +22,110 @@ def delete_message(request, message_id):
     return redirect(f'/forum/?group_id={group_id}')
 
 @login_required
+def join_group(request, group_id):
+    """
+    Rejoindre un groupe public.
+    """
+    group = get_object_or_404(Group, id=group_id)
+    
+    # Check if already member
+    if GroupMembership.objects.filter(group=group, user=request.user).exists():
+        messages.warning(request, "Vous êtes déjà membre de ce groupe.")
+    else:
+        GroupMembership.objects.create(group=group, user=request.user)
+        messages.success(request, f"Vous avez rejoint le groupe {group.name} !")
+        
+    return redirect(f'/forum/?group_id={group.id}')
+
+@login_required
+def leave_group(request, group_id):
+    """
+    Quitter un groupe.
+    """
+    group = get_object_or_404(Group, id=group_id)
+    
+    # Check if owner (cannot leave without transfer)
+    if group.owner == request.user:
+        messages.error(request, "Le propriétaire ne peut pas quitter le groupe. Transférez la propriété ou supprimez le groupe.")
+        return redirect(f'/forum/?group_id={group.id}')
+
+    membership = GroupMembership.objects.filter(group=group, user=request.user).first()
+    if membership:
+        membership.delete()
+        messages.success(request, f"Vous avez quitté le groupe {group.name}.")
+    
+    return redirect('social:forum_home')
+
+@login_required
 def forum_home(request):
     """
     Vue principale du Forum (anciennement Social + News).
     Affiche le Chat, les Events, et la barre de Stories.
+    Updated for Phase 2.4.3: My Groups / Discover tabs.
     """
-    groups = Group.objects.all()
+    from django.db.models import Q
+    
+    # 0. Get Tabs & Search
+    active_tab = request.GET.get('tab', 'my_groups') # 'my_groups' or 'discover'
+    search_query = request.GET.get('q', '')
+
+    # 1. Fetch Groups based on membership
+    my_memberships = GroupMembership.objects.filter(user=request.user).select_related('group')
+    my_group_ids = my_memberships.values_list('group_id', flat=True)
+    
+    my_groups = Group.objects.filter(id__in=my_group_ids)
+    other_groups = Group.objects.exclude(id__in=my_group_ids)
+
+    # Search Filter
+    if search_query:
+        my_groups = my_groups.filter(name__icontains=search_query)
+        other_groups = other_groups.filter(name__icontains=search_query)
+
+    # Events
     events = Event.objects.filter(date__gte=timezone.now()).order_by('date')
     
-    # Permission Check
+    # Permission Check for Stories
     can_post_story = request.user.is_authenticated and (
         request.user.role_admin or 
         request.user.role_moderator or 
         request.user.is_staff or
-        request.user.is_superuser
+        request.user.is_superuser or
+        Group.objects.filter(owner=request.user).exists() # Group owners can post stories too? Let's keep it strict for now as per previous logic, or expand.
     )
 
-    # 1. Chat Logic
+    # 2. Chat Logic
     active_group = None
-    messages = []
+    messages_list = []
+    is_member = False
+    is_banned = False
+    membership = None
     
     group_id = request.GET.get('group_id')
     if group_id:
         active_group = get_object_or_404(Group, id=group_id)
-        messages = active_group.messages.select_related('sender').all()
+        
+        # Check membership status
+        membership = GroupMembership.objects.filter(group=active_group, user=request.user).first()
+        if membership:
+            is_member = True
+            is_banned = membership.is_banned
+            
+        # Permission to view messages: Owners, Mods, or Members (if not banned)
+        # Assuming public groups for now -> actually user request says "Should only see in the forum, the groups he is member of"
+        # So we restrict message viewing to members only.
+        if is_member and not is_banned:
+            messages_list = active_group.messages.select_related('sender').all()
+        elif request.user.is_staff or request.user.role_moderator or active_group.owner == request.user:
+             # Staff/Mods/Owner can always see
+             messages_list = active_group.messages.select_related('sender').all()
+
+        # Phase 2.4.3 FIX: If viewing a group I'm not in, switch tab to 'discover'
+        # unless I am the owner (then it's effectively my group)
+        if not is_member and active_group.owner != request.user:
+            active_tab = 'discover'
         
     if request.method == 'POST':
-        # 2. Stories Upload Logic
+        # 3. Stories Upload Logic
         if 'story_image' in request.FILES:
             if can_post_story:
                 target_group_id = request.POST.get('target_group_id')
@@ -63,8 +140,17 @@ def forum_home(request):
                 )
             return redirect('social:forum_home')
             
-        # 3. Chat Logic
+        # 4. Chat Logic (Post Message)
         elif active_group and 'content' in request.POST:
+            # Security check: Must be member and not banned
+            if not is_member and not (request.user.is_staff or request.user.role_moderator or active_group.owner == request.user):
+                 messages.error(request, "Vous devez rejoindre le groupe pour participer.")
+                 return redirect(f'/forum/?group_id={active_group.id}')
+            
+            if is_banned:
+                messages.error(request, "Vous êtes banni de ce groupe.")
+                return redirect(f'/forum/?group_id={active_group.id}')
+
             content = request.POST.get('content')
             parent_id = request.POST.get('parent_id')
             parent_message = None
@@ -96,12 +182,10 @@ def forum_home(request):
                     
             return redirect(f'/forum/?group_id={active_group.id}')
 
-    # 4. Fetch Active Stories & Group by Group
+    # 5. Fetch Active Stories & Group by Group
     now = timezone.now()
-    # Only get stories that have a group, since we are moving to group-centric
     active_stories_qs = Story.objects.filter(expires_at__gt=now, group__isnull=False).select_related('group').order_by('-created_at')
     
-    # Group by Group to show unique bubbles (deduplication)
     seen_groups = set()
     story_groups = []
     for story in active_stories_qs:
@@ -109,7 +193,7 @@ def forum_home(request):
             story_groups.append(story.group)
             seen_groups.add(story.group.id)
 
-    # 5. Determine Active Mode (Priority: Story > Group > Event > Default)
+    # 6. Determine Active Mode
     active_mode = 'default'
     active_story_group = None
     active_event = None
@@ -120,7 +204,6 @@ def forum_home(request):
     if story_group_id:
         active_mode = 'story'
         active_story_group = get_object_or_404(Group, id=story_group_id)
-        # Filter stories for this specific group
         active_group_stories = Story.objects.filter(group=active_story_group, expires_at__gt=now).order_by('created_at')
     elif active_group:
         active_mode = 'chat'
@@ -129,10 +212,14 @@ def forum_home(request):
         active_event = get_object_or_404(Event, id=event_id)
 
     context = {
-        'groups': groups,
+        'my_groups': my_groups,
+        'other_groups': other_groups,
+        'active_tab': active_tab, 
         'events': events,
         'active_group': active_group,
-        'messages': messages,
+        'messages': messages_list,
+        'is_member': is_member,
+        'is_banned': is_banned,
         'story_groups': story_groups,
         'active_mode': active_mode,
         'active_story_group': active_story_group,

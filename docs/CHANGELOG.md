@@ -11,6 +11,36 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Phase 2.5.3: Système de Badges (Achievements)
 - Phase 2.5.4: Système de Création de Groupes
 
+## [1.9.0] - 2026-02-17 ([Phase 2.4.1 - Profile & UX Polish])
+
+### Added Profile Features
+
+- **Otaku Card** :
+  - Nouvelle carte utilisateur "style carte de crédit" avec flip animation sur le profil.
+  - Basculer entre la bannière classique et la carte via un bouton dédié.
+- **Domaine Animation** :
+  - Remplacement de l'animation de livre par défaut par une **Île Flottante**.
+  - Animation CSS pure : Vagues rotatives (3 couches), île de terre et icône Torii (Statique).
+- **Navigation Mobile & UX** :
+  - **Grille Mobile** : Correction de la navbar (1x4) pour éviter le dépassement.
+  - **Horizontal Scroll** : Panneaux "Amis" et "Badges" défilables horizontalement sur mobile avec snap-to-center.
+  - **Inline Display** : Réorganisation des blocs latéraux (Amis/Badges) en mode horizontal sous le héros pour mobile.
+
+### Changed Edit Profile
+
+- **Redesign Complet** :
+  - Suppression de la colonne "Aperçu" inutile pour centrer le formulaire.
+  - Harmonisation des inputs et labels avec le Design System.
+- **Light Mode Fixes** :
+  - Correction critique : Textes blancs sur fond blanc (Labels, Placeholders) forcés en **Midnight Blue**.
+  - Boutons d'action centrés sur mobile.
+
+### Fixed General
+
+- **Clean Up** : Suppression de la barre de recherche "Rechercher un manga" et du bloc "Compléter mon profil" une fois terminé.
+- **Scrollbars** : Masquage des scrollbars disgracieuses dans la section Domaine et Listes.
+- **Global Spacing** : Réduction des gaps excessifs sur mobile.
+
 ## [1.8.0] - 2026-02-10 ([Phase 3.2 - Notifications & Admin UI Polish])
 
 ### Added Notifications

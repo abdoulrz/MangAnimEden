@@ -18,8 +18,10 @@ urlpatterns = [
     # Social Discovery (Phase 2.5.2.1)
     path('users/search/', views.user_search_view, name='user_search'),
     
-    # Group Management (Phase 2.5.4 & 2.5.5)
+    # Group Management (Phase 2.5.4 & 2.5.5 + 2.4.3)
     path('groups/create/', views.create_group, name='create_group'),
+    path('groups/<int:group_id>/join/', views.join_group, name='join_group'),
+    path('groups/<int:group_id>/leave/', views.leave_group, name='leave_group'),
     path('groups/<int:group_id>/ban/<int:user_id>/', views.ban_user, name='ban_user'),
 
     # Notifications (Phase 3.2)

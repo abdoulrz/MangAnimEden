@@ -1,0 +1,17 @@
+﻿python : INFO 2026-02-12 16:18:56,713 services 18984 
+14208 Successfully processed Ring - Chapitre 9.0. Total 
+pages: 13
+En línea: 1 Carácter: 1
++ python -c "import os; 
+os.environ['DJANGO_SETTINGS_MODULE']='config.se ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INF    O 
+2026-02-12...Total pages: 13:String) [], R    
+emoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+File exists: True
+Processing Ring - Chapitre 9.0 (.cbz)...
+Processing Ring - Chapitre 9.0 (.cbz)...
+SUCCESS: Ring - Chapitre 9.0 296 9.0

@@ -53,8 +53,8 @@
                     <div class="form-group">
                         <label class="form-label">Photo de profil</label>
                         <div class="edit-upload-group">
-                            <div class="edit-current-avatar" id="current-avatar-preview">
-                                {{ user.username|make_list|first|upper }}
+                            <div class="edit-current-avatar" id="current-avatar-preview" {% if user.avatar %}style="background-image: url('{{ user.avatar.url }}'); background-size: cover; background-position: center;" {% endif %}>
+                                {% if not user.avatar %}{{ user.username|make_list|first|upper }}{% endif %}
                             </div>
                             <!-- Styled file input -->
                             <div class="edit-upload-wrapper">
@@ -80,53 +80,7 @@
                     </div>
                 </div>
 
-                <!-- Roles -->
-                <div class="edit-card">
-                    <div class="edit-section-title">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                            stroke="url(#gradient-icon)" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round">
-                            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                            <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                        </svg>
-                        <span>Vos rôles</span>
-                    </div>
-                    <p class="edit-section-subtitle">Sélectionnez vos activités sur MangAnimEDen</p>
 
-                    <div class="roles-grid">
-                        <label class="role-checkbox-card">
-                            {{ form.role_reader }}
-                            <div class="role-info">
-                                <h4>Lecteur</h4>
-                                <p>Vous lisez des mangas</p>
-                            </div>
-                        </label>
-
-                        <label class="role-checkbox-card">
-                            {{ form.role_translator }}
-                            <div class="role-info">
-                                <h4>Traducteur</h4>
-                                <p>Vous traduisez des mangas</p>
-                            </div>
-                        </label>
-
-                        <label class="role-checkbox-card">
-                            {{ form.role_editor }}
-                            <div class="role-info">
-                                <h4>Éditeur</h4>
-                                <p>Vous éditez du contenu</p>
-                            </div>
-                        </label>
-
-                        <label class="role-checkbox-card">
-                            {{ form.role_author }}
-                            <div class="role-info">
-                                <h4>Auteur</h4>
-                                <p>Vous créez du contenu</p>
-                            </div>
-                        </label>
-                    </div>
-                </div>
 
                 <!-- Socials -->
                 <div class="edit-card">
@@ -246,16 +200,7 @@
 
             </div>
 
-            <!-- Right Column: Preview -->
-            <div class="edit-preview-column">
-                <div class="preview-card-sticky">
-                    <div class="preview-title">Aperçu</div>
-                    <div class="preview-avatar" id="sticky-avatar-preview">
-                        {{ user.username|make_list|first|upper }}
-                    </div>
-                    <div class="preview-name">{{ user.nickname|default:user.email }}</div>
-                </div>
-            </div>
+
 
         </div>
     </form>

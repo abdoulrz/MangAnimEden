@@ -3,32 +3,439 @@
  * Styles pour le lecteur de manga
  */
 
+:root {
+    --reader-bg: #1a1a1a;
+    --reader-text: #e0e0e0;
+    --accent-color: #a78bfa;
+}
+
 .reader-container {
     min-height: 100vh;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: var(--space-lg);
     background: var(--color-bg-primary);
+    position: relative;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
 }
 
-.reader-page {
+/* --- READING MODES --- */
+
+/* Vertical / Webtoon Mode */
+.reader-container.mode-vertical .reader-page {
+    margin-bottom: var(--space-md);
+    width: 100%;
     max-width: 100%;
     height: auto;
-    margin-bottom: var(--space-md);
-    border-radius: var(--radius-md);
+    display: block;
+    object-fit: contain;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.reader-container.mode-webtoon .reader-page {
+    margin-bottom: 0;
+    border-radius: 0;
+    max-width: 800px;
+    width: 100%;
+    /* Force Full Width */
+    height: auto;
+    display: block;
+    object-fit: contain;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.reader-container.gapless .reader-page {
+    margin-bottom: 0;
+    border-radius: 0;
+}
+
+/* Paged Mode (Horizontal) */
+.reader-container.mode-paged {
+    height: 100vh;
+    padding: 0;
+    justify-content: center;
+    /* Center vertically */
+    align-items: center;
+    /* Center horizontally */
+    overflow: hidden;
+    background: #000;
+}
+
+.reader-container.mode-paged .reader-page {
+    width: auto;
+    height: auto;
+    max-height: 100vh;
+    max-width: 100%;
+    object-fit: contain;
+    display: none;
+    /* Hidden by default, JS shows active */
+    margin: auto;
+}
+
+.reader-container.mode-paged .reader-page.active {
+    display: block;
+}
+
+.reader-container.mode-paged .chapter-nav,
+.reader-container.mode-paged .reader-info,
+.reader-container.mode-paged .reader-empty {
+    display: none;
+    /* Hide standard elements in paged mode */
+}
+
+/* --- UI ELEMENTS --- */
+
+.reader-page {
     box-shadow: var(--shadow-lg);
+    border-radius: 4px;
+    /* Slight radius by default */
 }
 
 .reader-page.lazy {
     opacity: 0;
-    transition: opacity var(--transition-slow);
+    transition: opacity 0.3s ease;
 }
 
 .reader-page.loaded {
     opacity: 1;
 }
 
+/* Floating Controls Layer */
+.reader-controls-layer {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1100;
+}
+
+.settings-btn {
+    background: rgba(30, 30, 30, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--accent-color);
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.settings-btn:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: rotate(45deg);
+}
+
+/* Settings Menu */
+.settings-menu {
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 280px;
+    background: rgba(25, 25, 35, 0.95);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    transform-origin: top right;
+    animation: scaleIn 0.2s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.settings-menu.hidden {
+    display: none;
+}
+
+.settings-menu h3 {
+    font-size: 1rem;
+    margin-bottom: 12px;
+    color: #fff;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.setting-group {
+    margin-bottom: 16px;
+}
+
+.setting-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-bottom: 8px;
+}
+
+.mode-toggles {
+    display: flex;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 6px;
+    padding: 4px;
+}
+
+.mode-btn,
+.dir-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: #888;
+    padding: 6px 10px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.mode-btn.active,
+.dir-btn.active {
+    background: var(--accent-color);
+    color: white;
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Action Buttons (Subtle) */
+.action-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #bbb !important;
+    padding: 8px;
+    font-size: 0.8rem;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    text-decoration: none;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-btn:hover {
+    border-color: var(--accent-color);
+    color: white !important;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    color: #ddd !important;
+}
+
+/* Click Zones */
+/* Visible Prev/Next Buttons (Global) */
+.click-zone {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    bottom: auto;
+    width: 60px;
+    height: 60px;
+    z-index: 50;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(30, 30, 30, 0.6);
+    border-radius: 50%;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.click-zone svg {
+    display: block;
+    width: 32px;
+    height: 32px;
+}
+
+.click-zone:hover {
+    background: var(--accent-color);
+    color: white;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 0 15px rgba(167, 139, 250, 0.5);
+}
+
+.click-zone.left {
+    left: 20px;
+}
+
+.click-zone.right {
+    right: 20px;
+}
+
+.click-zone.hidden {
+    display: none;
+}
+
+/* DESKTOP FIX: Visible Buttons instead of huge click zones */
+@media (min-width: 769px) {
+    .click-zone {
+        top: 50%;
+        transform: translateY(-50%);
+        bottom: auto;
+        width: 60px;
+        height: 60px;
+        background: rgba(30, 30, 30, 0.6);
+        border-radius: 50%;
+        backdrop-filter: blur(4px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        transition: all 0.2s ease;
+    }
+
+    .click-zone.left {
+        left: 20px;
+    }
+
+    .click-zone.right {
+        right: 20px;
+    }
+
+    .click-zone:hover {
+        background: var(--accent-color);
+        color: white;
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 0 15px rgba(167, 139, 250, 0.5);
+    }
+
+    /* Show icons on Desktop */
+    .click-zone svg {
+        display: block;
+        width: 32px;
+        height: 32px;
+    }
+}
+
+/* Scroll To Top Button (Mobile Optimized) */
+.scroll-top-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    background: var(--color-bg-primary, #1a202c);
+    color: var(--color-purple-primary, #a78bfa);
+    border: none;
+    border-radius: 50%;
+
+    /* Stronger shadow for visibility */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+
+    opacity: 0;
+    transform: translateY(20px);
+    pointer-events: none;
+    transition: all 0.3s ease;
+}
+
+.scroll-top-btn svg {
+    stroke-width: 3px;
+    width: 24px;
+    height: 24px;
+}
+
+/* Media Query for Mobile */
+@media (max-width: 768px) {
+    .reader-container {
+        padding: 0;
+        /* Full width on mobile */
+    }
+
+    /* Force visible buttons on mobile Paged Mode */
+    .click-zone {
+        width: 48px !important;
+        height: 48px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        bottom: auto !important;
+        opacity: 1 !important;
+        z-index: 1000 !important;
+        background: rgba(40, 40, 45, 0.9) !important;
+        border: 1px solid rgba(255, 255, 255, 0.3) !important;
+        display: flex;
+        /* Removed !important to allow .hidden to work */
+    }
+
+    .click-zone svg {
+        width: 28px !important;
+        height: 28px !important;
+        display: block !important;
+    }
+
+    .click-zone.left {
+        left: 12px !important;
+        right: auto !important;
+    }
+
+    .click-zone.right {
+        right: 12px !important;
+        left: auto !important;
+    }
+
+    /* Smaller scroll button on mobile */
+    .scroll-top-btn {
+        width: 45px;
+        height: 45px;
+        bottom: 20px;
+        right: 20px;
+    }
+
+    .scroll-top-btn svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .reader-controls-layer {
+        top: auto;
+        bottom: 120px;
+        /* Moved up to verify change */
+        right: 20px;
+    }
+
+    .settings-btn {
+        width: 38px;
+        height: 38px;
+    }
+}
+
+/* Animations */
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Hide scrollbar in Paged mode to prevent layout shift */
+.mode-paged::-webkit-scrollbar {
+    display: none;
+}
+
+/* Original styles below (kept for fallback compatibility) */
 .reader-info {
     text-align: center;
     margin-bottom: var(--space-lg);
@@ -54,187 +461,6 @@
     border: 1px solid var(--color-border);
 }
 
-.reader-empty-icon {
-    font-size: 4rem;
-    margin-bottom: var(--space-lg);
-    opacity: 0.5;
-}
-
-.reader-empty-title {
-    font-size: var(--font-size-xl);
-    font-weight: var(--font-weight-semibold);
-    margin-bottom: var(--space-md);
-    color: var(--color-text-primary);
-}
-
-.reader-empty-text {
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-sm);
-}
-
-.reader-empty-link {
-    color: var(--color-purple-primary);
-    font-weight: var(--font-weight-medium);
-}
-
-.reader-empty-steps {
-    margin-top: var(--space-xl);
-    padding-top: var(--space-xl);
-    border-top: 1px solid var(--color-border);
-    text-align: left;
-    max-width: 500px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.reader-empty-steps h3 {
-    font-size: var(--font-size-lg);
-    margin-bottom: var(--space-md);
-    color: var(--color-text-primary);
-}
-
-.reader-empty-steps ol {
-    color: var(--color-text-secondary);
-    padding-left: var(--space-lg);
-}
-
-.reader-empty-steps li {
-    margin-bottom: var(--space-sm);
-    line-height: 1.6;
-}
-
-.reader-empty-steps code {
-    background: var(--color-bg-primary);
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-    font-family: 'Courier New', monospace;
-    font-size: 0.9em;
-    color: var(--color-purple-primary);
-}
-
-/* Scroll To Top Button */
-.scroll-top-btn {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    width: 60px;
-    height: 60px;
-    background: #1a202c;
-    /* Fallback dark */
-    background: var(--color-bg-primary, #1a202c);
-    color: #a78bfa;
-    /* Fallback purple */
-    color: var(--color-purple-primary, #a78bfa);
-    border: none;
-    border-radius: 50%;
-
-    /* Neumorphism Shadow (Dark Theme optimized) */
-    box-shadow:
-        5px 5px 15px rgba(0, 0, 0, 0.4),
-        -5px -5px 15px rgba(255, 255, 255, 0.05);
-
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-
-    /* Initial State handled by JS, but set hidden here to avoid flash */
-    opacity: 0;
-    transform: translateY(20px);
-    pointer-events: none;
-}
-
-.scroll-top-btn:hover {
-    color: #fff;
-    box-shadow:
-        inset 5px 5px 10px rgba(0, 0, 0, 0.3),
-        inset -5px -5px 10px rgba(255, 255, 255, 0.05);
-}
-
-.scroll-top-btn svg {
-    stroke-width: 3px;
-    width: 24px;
-    height: 24px;
-}
-/* Chapter List - Neumorphic Style */
-.chapters-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 15px;
-    padding: 10px;
-}
-
-.chapter-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 15px;
-    background: linear-gradient(145deg, #1c222f, #151a23);
-    border-radius: 12px;
-    box-shadow: 
-        5px 5px 10px rgba(0,0,0,0.2),
-        -5px -5px 10px rgba(255,255,255,0.03);
-    color: #cecfd1;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border: 1px solid rgba(255,255,255,0.02);
-}
-
-.chapter-item:hover {
-    transform: translateY(-2px);
-    box-shadow: 
-        6px 6px 12px rgba(0,0,0,0.3),
-        -6px -6px 12px rgba(255,255,255,0.05);
-    color: var(--color-purple-primary);
-    border-color: rgba(167, 139, 250, 0.1);
-}
-
-.chapter-info {
-    display: flex;
-    flex-direction: column;
-}
-
-.chapter-number {
-    font-weight: 600;
-    font-size: 0.95rem;
-    color: #e2e8f0;
-}
-
-.chapter-name {
-    font-size: 0.8rem;
-    color: #94a3b8;
-    margin-top: 2px;
-}
-
-.chapter-date {
-    font-size: 0.75rem;
-    color: #64748b;
-    white-space: nowrap;
-    margin-left: 10px;
-}
-
-
-/* PDF Viewer Styles */
-#pdf-render-container {
-    width: 100%;
-    max-width: 1000px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: #525659;
-    /* Standard PDF viewer bg color */
-    padding: 20px;
-    min-height: 80vh;
-}
-
-canvas.pdf-page {
-    margin-bottom: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Chapter Navigation Styles */
 .chapter-nav {
     display: flex;
     justify-content: space-between;
@@ -246,7 +472,7 @@ canvas.pdf-page {
 
 .nav-btn {
     padding: 10px 20px;
-    background: var(--color-purple-primary, #6b46c1);
+    background: var(--color-purple-primary);
     color: white;
     border-radius: 8px;
     text-decoration: none;
@@ -259,8 +485,30 @@ canvas.pdf-page {
     background: gray;
 }
 
-/* Back Button Container */
-.reader-back-container {
-    margin-top: 15px;
-}
+/* Force Settings Menu Visible & Centered on Mobile */
+@media (max-width: 768px) {
+    .settings-menu {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 320px;
+        background: rgba(25, 25, 35, 0.95);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        z-index: 2000;
+        border-radius: 12px;
+        padding: 20px;
+    }
 
+    /* Ensure toggles are big enough */
+    .mode-btn,
+    .dir-btn {
+        padding: 12px;
+        font-size: 14px;
+    }
+}

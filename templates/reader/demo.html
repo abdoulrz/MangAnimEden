@@ -85,100 +85,93 @@
 </div>
 
 <!-- Scroll To Top Button -->
-<button id="scrollTopBtn" class="scroll-top-btn" title="Retour en haut">
-    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="m18 15-6-6-6 6" />
-    </svg>
-</button>
 
-<div id="reader-data" class="hidden" data-total="{{ page.chapter.pages.count|default:'1' }}"></div>
+
+
+<!-- Reader Controls & Settings -->
+<div class="reader-controls-layer">
+    <!-- Gear Icon -->
+    <button id="settingsBtn" class="settings-btn" title="Paramètres de lecture">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+            </path>
+        </svg>
+    </button>
+
+    <!-- Settings Modal/Menu -->
+    <div id="settingsMenu" class="settings-menu hidden">
+        <h3>Paramètres de lecture</h3>
+
+        <div class="setting-group">
+            <label>Mode de lecture</label>
+            <div class="mode-toggles">
+                <button class="mode-btn active" data-mode="vertical">Vertical</button>
+                <button class="mode-btn" data-mode="webtoon">Webtoon</button>
+                <button class="mode-btn" data-mode="paged">Par Page</button>
+            </div>
+        </div>
+
+        <div class="setting-group paged-only hidden">
+            <label>Direction</label>
+            <div class="mode-toggles">
+                <button class="dir-btn active" data-dir="ltr">De G. à D.</button>
+                <button class="dir-btn" data-dir="rtl">De D. à G. (Manga)</button>
+            </div>
+        </div>
+
+        <div class="setting-group vertical-only">
+            <label class="checkbox-label">
+                <input type="checkbox" id="gaplessToggle">
+                Lecture sans espace (Gapless)
+            </label>
+        </div>
+
+        <div class="setting-group action-group">
+            <label>Actions</label>
+            <div class="mode-toggles">
+                <button class="action-btn"
+                    onclick="window.scrollTo({top: 0, behavior: 'smooth'}); document.getElementById('settingsMenu').classList.add('hidden');">
+                    <i class="fas fa-arrow-up"></i> Haut
+                </button>
+                <a href="{% url 'catalog:detail' chapter.series.id %}" class="action-btn">
+                    <i class="fas fa-info-circle"></i> Fiche
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Click Zones for Paged Mode -->
+<div id="clickZoneLeft" class="click-zone left hidden" title="Précédent">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
+</div>
+<div id="clickZoneRight" class="click-zone right hidden" title="Suivant">
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+</div>
+
+<div id="reader-data" class="hidden" data-total="{{ chapter.pages.count|default:'1' }}" data-mode="vertical"></div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    // Global Scroll To Top Logic
-    const scrollTopBtn = document.getElementById('scrollTopBtn');
 
-    if (scrollTopBtn) {
-        let isVisible = false;
-
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                if (!isVisible) {
-                    isVisible = true;
-                    scrollTopBtn.style.pointerEvents = 'auto';
-                    scrollTopBtn.animate([
-                        { opacity: 0, transform: 'translateY(20px)' },
-                        { opacity: 1, transform: 'translateY(0)' }
-                    ], {
-                        duration: 300,
-                        easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                        fill: 'forwards'
-                    });
-                }
-            } else {
-                if (isVisible) {
-                    isVisible = false;
-                    scrollTopBtn.style.pointerEvents = 'none';
-                    scrollTopBtn.animate([
-                        { opacity: 1, transform: 'translateY(0)' },
-                        { opacity: 0, transform: 'translateY(20px)' }
-                    ], {
-                        duration: 300,
-                        easing: 'ease-in',
-                        fill: 'forwards'
-                    });
-                }
-            }
-        });
-
-        scrollTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-
-            // Optional: Bounce animation on click
-            scrollTopBtn.animate([
-                { transform: 'translateY(0)' },
-                { transform: 'translateY(-10px)' },
-                { transform: 'translateY(0)' }
-            ], {
-                duration: 300,
-                easing: 'ease-out'
-            });
-        });
-
-        // Hover animation using JS (optional, but requested)
-        scrollTopBtn.addEventListener('mouseenter', () => {
-            scrollTopBtn.animate([
-                { transform: 'translateY(0)' },
-                { transform: 'translateY(-3px)' }
-            ], {
-                duration: 200,
-                fill: 'forwards',
-                easing: 'ease-out'
-            });
-        });
-
-        scrollTopBtn.addEventListener('mouseleave', () => {
-            scrollTopBtn.animate([
-                { transform: 'translateY(-3px)' },
-                { transform: 'translateY(0)' }
-            ], {
-                duration: 200,
-                fill: 'forwards',
-                easing: 'ease-out'
-            });
-        });
-    }
 </script>
 {% if chapter and not chapter.pdf_file %}
 <script src="{% static 'js/reader.js' %}?v={{ STATIC_VERSION }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        MangaReader.init();
+        const readerData = document.getElementById('reader-data');
+        const totalPages = readerData ? readerData.dataset.total : 1;
+        MangaReader.init(totalPages);
     });
 </script>
 {% endif %}

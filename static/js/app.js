@@ -9,29 +9,31 @@
 // ==========================================================================
 const REGIONAL_WISDOM = {
     'JP': [ // Japan (Manga/Anime)
-        { quote: "Penser que tu ne vaux rien est la pire chose que tu puisses faire.", author: "Nobita Nobi", source: "Doraemon" },
         { quote: "Si tu ne prends pas de risques, tu ne pourras jamais créer ton avenir.", author: "Monkey D. Luffy", source: "One Piece" },
-        { quote: "Un raté peut battre un génie par un travail acharné.", author: "Rock Lee", source: "Naruto" },
-        { quote: "La peur n'est pas mauvaise. Elle te dit quelle est ta faiblesse. Et une fois que tu connais ta faiblesse, tu peux devenir plus fort et plus gentil.", author: "Gildarts Clive", source: "Fairy Tail" },
+        { quote: "Je ne reviens jamais sur ma parole, c'est ça mon nindô !", author: "Naruto Uzumaki", source: "Naruto" },
+        { quote: "Si tu gagnes, tu vis. Si tu perds, tu meurs. Si tu ne te bats pas, tu ne peux pas gagner !", author: "Eren Jaeger", source: "L'Attaque des Titans" },
+        { quote: "Les gens ne cessent de mourir. C'est pour ça que je veux au moins qu'ils aient une mort correcte.", author: "Yuji Itadori", source: "Jujutsu Kaisen" },
         { quote: "Le monde n'est pas parfait. Mais il est là pour nous, faisant de son mieux... c'est ce qui le rend si beau.", author: "Roy Mustang", source: "Fullmetal Alchemist" },
-        { quote: "Si tu as le temps de penser à une belle fin, alors vis magnifiquement jusqu'à la fin.", author: "Sakata Gintoki", source: "Gintama" }
+        { quote: "Tu ne peux pas changer le monde sans te salir les mains.", author: "Lelouch Lamperouge", source: "Code Geass" },
+        { quote: "Un grand pouvoir implique de grandes responsabilités... Attends, mauvais univers.", author: "Sakata Gintoki", source: "Gintama" }
     ],
     'KR': [ // Korea (Manhwa)
-        { quote: "Le pouvoir ne vient pas de la volonté de frapper, mais de la volonté de protéger.", author: "Goomoonryong", source: "The Breaker" },
-        { quote: "Si je ne change pas, le monde ne changera pas.", author: "Jin Woo", source: "Solo Leveling" },
+        { quote: "Les faibles n'ont pas le droit de choisir leur façon de mourir.", author: "Trafalgar Law (Invité)", source: "Réf. Culturelle" },
+        { quote: "Je ne protège pas le monde. Je protège les gens qui sont à ma portée.", author: "Sung Jin-Woo", source: "Solo Leveling" },
         { quote: "Il n'y a pas de repas gratuit. Si tu veux quelque chose, tu dois en payer le prix.", author: "Khun Aguero Agnis", source: "Tower of God" },
-        { quote: "Un monstre ne naît pas, il est créé.", author: "Desir Arman", source: "A Returner's Magic Should Be Special" },
-        { quote: "Ne fais confiance à personne, pas même à toi-même.", author: "Bam", source: "Tower of God" }
+        { quote: "La vie est injuste, c'est pourquoi elle est amusante.", author: "Desir Arman", source: "A Returner's Magic Should Be Special" },
+        { quote: "Même si le ciel s'effondre, il y aura toujours un trou pour s'échapper.", author: "Proverbe Coréen", source: "Sagesse Manhwa" }
     ],
     'CN': [ // China (Manhua/Donghua)
-        { quote: "Il n'y a pas de chemin vers les cieux, alors je marcherai sur le chemin des démons.", author: "Wei Wuxian", source: "Mo Dao Zu Shi" },
-        { quote: "Dans ce monde, la force est respectée. Le raisonnement valable n'est que pour les forts.", author: "Proverbe Wuxia", source: "Martial World" },
-        { quote: "Si les cieux veulent m'écraser, je briserai les cieux !", author: "Meng Hao", source: "I Shall Seal the Heavens" },
-        { quote: "La patience est une lame qui garde le cœur.", author: "Inconnu", source: "Sagesse Ancienne" }
+        { quote: "Qui se soucie de la voie royale glorieuse ? Je préfère traverser la passerelle de bois jusqu'à ce qu'il fasse sombre.", author: "Wei Wuxian", source: "Mo Dao Zu Shi" },
+        { quote: "Si je deviens un Bouddha, il n'y a pas de démons. Si je deviens un démon, il n'y a pas de Bouddha !", author: "Sun Wukong", source: "La Légende du Roi Singe" },
+        { quote: "Dans ce monde, la force est la seule vérité.", author: "Fang Yuan", source: "Reverend Insanity" },
+        { quote: "Trente ans à l'est du fleuve, trente ans à l'ouest... Ne jamais intimider un jeune homme pauvre !", author: "Xiao Yan", source: "Battle Through the Heavens" }
     ],
     'GLOBAL': [ // Western/General or Fallback
         { quote: "Un grand pouvoir implique de grandes responsabilités.", author: "Oncle Ben", source: "Spider-Man" },
-        { quote: "Quoi qu'il arrive, cela arrive.", author: "Spike Spiegel", source: "Cowboy Bebop" }
+        { quote: "Quoi qu'il arrive, cela arrive.", author: "Spike Spiegel", source: "Cowboy Bebop" },
+        { quote: "La seule chose dont nous devons avoir peur, c'est de la peur elle-même.", author: "Franklin D. Roosevelt", source: "Histoire" }
     ]
 };
 
@@ -90,14 +92,24 @@ document.addEventListener('DOMContentLoaded', () => {
             e.stopPropagation();
             navbarMenu.classList.toggle('active');
 
-            // Toggle Icon
-            const icon = mobileMenuToggle.querySelector('i');
-            if (icon) {
-                if (navbarMenu.classList.contains('active')) {
-                    icon.classList.replace('fa-bars', 'fa-times');
-                } else {
-                    icon.classList.replace('fa-times', 'fa-bars');
-                }
+            // Toggle Icon SVG
+            if (navbarMenu.classList.contains('active')) {
+                // Switch to X icon
+                mobileMenuToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                `;
+            } else {
+                // Switch back to Bars icon
+                mobileMenuToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                `;
             }
         });
 
@@ -105,8 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('click', (e) => {
             if (navbarMenu.classList.contains('active') && !navbarMenu.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
                 navbarMenu.classList.remove('active');
-                const icon = mobileMenuToggle.querySelector('i');
-                if (icon) icon.classList.replace('fa-times', 'fa-bars');
+                // Reset to Bars icon
+                mobileMenuToggle.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                `;
             }
         });
     }

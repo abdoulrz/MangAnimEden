@@ -84,10 +84,20 @@
                 </a>
                 {% endif %}
             </h2>
+
+            <!-- Tabs Navigation -->
+            <div class="sidebar-tabs">
+                <a href="?tab=my_groups" class="sidebar-tab {% if active_tab == 'my_groups' %}active{% endif %}">Mes
+                    Groupes</a>
+                <a href="?tab=discover"
+                    class="sidebar-tab {% if active_tab == 'discover' %}active{% endif %}">Découvrir</a>
+            </div>
+
             <div class="glass-panel sidebar-content">
                 <div class="groups-list">
-                    {% for group in groups %}
-                    <a href="?group_id={{ group.id }}"
+                    {% if active_tab == 'my_groups' %}
+                    {% for group in my_groups %}
+                    <a href="?group_id={{ group.id }}&tab=my_groups"
                         class="group-card {% if active_group.id == group.id %}active{% endif %}">
                         <div class="group-icon">
                             {% if group.icon %}
@@ -102,8 +112,31 @@
                         </div>
                     </a>
                     {% empty %}
-                    <p class="no-data">Aucun groupe.</p>
+                    <div class="empty-state-small">
+                        <p class="no-data">Vous n'avez rejoint aucun groupe.</p>
+                        <a href="?tab=discover" class="btn-small-cta">Découvrir</a>
+                    </div>
                     {% endfor %}
+                    {% else %}
+                    {% for group in other_groups %}
+                    <a href="?group_id={{ group.id }}&tab=discover"
+                        class="group-card {% if active_group.id == group.id %}active{% endif %}">
+                        <div class="group-icon">
+                            {% if group.icon %}
+                            <img src="{{ group.icon.url }}" alt="{{ group.name }}">
+                            {% else %}
+                            <span>{{ group.name|slice:":1"|upper }}</span>
+                            {% endif %}
+                        </div>
+                        <div class="group-info">
+                            <span class="group-name">{{ group.name }}</span>
+                            <span class="group-member-count">👁️ Public</span>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <p class="no-data">Aucun nouveau groupe à découvrir.</p>
+                    {% endfor %}
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -115,32 +148,69 @@
             <!-- Chat View -->
             <div class="glass-panel chat-window">
                 <div class="chat-header">
-                    <h3>{{ active_group.name }}</h3>
-                    <p class="group-desc">{{ active_group.description|truncatechars:50 }}</p>
-                    {% if active_group.owner == user %}
-                    <span class="badge bg-primary">Propriétaire</span>
-                    {% endif %}
+                    <div class="chat-header-info">
+                        <h3>{{ active_group.name }}</h3>
+                        <p class="group-desc">{{ active_group.description|truncatechars:50 }}</p>
+                    </div>
+                    <div class="chat-header-actions">
+                        {% if is_member %}
+                        {% if active_group.owner != user %}
+                        <a href="{% url 'social:leave_group' active_group.id %}" class="btn-leave-group"
+                            onclick="return confirm('Voulez-vous vraiment quitter ce groupe ?')">Quitter</a>
+                        {% endif %}
+                        {% else %}
+                        <a href="{% url 'social:join_group' active_group.id %}" class="btn-join-group">Rejoindre</a>
+                        {% endif %}
+
+                        {% if active_group.owner == user %}
+                        <span class="badge bg-primary">Propriétaire</span>
+                        {% endif %}
+                    </div>
                 </div>
 
                 <div class="chat-messages" id="chatMessages">
+
+                    {% if not is_member and not user.is_staff and active_group.owner != user %}
+                    <!-- Blurred Preview / Join Prompt -->
+                    <div class="join-prompt-overlay">
+                        <div class="join-prompt-content">
+                            <div class="lock-icon">🔒</div>
+                            <h3>Groupe Privé</h3>
+                            <p>Rejoignez le groupe <strong>{{ active_group.name }}</strong> pour voir les messages et
+                                discuter avec les membres.</p>
+                            <a href="{% url 'social:join_group' active_group.id %}" class="btn-join-large">Rejoindre le
+                                Groupe</a>
+                        </div>
+                    </div>
+                    {% elif is_banned %}
+                    <!-- Banned UI -->
+                    <div class="banned-overlay">
+                        <div class="banned-content">
+                            <div class="ban-icon">🚫</div>
+                            <h3>Accès Restreint</h3>
+                            <p>Vous avez été banni de ce groupe par le modérateur.</p>
+                            <p class="ban-note">Contactez le propriétaire si vous pensez qu'il s'agit d'une erreur.</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <!-- Normal Chat Messages -->
                     {% for message in messages %}
                     <div class="message {% if message.sender == user %}my-message{% else %}other-message{% endif %}"
                         id="msg-{{ message.id }}">
                         <div class="message-bubble">
                             <div class="message-info">
-                                <a href="{% url 'users:public_profile' message.sender.id %}" class="sender-name" style="color: inherit; text-decoration: none; transition: opacity 0.3s;">{{
-                                    message.sender.nickname }}</a>
+                                <a href="{% url 'users:public_profile' message.sender.id %}" class="sender-name"style="color: inherit; text-decoration: none; transition: opacity 0.3s;">{{ message.sender.nickname }}</a>
                                 <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
 
                                 {% if active_group.owner == user and message.sender != user %}
-                                <button class="btn-ban"onclick="banUser({{ active_group.id }}, {{ message.sender.id }}, '{{ message.sender.nickname }}')" title="Bannir ce membre">🚫</button>
+                                <button class="btn-ban"onclick="banUser({{ active_group.id }}, {{ message.sender.id }}, '{{ message.sender.nickname }}')"
+                                    title="Bannir ce membre">🚫</button>
                                 {% endif %}
                             </div>
 
                             {% if message.parent %}
                             <div class="reply-context">
-                                <small>Réponse à <strong>{{ message.parent.sender.nickname }}</strong> : {{
-                                    message.parent.content|truncatechars:30 }}</small>
+                                <small>Réponse à <strong>{{ message.parent.sender.nickname }}</strong> : {{ message.parent.content|truncatechars:30 }}</small>
                             </div>
                             {% endif %}
 
@@ -152,7 +222,7 @@
                                     <i class="{% if user in message.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
                                     <span class="like-count">{{ message.like_count }}</span>
                                 </button>
-                                <button class="action-btn reply-btn"onclick="startReply({{ message.id }}, '{{ message.sender.nickname }}')">
+                                <button type="button" class="action-btn reply-btn"onclick="startReply({{ message.id }}, '{{ message.sender.nickname }}')">
                                     <i class="fas fa-reply"></i>
                                 </button>
                             </div>
@@ -166,8 +236,10 @@
                         <p>Commencez la conversation !</p>
                     </div>
                     {% endfor %}
+                    {% endif %}
                 </div>
 
+                {% if is_member and not is_banned or active_group.owner == user %}
                 <div class="chat-input-area">
                     <!-- Reply Banner (Hidden by default) -->
                     <div id="replyBanner" class="reply-banner" style="display: none;">
@@ -183,6 +255,7 @@
                         <button type="submit" class="send-btn">🚀</button>
                     </form>
                 </div>
+                {% endif %}
             </div>
 
             {% elif active_mode == 'story' %}

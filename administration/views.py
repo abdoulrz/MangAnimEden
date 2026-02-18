@@ -1,3 +1,6 @@
+import logging
+import os
+from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect
 from django.views.generic import TemplateView, ListView, View, CreateView, UpdateView, DeleteView
 from django.db.models import Count, Q
@@ -13,6 +16,7 @@ from social.models import Group  # Import Group model
 from users.models import Badge
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 @method_decorator(requires_admin, name='dispatch')
 class AdminDashboardView(TemplateView):
@@ -151,6 +155,12 @@ class AdminSeriesCreateView(CreateView):
         messages.success(self.request, "Série créée avec succès.")
         return super().form_valid(form)
 
+    def form_invalid(self, form):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            errors = {field: errs.get_json_data() for field, errs in form.errors.items()}
+            return JsonResponse({'error': 'Erreurs de validation', 'errors': errors}, status=400)
+        return super().form_invalid(form)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['active_tab'] = 'series'
@@ -180,6 +190,12 @@ class AdminSeriesUpdateView(UpdateView):
 
         messages.success(self.request, "Série mise à jour avec succès.")
         return super().form_valid(form)
+
+    def form_invalid(self, form):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            errors = {field: errs.get_json_data() for field, errs in form.errors.items()}
+            return JsonResponse({'error': 'Erreurs de validation', 'errors': errors}, status=400)
+        return super().form_invalid(form)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

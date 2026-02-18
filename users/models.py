@@ -104,6 +104,14 @@ class User(AbstractUser):
         
         return role_updated
 
+    @property
+    def is_profile_complete(self):
+        """
+        Vérifie si le profil est considéré comme complet.
+        Critères : Avatar, Bio, Pays et Ville sont remplis.
+        """
+        return bool(self.avatar and self.bio and self.location_country and self.location_city)
+
     # Roles (Activités)
     role_admin = models.BooleanField(default=False, verbose_name="Administrateur")
     role_moderator = models.BooleanField(default=False, verbose_name="Modérateur")

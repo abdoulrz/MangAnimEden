@@ -6,6 +6,7 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/profile.css' %}?v={{ STATIC_VERSION }}">
+<link rel="stylesheet" href="{% static 'css/components/otaku_card.css' %}?v={{ STATIC_VERSION }}">
 {% endblock %}
 
 {% block content %}
@@ -14,6 +15,7 @@
     <!-- Main Content Column -->
     <div class="profile-main-content">
         <!-- Header Notification -->
+        {% if not user.is_profile_complete %}
         <div class="profile-notification">
             <div class="notification-text">
                 <h3>Complétez votre profil</h3>
@@ -21,6 +23,7 @@
             </div>
             <a href="{% url 'users:edit_profile' %}" class="btn btn-primary btn-sm">Compléter</a>
         </div>
+        {% endif %}
 
         <!-- Main Profile Card (Premium Redesign) -->
         <div class="profile-card profile-card-premium">
@@ -92,7 +95,8 @@
                         </div>
                     </div>
 
-                    <a href="{% url 'users:domaine' %}?mode=badges" class="stat-glass-card stat-clickable">
+                    <!-- Badges Card - Toggle (Phase 2.5.4) -->
+                    <div class="stat-glass-card stat-clickable" id="badges-card-toggle">
                         <div class="stat-icon-wrapper icon-pink">
                             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -106,7 +110,7 @@
                             <span class="stat-value">{{ user_badges_count }} / {{ total_badges_count }}</span>
                             <span class="stat-label">Badges</span>
                         </div>
-                    </a>
+                    </div>
 
                     <a href="?mode=overview" class="stat-glass-card stat-clickable">
                         <div class="stat-icon-wrapper icon-blue">
@@ -172,19 +176,134 @@
                     </div>
                 </div>
 
+                <!-- Collapsible Badges Panel (Phase 2.5.4) -->
+                <div id="badges-panel" class="badges-panel badges-panel-hidden">
+                    <div class="friends-panel-header">
+                        <h3>🏆 Mes Badges</h3>
+                        <button id="badges-panel-close" class="panel-close-btn" aria-label="Fermer">✕</button>
+                    </div>
+
+                    <div class="badges-grid-premium">
+                        {% for item in timeline_badges %}
+                        <div class="badge-card-premium {{ item.status }}">
+                            <div class="badge-icon-wrapper-large">
+                                {% if item.badge.icon %}
+                                <img src="{{ item.badge.icon.url }}" alt="{{ item.badge.name }}" class="badge-icon-img">
+                                {% else %}
+                                <div class="badge-icon-placeholder">
+                                    {% if item.status == 'locked' %}🔒{% else %}🏆{% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="badge-info">
+                                <h4>{{ item.badge.name }}</h4>
+                                <p>{{ item.badge.description }}</p>
+
+                                {% if item.status == 'unlocked' %}
+                                <span class="badge-status-pill">Débloqué</span>
+                                {% elif item.status == 'next' %}
+                                <span class="badge-status-pill">Prochain</span>
+                                {% else %}
+                                <span class="badge-status-pill">Verrouillé</span>
+                                {% endif %}
+                            </div>
+
+                            {% if item.obtained_at %}
+                            <div class="badge-date-footer">
+                                Obtenu le {{ item.obtained_at|date:"d M Y" }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% empty %}
+                        <p class="empty-message">Aucun badge disponible.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
             </div>
         </div>
 
+        <!-- Mobile Profile Navigation (Visible only on mobile) -->
+        <div class="mobile-profile-nav glass-panel">
+            <a href="?mode=favoris" class="block-item" id="mobile-nav-favoris">
+                <span class="block-icon">❤️</span>
+                <span class="block-title">Favoris</span>
+            </a>
+            <a href="?mode=scans" class="block-item" id="mobile-nav-scans">
+                <span class="block-icon">📚</span>
+                <span class="block-title">Scans</span>
+            </a>
+            <a href="?mode=stats" class="block-item" id="mobile-nav-stats">
+                <span class="block-icon">📊</span>
+                <span class="block-title">Stats</span>
+            </a>
+            <a href="?mode=history" class="block-item" id="mobile-nav-history">
+                <span class="block-icon">🕰️</span>
+                <span class="block-title">Historique</span>
+            </a>
+        </div>
+
         <!-- Carte Otaku Banner -->
-        <div class="otaku-card-banner">
+        <div class="otaku-card-banner" id="open-otaku-card">
             <div class="otaku-icon-wrapper">
                 <span class="otaku-icon">💳</span>
             </div>
             <div class="otaku-text">
                 <h3>Carte Otaku</h3>
-                <p>Obtenez des réductions exclusives</p>
+                <p>Votre identité de membre officiel</p>
             </div>
             <div class="otaku-arrow">›</div>
+        </div>
+
+        <!-- OTAKU CARD OVERLAY -->
+        <div class="otaku-card-overlay" id="otaku-card-overlay">
+            <div class="otaku-card-container">
+                <div class="otaku-id-card">
+                    <button class="close-card-btn" id="close-otaku-card">&times;</button>
+
+                    <div class="card-header">
+                        <div class="card-logo">
+                            <span>⛩️</span> MangAnimEDen
+                        </div>
+                        <div class="card-rank">
+                            {% if user.is_superuser %}Admin{% elif user.is_staff %}Staff{% else %}Membre{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-avatar">
+                            {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="{{ user.nickname }}">
+                            {% else %}
+                            <div class="card-placeholder">{{ user.nickname|first|upper }}</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="card-info">
+                            <div class="card-row">
+                                <span class="card-label">PSEUDONYME</span>
+                                <span class="card-value highlight">{{ user.nickname }}</span>
+                            </div>
+
+                            <div class="card-row">
+                                <span class="card-label">NIVEAU</span>
+                                <span class="card-value">LVL {{ user.level }}</span>
+                            </div>
+
+                            <div class="card-row">
+                                <span class="card-label">MEMBRE DEPUIS</span>
+                                <span class="card-value">{{ user.date_joined|date:"d/m/Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="card-id">ID: {{ user.id|stringformat:"08d" }}</div>
+                        <div class="card-chip"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Dynamic Domaine Content (Replacing Quick Access) -->
@@ -197,11 +316,7 @@
                 <!-- Reusing a simpler quick access if needed, or just intro -->
                 <div class="profile-welcome-panel profile-welcome-flex">
 
-                    <div class="book-animation profile-book-animation">
-                        <div class="book-cover"></div>
-                        <div class="book-page"></div>
-                        <div class="book-page"></div>
-                    </div>
+                    <!-- Animation removed as requested -->
 
                     <h3>Bienvenue dans votre Espace</h3>
                     <p class="profile-welcome-text">Sélectionnez une catégorie à droite pour voir vos contenus.
@@ -321,83 +436,35 @@
                 </div>
             </div>
 
-            <!-- Badges Block (Premium Grid) -->
-            <div id="content-badges" class="content-block content-hidden">
-                <h2 class="panel-title">🏆 Mes Badges</h2>
-                <div class="badges-grid-premium">
-                    {% for item in timeline_badges %}
-                    <div class="badge-card-premium {{ item.status }}">
-                        <div class="badge-icon-wrapper-large">
-                            {% if item.badge.icon %}
-                            <img src="{{ item.badge.icon.url }}" alt="{{ item.badge.name }}" class="badge-icon-img">
-                            {% else %}
-                            <div class="badge-icon-placeholder">
-                                {% if item.status == 'locked' %}🔒{% else %}🏆{% endif %}
-                            </div>
-                            {% endif %}
-                        </div>
-
-                        <div class="badge-info">
-                            <h4>{{ item.badge.name }}</h4>
-                            <p>{{ item.badge.description }}</p>
-
-                            {% if item.status == 'unlocked' %}
-                            <span class="badge-status-pill">Débloqué</span>
-                            {% elif item.status == 'next' %}
-                            <span class="badge-status-pill">Prochain</span>
-                            {% else %}
-                            <span class="badge-status-pill">Verrouillé</span>
-                            {% endif %}
-                        </div>
-
-                        {% if item.obtained_at %}
-                        <div class="badge-date-footer">
-                            Obtenu le {{ item.obtained_at|date:"d M Y" }}
-                        </div>
-                        {% endif %}
-                    </div>
-                    {% empty %}
-                    <p class="empty-message">Aucun badge disponible.</p>
-                    {% endfor %}
-                </div>
-            </div>
+            <!-- Badges Content Removed (Moved to Toggle Panel) -->
 
         </div>
 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
-                const sidebarLinks = document.querySelectorAll('.profile-sidebar .block-item');
+                // Select both sidebar and mobile nav items
+                const sidebarLinks = document.querySelectorAll('.profile-sidebar .block-item, .mobile-profile-nav .block-item');
                 const contentBlocks = document.querySelectorAll('.content-block');
                 const contentArea = document.getElementById('domaine-content-area');
-                const badgesCard = document.querySelector('a[href*="mode=badges"]'); // Select the Glass Card
+                // badgesCard selector removed
 
                 // Function to switch content mode
                 function switchToMode(mode) {
                     if (!mode) return;
-
-                    // 1. HIDE ALL BLOCKS
                     contentBlocks.forEach(block => {
                         block.style.display = 'none';
                         block.classList.add('content-hidden');
                     });
-
-                    // 2. RESET ACTIVE STATE ON SIDEBAR
                     sidebarLinks.forEach(l => l.classList.remove('active'));
-
-                    // 3. SHOW TARGET BLOCK
                     const targetBlock = document.getElementById('content-' + mode);
                     if (targetBlock) {
                         targetBlock.style.display = 'block';
                         targetBlock.classList.remove('content-hidden');
-
-                        // Update active state in sidebar if matching link exists
                         sidebarLinks.forEach(link => {
                             if (link.href.includes('mode=' + mode)) {
                                 link.classList.add('active');
                             }
                         });
-
-                        // 4. SCROLL TO CONTENT CENTERED
                         if (contentArea) {
                             requestAnimationFrame(() => {
                                 contentArea.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -406,189 +473,153 @@
                     }
                 }
 
-                // Generic Click Handler
-                function handleNavigationClick(e) {
-                    e.preventDefault();
-                    const url = new URL(this.href, window.location.origin);
-                    const mode = url.searchParams.get('mode');
-                    if (mode) {
-                        // Update URL without reload (History API)
-                        window.history.pushState({ mode: mode }, '', url);
-                        switchToMode(mode);
-                    }
-                }
-
-                // Attach to Sidebar Links
+                // Internal Link Handlers
                 sidebarLinks.forEach(link => {
-                    link.addEventListener('click', handleNavigationClick);
+                    link.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const url = new URL(this.href, window.location.origin);
+                        const mode = url.searchParams.get('mode');
+                        if (mode) {
+                            window.history.pushState({ mode: mode }, '', url);
+                            switchToMode(mode);
+                        }
+                    });
                 });
 
-                // Attach to Badges Card if it exists
-                if (badgesCard) {
-                    badgesCard.addEventListener('click', handleNavigationClick);
-                }
+                // Old Badges listener removed
 
-                // Handle Page Load / Back Button
+                // Handle Browser Navigation
                 const urlParams = new URLSearchParams(window.location.search);
                 const initialMode = urlParams.get('mode');
-                if (initialMode) {
-                    switchToMode(initialMode);
-                }
+                if (initialMode) switchToMode(initialMode);
 
-                // Handle Browser Back/Forward buttons
                 window.addEventListener('popstate', function (event) {
                     const mode = event.state ? event.state.mode : (new URLSearchParams(window.location.search).get('mode') || 'overview');
                     switchToMode(mode);
                 });
 
-                // FORCE PROGRESS BAR FIX - Read from data attribute
+                // ========== FRIENDS PANEL (Inside DOMContentLoaded) ==========
+                const friendsCardToggle = document.getElementById('friends-card-toggle');
+                const friendsPanel = document.getElementById('friends-panel');
+                const friendsPanelClose = document.getElementById('friends-panel-close');
+                const friendsListContainer = document.getElementById('friends-list-container');
+
+                if (friendsCardToggle && friendsPanel) {
+                    friendsCardToggle.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const isHidden = friendsPanel.classList.contains('friends-panel-hidden');
+                        if (isHidden) {
+                            friendsPanel.classList.remove('friends-panel-hidden');
+                            loadFriendsList();
+                            friendsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        } else {
+                            friendsPanel.classList.add('friends-panel-hidden');
+                        }
+                    });
+                }
+
+                if (friendsPanelClose) {
+                    friendsPanelClose.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        friendsPanel.classList.add('friends-panel-hidden');
+                    });
+                }
+
+                // ========== BADGES PANEL TOGGLE (Phase 2.5.4) ==========
+                const badgesCardToggle = document.getElementById('badges-card-toggle');
+                const badgesPanel = document.getElementById('badges-panel');
+                const badgesPanelClose = document.getElementById('badges-panel-close');
+
+                if (badgesCardToggle && badgesPanel) {
+                    badgesCardToggle.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const isHidden = badgesPanel.classList.contains('badges-panel-hidden');
+                        if (isHidden) {
+                            badgesPanel.classList.remove('badges-panel-hidden');
+                            badgesPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        } else {
+                            badgesPanel.classList.add('badges-panel-hidden');
+                        }
+                    });
+                }
+
+                if (badgesPanelClose) {
+                    badgesPanelClose.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        badgesPanel.classList.add('badges-panel-hidden');
+                    });
+                }
+
+                function loadFriendsList() {
+                    if (!friendsListContainer) return;
+                    friendsListContainer.innerHTML = '<div class="loading-spinner">Chargement...</div>';
+                    fetch('/forum/friends/list/')
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success && data.friends.length > 0) {
+                                let html = '';
+                                data.friends.forEach(friend => {
+                                    const avatarHtml = friend.avatar
+                                        ? `<img src="${friend.avatar}" alt="${friend.nickname}">`
+                                        : `<div class="avatar-placeholder-small">${friend.nickname.charAt(0).toUpperCase()}</div>`;
+                                    html += `
+                                        <a href="/users/user/${friend.id}/" class="friend-item" data-user-id="${friend.id}" style="text-decoration: none; color: inherit;">
+                                            <div class="friend-avatar-small">${avatarHtml}</div>
+                                            <div class="friend-info">
+                                                <span class="friend-nickname">${friend.nickname}</span>
+                                                <span class="friend-level">Niveau ${friend.level}</span>
+                                            </div>
+                                        </a>
+                                    `;
+                                });
+                                friendsListContainer.innerHTML = html;
+                            } else {
+                                friendsListContainer.innerHTML = '<p class="empty-message">Aucun ami pour le moment.</p>';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error loading friends:', error);
+                            friendsListContainer.innerHTML = '<p class="error-message">Erreur de chargement</p>';
+                        });
+                }
+
+                // ========== PROGRESS BAR FIX ==========
                 const progressBar = document.querySelector('.progress-bar-fill');
                 if (progressBar) {
                     const percentValue = parseFloat(progressBar.getAttribute('data-percent') || '0');
-                    console.log('Progress bar percent:', percentValue); // Debug
-
                     if (percentValue === 0 || percentValue < 0.1) {
-                        // Force complete invisibility for 0% or near-0%
                         progressBar.style.width = '0';
-                        progressBar.style.minWidth = '0';
                         progressBar.style.opacity = '0';
                         progressBar.style.visibility = 'hidden';
                     } else {
-                        // Ensure visible for non-zero values
                         progressBar.style.width = percentValue + '%';
                         progressBar.style.opacity = '1';
                         progressBar.style.visibility = 'visible';
                     }
                 }
-            });
 
-            // ========== FRIENDS PANEL FUNCTIONALITY (Phase 2.5.2) ==========
+                // ========== OTAKU CARD TOGGLE ==========
+                const otakuBanner = document.getElementById('open-otaku-card');
+                const otakuOverlay = document.getElementById('otaku-card-overlay');
+                const closeOtakuBtn = document.getElementById('close-otaku-card');
 
-            const friendsCardToggle = document.getElementById('friends-card-toggle');
-            const friendsPanel = document.getElementById('friends-panel');
-            const friendsPanelClose = document.getElementById('friends-panel-close');
-            const friendsListContainer = document.getElementById('friends-list-container');
-
-            // Toggle friends panel
-            if (friendsCardToggle && friendsPanel) {
-                friendsCardToggle.addEventListener('click', function () {
-                    const isHidden = friendsPanel.classList.contains('friends-panel-hidden');
-
-                    if (isHidden) {
-                        friendsPanel.classList.remove('friends-panel-hidden');
-                        loadFriendsList();
-                    } else {
-                        friendsPanel.classList.add('friends-panel-hidden');
-                    }
-                });
-            }
-
-
-
-            // Close panel button
-            if (friendsPanelClose) {
-                friendsPanelClose.addEventListener('click', function () {
-                    friendsPanel.classList.add('friends-panel-hidden');
-                });
-            }
-
-
-            // Load friends list via AJAX
-            function loadFriendsList() {
-                if (!friendsListContainer) return;
-
-                friendsListContainer.innerHTML = '<div class="loading-spinner">Chargement...</div>';
-
-                fetch('/forum/friends/list/')
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success && data.friends.length > 0) {
-                            let html = '';
-                            data.friends.forEach(friend => {
-                                const avatarHtml = friend.avatar
-                                    ? `<img src="${friend.avatar}" alt="${friend.nickname}">`
-                                    : `<div class="avatar-placeholder-small">${friend.nickname.charAt(0).toUpperCase()}</div>`;
-
-                                html += `
-                                    <div class="friend-item" data-user-id="${friend.id}">
-                                        <div class="friend-avatar-small">${avatarHtml}</div>
-                                        <div class="friend-info">
-                                            <span class="friend-nickname">${friend.nickname}</span>
-                                            <span class="friend-level">Niveau ${friend.level}</span>
-                                        </div>
-                                    </div>
-                                `;
-                            });
-                            friendsListContainer.innerHTML = html;
-                        } else {
-                            friendsListContainer.innerHTML = '<p class="empty-message">Aucun ami pour le moment.</p>';
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error loading friends:', error);
-                        friendsListContainer.innerHTML = '<p class="error-message">Erreur de chargement</p>';
+                if (otakuBanner && otakuOverlay) {
+                    otakuBanner.addEventListener('click', function () {
+                        otakuOverlay.classList.add('active');
                     });
-            }
-
-            // Accept friend request
-            document.addEventListener('click', function (e) {
-                if (e.target.classList.contains('btn-accept-friend')) {
-                    const requestId = e.target.dataset.requestId;
-                    const requestItem = e.target.closest('.friend-request-item');
-
-                    fetch(`/forum/friends/accept/${requestId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'),
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                // Remove request item with animation
-                                requestItem.style.opacity = '0';
-                                setTimeout(() => {
-                                    requestItem.remove();
-                                    // Reload friends list
-                                    loadFriendsList();
-                                    // Update counter (reload page or update manually)
-                                    location.reload();
-                                }, 300);
-                            }
-                        })
-                        .catch(error => console.error('Error accepting friend:', error));
+                    if (closeOtakuBtn) {
+                        closeOtakuBtn.addEventListener('click', function () {
+                            otakuOverlay.classList.remove('active');
+                        });
+                    }
+                    otakuOverlay.addEventListener('click', e => { if (e.target === otakuOverlay) otakuOverlay.classList.remove('active'); });
+                    document.addEventListener('keydown', e => { if (e.key === 'Escape' && otakuOverlay.classList.contains('active')) otakuOverlay.classList.remove('active'); });
                 }
             });
 
-            // Reject friend request
-            document.addEventListener('click', function (e) {
-                if (e.target.classList.contains('btn-reject-friend')) {
-                    const requestId = e.target.dataset.requestId;
-                    const requestItem = e.target.closest('.friend-request-item');
-
-                    fetch(`/forum/friends/reject/${requestId}/`, {
-                        method: 'POST',
-                        headers: {
-                            'X-CSRFToken': getCookie('csrftoken'),
-                            'Content-Type': 'application/json'
-                        }
-                    })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                requestItem.style.opacity = '0';
-                                setTimeout(() => {
-                                    requestItem.remove();
-                                    location.reload();
-                                }, 300);
-                            }
-                        })
-                        .catch(error => console.error('Error rejecting friend:', error));
-                }
-            });
-
-            // Helper function to get CSRF token
+            // Helper function for CSRF (keep outside)
             function getCookie(name) {
                 let cookieValue = null;
                 if (document.cookie && document.cookie !== '') {
@@ -602,21 +633,6 @@
                     }
                 }
                 return cookieValue;
-            }
-
-            // FORCE PROGRESS BAR FIX
-            const progressBar = document.querySelector('.progress-bar-fill');
-            if (progressBar) {
-                const percentValue = parseFloat(progressBar.getAttribute('data-percent') || '0');
-                if (percentValue === 0 || percentValue < 0.1) {
-                    progressBar.style.width = '0';
-                    progressBar.style.opacity = '0';
-                    progressBar.style.visibility = 'hidden';
-                } else {
-                    progressBar.style.width = percentValue + '%';
-                    progressBar.style.opacity = '1';
-                    progressBar.style.visibility = 'visible';
-                }
             }
         </script>
 

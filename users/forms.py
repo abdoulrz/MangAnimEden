@@ -33,7 +33,6 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         fields = [
             'nickname', 'avatar', 'bio',
-            'role_reader', 'role_translator', 'role_editor', 'role_author',
             'social_facebook', 'social_twitter', 'social_instagram', 'social_youtube', 'social_linkedin',
             'location_country', 'location_city'
         ]

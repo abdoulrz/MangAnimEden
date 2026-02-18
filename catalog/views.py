@@ -7,14 +7,30 @@ from django.views.decorators.http import require_POST
 
 def catalog_index(request):
     """
-    Page principale du catalogue de mangas.
+    Page principale du catalogue de mangas avec recherche et filtrage.
     """
+    query = request.GET.get('q', '')
+    genre = request.GET.get('genre', '')
+    type_filter = request.GET.get('type', '')
+
     series_list = Series.objects.all().order_by('title')
+
+    if query:
+        series_list = series_list.filter(title__icontains=query)
+    
+    if genre:
+        series_list = series_list.filter(genres__name__icontains=genre)
+    
+    if type_filter:
+        series_list = series_list.filter(type__iexact=type_filter)
+
     trending_series = Series.objects.all().order_by('-views_count')[:5]
+    
     return render(request, 'catalog/index.html', {
         'series_list': series_list,
         'trending_series': trending_series,
-        'STATIC_VERSION': settings.STATIC_VERSION
+        'STATIC_VERSION': settings.STATIC_VERSION,
+        'search_query': query, # Preserve search term
     })
 
 def manga_detail(request, series_id):

@@ -27,7 +27,7 @@ SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-l=yy7+4k^aw!u^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = [
+ALLOWED_HOSTS = ['*',
     '.web.app',
     '.firebaseapp.com',
     '.run.app',
@@ -237,7 +237,7 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = True  # Required for HTTPS
 
 # Versioning for cache busting
-STATIC_VERSION = '2.8.0'
+STATIC_VERSION = '2.7.13'
 
 LOGGING = {
     'version': 1,

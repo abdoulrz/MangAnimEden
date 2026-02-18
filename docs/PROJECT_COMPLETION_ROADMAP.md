@@ -63,11 +63,11 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 - [x] **Suppression Page Domaine** : Rediriger `/domaine/` vers `/profile/` (section intégrée). Supprimer le code mort.
 - [x] **Profil** : Supprimer le bloc "Paramètres du profil" (doublon ou inutile).
-- [ ] **Profil Cleanup** : Supprimer la barre de recherche "Rechercher un manga" de la page profil.
-- [ ] **Profil UX** : Le bloc "Compléter mon profil" doit disparaître une fois le profil terminé.
+- [x] **Profil Cleanup** : Supprimer la barre de recherche "Rechercher un manga" de la page profil.
+- [x] **Profil UX** : Le bloc "Compléter mon profil" doit disparaître une fois le profil terminé.
 - [x] **Profil Redesign** : Refondre le bloc "Info Utilisateur" (Niveau, Amis) pour un look plus premium.
-- [ ] **Redesign `edit_profile`** : Changer "Chapter" en "Domaine" pour le regroupement thématique.
-- [ ] **Otaku Card** : Implémentation de la "Carte Otaku" sur le profil.
+- [x] **Redesign `edit_profile`** : Changer "Chapter" en "Domaine" pour le regroupement thématique.
+- [x] **Otaku Card** : Implémentation de la "Carte Otaku" sur le profil.
 
 #### 2.4.2 Navigation & Footer
 
@@ -83,8 +83,8 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 #### 2.4.3 Fonctionnalités "Quick Wins"
 
 - [x] **Forum** : Réparer le bouton "Ajouter une Story".
-- [ ] **Forum UX** : Changer placeholder recherche manga -> "Rechercher un groupe".
-- [ ] **Forum Fix** : Corriger les images de profil des groupes cassées.
+- [x] **Forum UX** : Changer placeholder recherche manga -> "Rechercher un groupe".
+- [x] **Forum Fix** : Corriger les images de profil des groupes cassées.
 - [ ] **Forum Permissions** : Restreindre le chat aux membres du groupe.
 - [x] **Thème** : Activer la logique du Theme Switcher (bouton existant).
 - [ ] **Thème Visibilité** : Ajuster les couleurs de texte en mode clair (ex: noir sur blanc).
@@ -111,7 +111,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 #### 2.5.2 Système Social (Amis)
 
 - [ ] **Backend - Gestion des Amis** :
-  - [ ] Modèle `Friendship` (Demandeur, Receveur, Statut: Pending/Accepted).
+  - [x] Modèle `Friendship` (Demandeur, Receveur, Statut: Pending/Accepted).
   - [x] Logique : Envoyer demande, Accepter, Refuser, Retirer.
   - [x] Compteurs : Méthode pour compter les amis actifs.
 - [x] **Frontend - UI Sociale** :
@@ -132,10 +132,6 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [x] **Section "Qui lit cette série ?"** :
   - [x] Sur la page détail manga : Liste des 10 lecteurs actifs récents.
   - [x] Link to Public Profile.
-- [ ] **Fil d'Activité / Leaderboard** (DEFERRED):
-  - [ ] Activité récente : "User X a terminé Série Y".
-  - [ ] Classement par XP/Niveau (Top 10).
-  - [ ] Classement par chapitres lus cette semaine/mois.
 
 #### 2.5.3 Système de Badges (Achievements) ✅ (COMPLÉTÉ)
 
@@ -180,6 +176,9 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 #### 2.5.7 Nouvelles Interactions Sociales
 
 - [ ] **Système de Réponse** : Pouvoir répondre à un message par un appui long (2s).
+- [ ] **Direct Messages (DMs)** :
+  - [ ] Conversation privée entre amis (accessible depuis le profil public).
+  - [ ] Interface style "Messenger" ou intégrée au Forum.
 - [ ] **Gestion d'Événements** :
   - [ ] Admins/Modérateurs peuvent ajouter des événements.
   - [ ] Empêcher la répétition d'événements.
@@ -192,7 +191,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 ### 3.1 Authentification & Rôles ✅ (COMPLÉTÉ)
 
 - [x] **Google Auth** : Inscription/Connexion via Google (OAuth2).
-  - [ ] **Fix** : Vérifier l'intégration OAuth, la connexion automatique et la redirection.
+  - [x] **Fix** : Vérifier l'intégration OAuth, la connexion automatique et la redirection.
 - [ ] **Auth UX** :
   - [ ] Icone "œil" pour afficher/masquer le mot de passe sur tous les navigateurs.
   - [ ] **Navbar Simplifiée** : Pendant l'inscription, ne laisser que Logo, Thème et Connexion.
@@ -216,8 +215,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 ### 3.3 Gestion des Uploads (Sécurité)
 
 - [ ] **Validateur** : Magic Bytes check pour les images.
-- [ ] **Quotas** : Limites de taille par user.
-- [ ] **Optimisation Upload** : Implémenter l'upload par morceaux (Chunked Uploads) pour supporter les très gros fichiers (>1GB) de manière fiable, comme Google Drive.
+- [x] **Optimisation Upload** : Implémenter l'upload par morceaux (Chunked Uploads) pour supporter les très gros fichiers (>1GB) de manière fiable, comme Google Drive.
 
 ### 3.4 Recherche Avancée
 
@@ -287,6 +285,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [ ] **Touch Targets** : Audit des boutons trop petits.
 - [ ] **Navigation** : Test du menu sur mobile (Burger ou Bottom Nav).
 - [ ] **Mobile Touch** : Feedback visuel au tap (:active), Swipe gestures.
+- [ ] **Layout Fix** : Éliminer les "voids" (espaces vides) latéraux sur Mobile et Tablette (Global & Reader).
 - [ ] **Scan Reading Fix** : Corriger la lecture des scans (actuellement impossible).
 
 ---

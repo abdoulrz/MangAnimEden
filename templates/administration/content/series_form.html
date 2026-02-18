@@ -104,6 +104,17 @@
 
         if (!form || !folderInput) return;
 
+        // Helper: fetch with detailed error info
+        async function safeFetch(url, options, label) {
+            const res = await fetch(url, options);
+            if (!res.ok) {
+                const body = await res.text();
+                console.error(`[${label}] FAILED`, { url, status: res.status, body: body.substring(0, 500) });
+                throw new Error(`[${label}] ${res.status} — ${body.substring(0, 150)}`);
+            }
+            return res;
+        }
+
         form.addEventListener('submit', async function (e) {
             const files = Array.from(folderInput.files);
             if (files.length === 0) return; // Standard submission if no folder selected
@@ -118,7 +129,7 @@
                 // PHASE 1: UPLOAD ALL FILES AS CHUNKS
                 for (let i = 0; i < files.length; i++) {
                     const file = files[i];
-                    const overallPercent = Math.round((i / files.length) * 50); // Takes first 50% of bar
+                    const overallPercent = Math.round((i / files.length) * 50);
                     progressBar.style.width = `${overallPercent}%`;
                     statusText.innerText = `[${i + 1}/${files.length}] Upload de ${file.name}...`;
 
@@ -131,27 +142,26 @@
                 progressBar.style.width = '55%';
 
                 const formData = new FormData(form);
-                // Clear the folder_upload from the meta-POST to avoid double upload
                 formData.delete('folder_upload');
 
-                const seriesRes = await fetch('', {
+                const seriesRes = await safeFetch('', {
                     method: 'POST',
                     body: formData,
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
+                }, 'Series Save');
 
-                if (!seriesRes.ok) {
-                    const errorData = await seriesRes.json();
-                    throw new Error(errorData.error || "Erreur lors de la création de la série");
+                const seriesData = await seriesRes.json();
+                const series_id = seriesData.series_id;
+
+                if (!series_id) {
+                    throw new Error("Réponse inattendue du serveur: " + JSON.stringify(seriesData));
                 }
-
-                const { series_id } = await seriesRes.json();
 
                 // PHASE 3: ITERATIVE PROCESSING
                 for (let i = 0; i < uploadIds.length; i++) {
                     const uploadId = uploadIds[i];
                     const chapterName = files[i].name;
-                    const overallPercent = 60 + Math.round((i / uploadIds.length) * 40); // 60% to 100%
+                    const overallPercent = 60 + Math.round((i / uploadIds.length) * 40);
                     progressBar.style.width = `${overallPercent}%`;
                     statusText.innerText = `[${i + 1}/${uploadIds.length}] Traitement de ${chapterName}...`;
 
@@ -160,26 +170,22 @@
                     processData.append('upload_id', uploadId);
                     processData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-                    const processRes = await fetch('{% url "administration:upload_process" %}', {
-                        method: 'POST',
-                        body: processData
-                    });
-
-                    if (!processRes.ok) {
-                        const err = await processRes.json();
-                        console.warn(`Erreur sur le chapitre ${i + 1}: ${err.error}`);
-                        // We continue even if one chapter fails
+                    try {
+                        await safeFetch('{% url "administration:upload_process" %}', {
+                            method: 'POST',
+                            body: processData
+                        }, `Process Ch.${i + 1}`);
+                    } catch (err) {
+                        console.warn(`Chapitre ${i + 1} échoué:`, err.message);
                     }
                 }
 
                 progressBar.style.width = '100%';
                 statusText.innerText = "Terminé ! Redirection...";
-
-                // Final Redirection
                 window.location.href = "{% url 'administration:series_list' %}";
 
             } catch (error) {
-                console.error(error);
+                console.error('Upload Error:', error);
                 statusText.innerText = "Erreur : " + error.message;
                 statusText.style.color = "#ff4d4d";
                 submitBtn.disabled = false;
@@ -187,7 +193,7 @@
         });
 
         async function uploadFileInChunks(file) {
-            const chunkSize = 2 * 1024 * 1024; // Lowered to 2MB for stability on restricted networks
+            const chunkSize = 2 * 1024 * 1024;
             const totalChunks = Math.ceil(file.size / chunkSize);
 
             // 1. Init
@@ -196,12 +202,11 @@
             initData.append('total_chunks', totalChunks);
             initData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-            const initRes = await fetch('{% url "administration:upload_init" %}', {
+            const initRes = await safeFetch('{% url "administration:upload_init" %}', {
                 method: 'POST',
                 body: initData
-            });
+            }, 'Upload Init');
 
-            if (!initRes.ok) throw new Error("Impossible d'initialiser l'upload");
             const { upload_id } = await initRes.json();
 
             // 2. Chunks
@@ -216,12 +221,10 @@
                 chunkData.append('chunk', chunk, file.name);
                 chunkData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-                const chunkRes = await fetch('{% url "administration:upload_chunk" %}', {
+                await safeFetch('{% url "administration:upload_chunk" %}', {
                     method: 'POST',
                     body: chunkData
-                });
-
-                if (!chunkRes.ok) throw new Error(`Échec de l'envoi du morceau ${index + 1}`);
+                }, `Chunk ${index + 1}/${totalChunks}`);
             }
 
             // 3. Complete (Assembly)
@@ -229,12 +232,10 @@
             completeData.append('upload_id', upload_id);
             completeData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-            const completeRes = await fetch('{% url "administration:upload_complete" %}', {
+            await safeFetch('{% url "administration:upload_complete" %}', {
                 method: 'POST',
                 body: completeData
-            });
-
-            if (!completeRes.ok) throw new Error("Erreur lors de l'assemblage final");
+            }, 'Upload Complete');
 
             return upload_id;
         }

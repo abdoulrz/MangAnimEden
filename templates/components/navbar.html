@@ -26,25 +26,22 @@
         <div class="navbar-right">
             <!-- Search Bar Navigation Logic -->
             {% with view_name=request.resolver_match.view_name namespace=request.resolver_match.namespace %}
-            {% if view_name != 'catalog:index' and view_name != 'users:profile' and namespace != 'administration' %}
-            <div class="navbar-search">
-                {% if namespace == 'social' %}
-                <input type="text" placeholder="Rechercher un groupe..." class="input navbar-search-input">
-                {% else %}
-                <input type="text" placeholder="Rechercher un manga..." class="input navbar-search-input">
-                {% endif %}
-                <span class="navbar-search-icon">🔍</span>
-            </div>
+            {% if view_name != 'catalog:index' and view_name != 'users:profile' and view_name != 'users:edit_profile' and namespace != 'administration' %}
+            <form method="get"
+                action="{% if namespace == 'social' %}{% url 'social:forum_home' %}{% else %}{% url 'catalog:index' %}{% endif %}"
+                class="navbar-search">
+                <input type="text" name="q"
+                    placeholder="{% if namespace == 'social' %}Rechercher un groupe...{% else %}Rechercher un manga...{% endif %}"
+                    class="input navbar-search-input" value="{{ request.GET.q }}">
+                <button type="submit" class="navbar-search-btn">🔍</button>
+            </form>
             {% endif %}
             {% endwith %}
 
             <!-- Dark Mode Toggle -->
             <button id="theme-toggle" class="btn-ghost navbar-icon-btn">🌙</button>
 
-            <!-- Mobile Menu Toggle -->
-            <button class="navbar-toggle" id="mobileMenuToggle" aria-label="Menu">
-                <i class="fas fa-bars"></i>
-            </button>
+
 
             <!-- User Profile Avatar or Login -->
             {% if user.is_authenticated %}
@@ -167,6 +164,15 @@
                 Connexion
             </a>
             {% endif %}
+            <!-- Mobile Menu Toggle (Moved to End) -->
+            <button class="navbar-toggle" id="mobileMenuToggle" aria-label="Menu">
+                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="3" y1="12" x2="21" y2="12"></line>
+                    <line x1="3" y1="6" x2="21" y2="6"></line>
+                    <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+            </button>
         </div>
     </div>
 </nav>

@@ -1,4 +1,3 @@
-
 import os
 import zipfile
 import shutil
@@ -10,6 +9,23 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 from PIL import Image
 import pypdf
+
+try:
+    import rarfile
+    # Configure rarfile to find UnRAR.exe on Windows
+    import platform
+    if platform.system() == 'Windows':
+        _unrar_paths = [
+            r'C:\Program Files\WinRAR\UnRAR.exe',
+            r'C:\Program Files (x86)\WinRAR\UnRAR.exe',
+        ]
+        for _p in _unrar_paths:
+            if os.path.exists(_p):
+                rarfile.UNRAR_TOOL = _p
+                break
+    HAS_RARFILE = True
+except ImportError:
+    HAS_RARFILE = False
 
 from .models import Page, Chapter, Series
 from .utils import extract_chapter_number
@@ -35,9 +51,7 @@ def process_single_chapter_from_temp(series_id, temp_file_path):
         defaults={'title': f"Chapitre {chapter_num}"}
     )
     
-    # Save file to chapter ImageField/FileField
-    # chapter.source_file.save(filename, File(open(temp_file_path, 'rb')), save=True)
-    # Actually, we need to pass a File object correctly
+    # Save file to chapter FileField
     from django.core.files import File
     with open(temp_file_path, 'rb') as f:
         chapter.source_file.save(filename, File(f), save=True)
@@ -60,7 +74,6 @@ def bulk_create_chapters_from_folder(series, files):
     for f in files:
         chapter_num = extract_chapter_number(f.name)
         if chapter_num is not None:
-             # Create chapter
             chapter, created = Chapter.objects.get_or_create(
                 series=series,
                 number=chapter_num,
@@ -81,7 +94,7 @@ def bulk_create_chapters_from_folder(series, files):
 
 class FileProcessor:
     def __init__(self):
-        self.supported_extensions = {'.pdf', '.cbz', '.zip', '.epub'}
+        self.supported_extensions = {'.pdf', '.cbz', '.cbr', '.zip', '.epub'}
 
     def process_chapter(self, chapter):
         """
@@ -89,84 +102,98 @@ class FileProcessor:
         Extracts images and creates Page objects.
         """
         if not chapter.source_file:
-            print(f"Chapter {chapter} has no source file.")
+            logger.warning(f"Chapter {chapter} has no source file.")
             return False
 
         file_path = chapter.source_file.path
         ext = os.path.splitext(file_path)[1].lower()
 
         if ext not in self.supported_extensions:
-            print(f"Unsupported file extension: {ext}")
+            logger.warning(f"Unsupported file extension: {ext}")
             return False
             
-        print(f"Processing {chapter} ({ext})...")
-
-        print(f"Processing {chapter} ({ext})...")
+        logger.info(f"Processing {chapter} ({ext})...")
 
         try:
             if ext == '.pdf':
                 self._extract_from_pdf(chapter, file_path)
+            elif ext == '.cbr':
+                self._extract_from_rar(chapter, file_path)
             elif ext in ['.cbz', '.zip', '.epub']:
                 self._extract_from_zip(chapter, file_path)
             elif ext in ['.jpg', '.jpeg', '.png', '.webp']:
-                # If it's a direct image file, just save it as a single page
-                # We don't delete all pages here as multiple image uploads might be targeting the same chapter
-                # But for our iterative flow, we usually want to clear if it's the first time 
-                # Actually, let's just append if it's an image, or use a better strategy.
                 page_count = chapter.pages.count()
                 self._save_page_image(chapter, chapter.source_file.read(), page_count + 1, os.path.basename(file_path))
             
             logger.info(f"Successfully processed {chapter}. Total pages: {chapter.pages.count()}")
             return True
         except Exception as e:
-            print(f"Error processing {chapter}: {e}")
+            logger.error(f"Error processing {chapter}: {e}")
             return False
 
     def _save_page_image(self, chapter, image_data, page_number, filename):
-        # Create Page object
+        """Create a Page object and save the image data."""
         page = Page(chapter=chapter, page_number=page_number)
-        
-        # Save image content to the ImageField
-        # ContentFile wraps logic to behave like an uploaded file
         final_filename = f"{chapter.id}_{page_number}_{filename}"
         page.image.save(final_filename, ContentFile(image_data), save=True)
 
     def _extract_from_pdf(self, chapter, file_path):
-        # Clear existing pages for archives to avoid duplicates
+        """Extract images from PDF files."""
         chapter.pages.all().delete()
         
         reader = pypdf.PdfReader(file_path)
         
         count = 0 
         for i, page in enumerate(reader.pages):
-            # Extract images from PDF page
             for image_file_object in page.images:
-                # Save image
                 self._save_page_image(chapter, image_file_object.data, count + 1, image_file_object.name)
                 count += 1
 
-
-    def _extract_from_zip(self, chapter, file_path):
-        # Clear existing pages for archives to avoid duplicates
+    def _extract_from_rar(self, chapter, file_path):
+        """Extract images from RAR/CBR archives."""
+        if not HAS_RARFILE:
+            raise ImportError(
+                "Le paquet 'rarfile' est requis pour traiter les fichiers .cbr. "
+                "Installez-le avec: pip install rarfile"
+            )
+        
         chapter.pages.all().delete()
         
-        # ZIP, CBZ, and EPUB are all zip-based
+        try:
+            with rarfile.RarFile(file_path, 'r') as rf:
+                image_files = [
+                    f for f in rf.namelist()
+                    if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
+                    and not f.startswith('__MACOSX')
+                ]
+                
+                image_files.sort()
+                
+                for i, filename in enumerate(image_files):
+                    with rf.open(filename) as f:
+                        image_data = f.read()
+                        clean_name = os.path.basename(filename)
+                        self._save_page_image(chapter, image_data, i + 1, clean_name)
+        except rarfile.BadRarFile:
+            # Some .cbr files are actually ZIP-compressed (mislabeled)
+            logger.warning(f"CBR file {file_path} is not a valid RAR, trying as ZIP...")
+            self._extract_from_zip(chapter, file_path)
+
+    def _extract_from_zip(self, chapter, file_path):
+        """Extract images from ZIP/CBZ/EPUB archives."""
+        chapter.pages.all().delete()
+        
         with zipfile.ZipFile(file_path, 'r') as zf:
-            # Filter for images
             image_files = [
                 f for f in zf.namelist() 
                 if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp'))
-                and not f.startswith('__MACOSX') # Ignore Mac metadata
+                and not f.startswith('__MACOSX')
             ]
             
-            # Sort naturally (1, 2, 10 instead of 1, 10, 2)
-            # Basic natural sort might fail (1, 10, 2), so let's try a better sort key if possible
-            # Or just rely on standard sort if filenames are padded (001.jpg, 002.jpg)
             image_files.sort()
             
             for i, filename in enumerate(image_files):
                 with zf.open(filename) as f:
                     image_data = f.read()
-                    # Clean filename to remove paths inside zip
                     clean_name = os.path.basename(filename)
                     self._save_page_image(chapter, image_data, i + 1, clean_name)

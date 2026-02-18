@@ -32,3 +32,17 @@ A special status or digital card for dedicated users.
 
 - **PWA (Progressive Web App)**: Installable on phone home screens.
 - **Offline Mode**: Download chapters for offline reading (via App wrapper).
+
+## ?? Fil d'Activité / Leaderboard
+
+- [ ] Activité récente : "User X a terminé Série Y".
+- [ ] Classement par XP/Niveau (Top 10).
+- [ ] Classement par chapitres lus cette semaine/mois.
+
+## ?? Support Multi-Langues (Internationalization)
+
+- **Objectif** : Rendre la plateforme accessible en **Français**, **Anglais** et **Espagnol**.
+- **Spécificités** :
+  - **Traductions Natives** : Les citations (Quotes), le contenu éditorial et l'interface doivent être traduits nativement (pas de traduction automatique à la volée).
+  - **Contenu Adapté** : Proposer les scans dans la langue de l'utilisateur si disponible.
+  - **Sélecteur de Langue** : Switcher facilement dans le footer ou la navbar.

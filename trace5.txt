@@ -1,0 +1,138 @@
+﻿python : INFO 2026-02-12 16:55:00,770 services 
+34616 33772 Processing JUJUJ - Chapitre 4.0 
+(.cbr)...
+En línea: 1 Carácter: 1
++ python -c "
++ ~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (INF 
+   O 2026-02-12...e 4.0 (.cbr)...:String) [], R  
+  emoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+INFO 2026-02-12 16:55:19,532 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+4.0. Total pages: 191
+INFO 2026-02-12 16:55:19,533 services 34616 
+33772 Processing JUJUJ - Chapitre 7.0 (.cbr)...
+INFO 2026-02-12 16:55:37,283 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+7.0. Total pages: 179
+INFO 2026-02-12 16:55:37,285 services 34616 
+33772 Processing JUJUJ - Chapitre 16.0 (.cbr)...
+INFO 2026-02-12 16:55:55,054 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+16.0. Total pages: 174
+INFO 2026-02-12 16:55:55,056 services 34616 
+33772 Processing JUJUJ - Chapitre 25.0 (.cbr)...
+INFO 2026-02-12 16:56:12,516 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+25.0. Total pages: 177
+INFO 2026-02-12 16:56:12,516 services 34616 
+33772 Processing JUJUJ - Chapitre 34.0 (.cbr)...
+INFO 2026-02-12 16:56:29,742 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+34.0. Total pages: 174
+INFO 2026-02-12 16:56:29,744 services 34616 
+33772 Processing JUJUJ - Chapitre 43.0 (.cbr)...
+INFO 2026-02-12 16:56:48,077 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+43.0. Total pages: 179
+INFO 2026-02-12 16:56:48,080 services 34616 
+33772 Processing JUJUJ - Chapitre 52.0 (.cbr)...
+INFO 2026-02-12 16:57:05,560 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+52.0. Total pages: 173
+INFO 2026-02-12 16:57:05,561 services 34616 
+33772 Processing JUJUJ - Chapitre 61.0 (.cbr)...
+INFO 2026-02-12 16:57:22,508 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+61.0. Total pages: 175
+INFO 2026-02-12 16:57:22,510 services 34616 
+33772 Processing JUJUJ - Chapitre 70.0 (.cbr)...
+INFO 2026-02-12 16:57:40,485 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+70.0. Total pages: 178
+INFO 2026-02-12 16:57:40,487 services 34616 
+33772 Processing JUJUJ - Chapitre 79.0 (.cbr)...
+INFO 2026-02-12 16:57:58,479 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+79.0. Total pages: 177
+INFO 2026-02-12 16:57:58,482 services 34616 
+33772 Processing JUJUJ - Chapitre 88.0 (.cbr)...
+INFO 2026-02-12 16:58:14,792 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+88.0. Total pages: 167
+INFO 2026-02-12 16:58:14,794 services 34616 
+33772 Processing JUJUJ - Chapitre 97.0 (.cbr)...
+INFO 2026-02-12 16:58:32,697 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+97.0. Total pages: 177
+INFO 2026-02-12 16:58:32,700 services 34616 
+33772 Processing JUJUJ - Chapitre 106.0 (.cbr)...
+INFO 2026-02-12 16:58:50,227 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+106.0. Total pages: 177
+INFO 2026-02-12 16:58:50,227 services 34616 
+33772 Processing JUJUJ - Chapitre 115.0 (.cbr)...
+INFO 2026-02-12 16:59:06,854 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+115.0. Total pages: 173
+INFO 2026-02-12 16:59:06,856 services 34616 
+33772 Processing JUJUJ - Chapitre 124.0 (.cbr)...
+INFO 2026-02-12 16:59:23,078 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+124.0. Total pages: 166
+INFO 2026-02-12 16:59:23,081 services 34616 
+33772 Processing JUJUJ - Chapitre 133.0 (.cbr)...
+INFO 2026-02-12 16:59:39,979 services 34616 
+33772 Successfully processed JUJUJ - Chapitre 
+133.0. Total pages: 166
+Found 16 CBR chapters to process
+Processing: JUJUJ - Chapitre 4.0 (scans/Jujutsu_Kaisen_-_Tomo_00_001-004.cbr)...
+  Result: True, Pages: 191
+
+Processing: JUJUJ - Chapitre 7.0 (scans/Jujutsu_Kaisen_-_Tomo_01_001-007.cbr)...
+  Result: True, Pages: 179
+
+Processing: JUJUJ - Chapitre 16.0 (scans/Jujutsu_Kaisen_-_Tomo_02_008-016.cbr)...
+  Result: True, Pages: 174
+
+Processing: JUJUJ - Chapitre 25.0 (scans/Jujutsu_Kaisen_-_Tomo_03_017-025.cbr)...
+  Result: True, Pages: 177
+
+Processing: JUJUJ - Chapitre 34.0 (scans/Jujutsu_Kaisen_-_Tomo_04_026-034.cbr)...
+  Result: True, Pages: 174
+
+Processing: JUJUJ - Chapitre 43.0 (scans/Jujutsu_Kaisen_-_Tomo_05_035-043.cbr)...
+  Result: True, Pages: 179
+
+Processing: JUJUJ - Chapitre 52.0 (scans/Jujutsu_Kaisen_-_Tomo_06_044-052.cbr)...
+  Result: True, Pages: 173
+
+Processing: JUJUJ - Chapitre 61.0 (scans/Jujutsu_Kaisen_-_Tomo_07_053-061.cbr)...
+  Result: True, Pages: 175
+
+Processing: JUJUJ - Chapitre 70.0 (scans/Jujutsu_Kaisen_-_Tomo_08_062-070.cbr)...
+  Result: True, Pages: 178
+
+Processing: JUJUJ - Chapitre 79.0 (scans/Jujutsu_Kaisen_-_Tomo_09_071-079.cbr)...
+  Result: True, Pages: 177
+
+Processing: JUJUJ - Chapitre 88.0 (scans/Jujutsu_Kaisen_-_Tomo_10_080-088.cbr)...
+  Result: True, Pages: 167
+
+Processing: JUJUJ - Chapitre 97.0 (scans/Jujutsu_Kaisen_-_Tomo_11_089-097.cbr)...
+  Result: True, Pages: 177
+
+Processing: JUJUJ - Chapitre 106.0 (scans/Jujutsu_Kaisen_-_Tomo_12_098-106.cbr)...
+  Result: True, Pages: 177
+
+Processing: JUJUJ - Chapitre 115.0 (scans/Jujutsu_Kaisen_-_Tomo_13_107-115.cbr)...
+  Result: True, Pages: 173
+
+Processing: JUJUJ - Chapitre 124.0 (scans/Jujutsu_Kaisen_-_Tomo_14_116-124.cbr)...
+  Result: True, Pages: 166
+
+Processing: JUJUJ - Chapitre 133.0 (scans/Jujutsu_Kaisen_-_Tomo_15_125-133.cbr)...
+  Result: True, Pages: 166
+

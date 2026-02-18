@@ -1,0 +1,5 @@
+﻿UNRAR_TOOL: C:\Program Files\WinRAR\UnRAR.exe
+CBR files in temp_uploads: []
+Chapter: JUJUJ - Chapitre 4.0 - source: scans/Jujutsu_Kaisen_-_Tomo_00_001-004.cbr - pages: 0
+Chapter: JUJUJ - Chapitre 7.0 - source: scans/Jujutsu_Kaisen_-_Tomo_01_001-007.cbr - pages: 0
+Chapter: JUJUJ - Chapitre 16.0 - source: scans/Jujutsu_Kaisen_-_Tomo_02_008-016.cbr - pages: 0
