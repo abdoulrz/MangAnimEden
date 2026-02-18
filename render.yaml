@@ -1,0 +1,24 @@
+databases:
+  - name: manganimeden-db
+    databaseName: manganimeden
+    user: manganimeden_user
+
+services:
+  - type: web
+    name: MangaAnimEden
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn config.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+      - key: DATABASE_URL
+        fromDatabase:
+          name: manganimeden-db
+          property: connectionString
+      - key: DJANGO_SETTINGS_MODULE
+        value: config.settings
