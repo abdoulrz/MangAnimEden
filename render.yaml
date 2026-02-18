@@ -2,11 +2,13 @@ databases:
   - name: manganimeden-db
     databaseName: manganimeden
     user: manganimeden_user
+    plan: free # Explicitly use the Free Tier
 
 services:
   - type: web
     name: MangaAnimEden
     runtime: python
+    plan: free # Explicitly use the Free Tier
     buildCommand: "./build.sh"
     startCommand: "gunicorn config.wsgi:application"
     envVars:
