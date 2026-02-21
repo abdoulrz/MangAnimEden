@@ -112,13 +112,10 @@ class User(AbstractUser):
         """
         return bool(self.avatar and self.bio and self.location_country and self.location_city)
 
-    # Roles (Activités)
+    # Hierarchy: Admin > Moderator > Reader > Banned
     role_admin = models.BooleanField(default=False, verbose_name="Administrateur")
     role_moderator = models.BooleanField(default=False, verbose_name="Modérateur")
     role_reader = models.BooleanField(default=True, verbose_name="Lecteur")
-    role_translator = models.BooleanField(default=False, verbose_name="Traducteur")
-    role_editor = models.BooleanField(default=False, verbose_name="Éditeur")
-    role_author = models.BooleanField(default=False, verbose_name="Auteur")
 
     # Status
     is_banned = models.BooleanField(default=False, verbose_name="Banni")
