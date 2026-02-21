@@ -63,10 +63,10 @@
     padding: 20px 30px;
     padding-right: 60px;
     /* Glassmorphism */
-    background: rgba(20, 20, 20, 0.6);
+    background: var(--glass-bg);
     -webkit-backdrop-filter: blur(20px);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
     color: var(--color-text-primary);
     font-size: 1.2rem;
@@ -93,7 +93,7 @@
     font-size: 1.4rem;
     pointer-events: none;
     opacity: 0.8;
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.3));
+    color: var(--color-text-muted);
 }
 
 /* ==================== CATALOG GRID ==================== */
@@ -142,10 +142,10 @@
 /* ==================== PREMIUM MANGA CARD ==================== */
 .manga-card {
     /* Glassmorphism Base */
-    background: rgba(30, 30, 30, 0.4);
+    background: var(--glass-bg);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
     overflow: hidden;
     text-decoration: none;
@@ -159,10 +159,10 @@
 .manga-card:hover {
     transform: translateY(-8px) scale(1.02);
     box-shadow:
-        0 20px 40px rgba(0, 0, 0, 0.4),
-        0 0 20px rgba(139, 92, 246, 0.2);
+        0 20px 40px rgba(0, 0, 0, 0.1),
+        0 0 20px rgba(139, 92, 246, 0.1);
     border-color: rgba(139, 92, 246, 0.5);
-    background: rgba(40, 40, 40, 0.6);
+    background: var(--glass-bg-hover);
     z-index: 10;
 }
 
@@ -260,7 +260,7 @@
 
 .manga-meta {
     font-size: 0.85rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--color-text-secondary);
     margin-top: auto;
     display: flex;
     align-items: center;
@@ -274,13 +274,13 @@
 }
 
 .trending-block {
-    background: rgba(20, 20, 20, 0.6);
+    background: var(--glass-bg);
     -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
     border-radius: var(--radius-xl);
     padding: var(--space-xl);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-xl);
     position: relative;
     overflow: hidden;
 }
@@ -293,14 +293,14 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.03) 0%, transparent 100%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.02) 0%, transparent 100%);
     pointer-events: none;
 }
 
 .trending-header {
     margin-bottom: var(--space-xl);
     padding-bottom: var(--space-md);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .trending-title {
@@ -309,8 +309,7 @@
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    color: white;
-    text-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+    color: var(--color-text-primary);
 }
 
 .trending-title span {
@@ -337,8 +336,8 @@
 }
 
 .trending-item:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--glass-bg-hover);
+    border-color: var(--color-border-hover);
     transform: translateX(5px);
 }
 
@@ -346,7 +345,7 @@
     font-size: 2rem;
     font-weight: 900;
     color: transparent;
-    -webkit-text-stroke: 2px rgba(255, 255, 255, 0.1);
+    -webkit-text-stroke: 2px var(--color-border);
     position: absolute;
     right: 0;
     top: 50%;
@@ -357,7 +356,7 @@
 }
 
 .trending-item:hover .trending-rank {
-    -webkit-text-stroke: 2px rgba(255, 255, 255, 0.2);
+    -webkit-text-stroke: 2px var(--color-border-hover);
     transform: translateY(-50%) rotate(0deg) scale(1.1);
 }
 
@@ -433,13 +432,13 @@
 }
 
 .placeholder-trending {
-    background: #222;
+    background: var(--color-bg-secondary);
     width: 50px;
     height: 75px;
     border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--color-text-muted);
     font-weight: bold;
 }
