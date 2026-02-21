@@ -27,25 +27,11 @@ SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-l=yy7+4k^aw!u^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['*',
-    '.web.app',
-    '.firebaseapp.com',
-    '.run.app',
-    '127.0.0.1',
-    'localhost',
-    '.pythonanywhere.com',
-    '.onrender.com'
-]
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.web.app',
-    'https://*.firebaseapp.com',
-    'https://*.run.app',
-    'https://*.a.run.app',
-    'https://*.pythonanywhere.com',
-]
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://*.web.app,https://*.firebaseapp.com,https://*.run.app,https://*.a.run.app,https://*.pythonanywhere.com,https://*.onrender.com,http://localhost:8000,http://127.0.0.1:8000', cast=Csv())
 
 # Static files version for cache busting
 # EMAIL CONFIGURATION
@@ -223,6 +209,7 @@ ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https' if not DEBUG else 'http'
 
 SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
 
@@ -231,8 +218,8 @@ SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APPS': [
             {
-                'client_id': '998805449587-mvkim50ag8mqpqba2q3cn5p9uobbjk43q.apps.googleusercontent.com',
-                'secret': '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',
+                'client_id': config('GOOGLE_CLIENT_ID', default='998805449587-mvkim50ag8mqpqba2q3cn5p9uobbjk43q.apps.googleusercontent.com'),
+                'secret': config('GOOGLE_CLIENT_SECRET', default='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'),
                 'key': ''
             },
         ],
@@ -248,10 +235,11 @@ SOCIALACCOUNT_PROVIDERS = {
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# Session settings for Serverless (Stateless Cloud Run)
+# Session settings for Serverless (Stateless Cloud Run / Render)
 SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 SESSION_COOKIE_HTTPONLY = True
-SESSION_COOKIE_SECURE = True  # Required for HTTPS
+SESSION_COOKIE_SECURE = not DEBUG  # True in prod (HTTPS), False in dev (HTTP)
+CSRF_COOKIE_SECURE = not DEBUG
 
 # Versioning for cache busting
 STATIC_VERSION = '2.7.13'
