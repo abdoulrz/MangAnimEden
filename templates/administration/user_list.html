@@ -79,8 +79,7 @@
                         {% csrf_token %}
                         <input type="hidden" name="user_id" value="{{ user.id }}">
                         <input type="hidden" name="action" value="toggle_admin">
-                        <button type="submit" class="btn-icon promote" title="Toggle Admin" {% if user.is_superuser
-                            %}disabled title="Cannot modify superuser" {% endif %}>
+                        <button type="submit" class="btn-icon promote" title="Toggle Admin" {% if user.is_superuser %}disabled title="Cannot modify superuser" {% endif %}>
                             👑
                         </button>
                     </form>

@@ -1,0 +1,8 @@
+--- DEBUG SETTINGS ---
+BASE_DIR: C:\Users\Usuario\Documents\Developer\Projects\MangaAnimEden
+STATICFILES_DIRS: [WindowsPath('C:/Users/Usuario/Documents/Developer/Projects/MangaAnimEden/static')]
+Does static exist? True
+Contents of static: [WindowsPath('C:/Users/Usuario/Documents/Developer/Projects/MangaAnimEden/static/css'), WindowsPath('C:/Users/Usuario/Documents/Developer/Projects/MangaAnimEden/static/img'), WindowsPath('C:/Users/Usuario/Documents/Developer/Projects/MangaAnimEden/static/js')]
+----------------------
+28 objects imported automatically (use -v 2 for details).
+
