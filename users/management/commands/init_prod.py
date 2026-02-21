@@ -33,9 +33,16 @@ class Command(BaseCommand):
             self.stdout.write(self.style.SUCCESS(f'Superuser already exists: {email}'))
             return
 
-        User.objects.create_superuser(
-            nickname=username,
+        # Use direct model creation to bypass password validators that
+        # internally reference the removed 'username' field (FieldError).
+        user = User(
             email=email,
-            password=password,
+            nickname=username,
+            is_staff=True,
+            is_superuser=True,
+            is_active=True,
+            role_admin=True,
         )
+        user.set_password(password)  # Hashes correctly, skips validators
+        user.save()
         self.stdout.write(self.style.SUCCESS(f'Superuser created: {email}'))
