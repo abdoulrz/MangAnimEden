@@ -157,7 +157,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+# Moved STATICFILES_STORAGE to STORAGES setting below
 
 # DEBUG PATHS
 print(f"--- DEBUG SETTINGS ---")
@@ -166,10 +166,6 @@ print(f"STATICFILES_DIRS: {STATICFILES_DIRS}")
 print(f"Does static exist? {(BASE_DIR / 'static').exists()}")
 print(f"Contents of static: {list((BASE_DIR / 'static').glob('*')) if (BASE_DIR / 'static').exists() else 'NotFound'}")
 print(f"----------------------")
-
-# Media files (Cloudflare R2 / AWS S3)
-MEDIA_URL = '/media/'
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # AWS / Cloudflare R2 Settings
 AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
@@ -180,6 +176,20 @@ AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL', default='') # e.g. https://<
 AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='') # Optional, e.g. pub-xxxx.r2.dev or your custom domain
 AWS_DEFAULT_ACL = None # Required for some providers
 AWS_S3_FILE_OVERWRITE = False
+
+# Media files (Cloudflare R2 / AWS S3)
+MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/' if AWS_S3_ENDPOINT_URL else '/media/'
+if AWS_S3_CUSTOM_DOMAIN:
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
 
 # Data Upload Settings
 DATA_UPLOAD_MAX_NUMBER_FILES = 10000  # Increased limit for bulk chapter uploads

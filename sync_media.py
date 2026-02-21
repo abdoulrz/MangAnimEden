@@ -4,27 +4,33 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from pathlib import Path
+from decouple import config
 
 # Setup django environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 def sync_local_media_to_r2():
-    local_media_dir = Path(settings.BASE_DIR) / 'media'
-    
-    if not local_media_dir.exists():
-        print(f"Directory {local_media_dir} does not exist. Nothing to sync.")
-        return
+    # Because there was no MEDIA_ROOT originally, files like 'scans/82.cbz' ended up in the project root
+    media_dirs_to_sync = ['scans', 'stories', 'covers', 'avatars', 'badges', 'Background', 'group_icons', 'temp_uploads']
+    base_dir = Path(settings.BASE_DIR)
 
-    print(f"Scanning local media directory: {local_media_dir}")
-    
-    # Loop through all files in the local media directory
-    for root, dirs, files in os.walk(local_media_dir):
-        for file in files:
-            local_path = Path(root) / file
-            
-            # Create the relative path (e.g., 'avatars/my_avatar.png')
-            relative_path = str(local_path.relative_to(local_media_dir)).replace('\\', '/')
+    for dir_name in media_dirs_to_sync:
+        local_dir = base_dir / dir_name
+        
+        if not local_dir.exists():
+            print(f"Skipping {dir_name}/ - does not exist.")
+            continue
+
+        print(f"\nScanning directory: {local_dir}")
+        for root, dirs, files in os.walk(local_dir):
+            for file in files:
+                local_path = Path(root) / file
+                
+                # We want the path IN the bucket to be e.g. 'scans/file.cbz'
+                # So we take the path relative to the base project dir
+                relative_path = str(local_path.relative_to(base_dir)).replace('\\', '/')
+                
             
             print(f"Uploading {relative_path}...")
             
