@@ -189,11 +189,10 @@
     top: 120%;
     right: 0;
     width: 220px;
-    background: #0f0f0f;
-    /* Very dark background */
+    background: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    padding: var(--space-sm);
+    padding: var(--space-sm) 0;
     box-shadow: var(--shadow-xl);
 
     /* Animation state */
@@ -217,7 +216,7 @@
     right: -100px;
     /* Center relative to bell */
     width: 320px;
-    background: #0f0f0f;
+    background: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
     padding: 0;
@@ -249,7 +248,7 @@
 
 .notification-header {
     padding: var(--space-sm) var(--space-md);
-    background: #111;
+    background: var(--color-bg-card);
     border-bottom: 1px solid var(--color-border);
     display: flex;
     justify-content: space-between;
