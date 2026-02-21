@@ -56,14 +56,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     # Third party apps
     'django.contrib.staticfiles',
-    'django.contrib.sites', # Added back as it was in original and not explicitly removed
-    'cloudinary_storage', # Moved below staticfiles to prevent collectstatic hijack
+    'django.contrib.sites',
+    'storages',
 
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
-    'cloudinary',
+
 
     # Local apps
     'users',
@@ -167,15 +167,19 @@ print(f"Does static exist? {(BASE_DIR / 'static').exists()}")
 print(f"Contents of static: {list((BASE_DIR / 'static').glob('*')) if (BASE_DIR / 'static').exists() else 'NotFound'}")
 print(f"----------------------")
 
-# Media files (Cloudinary)
-MEDIA_URL = '/media/'  # Or use full URL if preferred, but usually '/media/' works fine with storage backend
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+# Media files (Cloudflare R2 / AWS S3)
+MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': config('CLOUDINARY_CLOUD_NAME', default=''),
-    'API_KEY': config('CLOUDINARY_API_KEY', default=''),
-    'API_SECRET': config('CLOUDINARY_API_SECRET', default=''),
-}
+# AWS / Cloudflare R2 Settings
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='')
+AWS_S3_REGION_NAME = 'auto' # Required for R2
+AWS_S3_ENDPOINT_URL = config('AWS_S3_ENDPOINT_URL', default='') # e.g. https://<ACCOUNT_ID>.r2.cloudflarestorage.com
+AWS_S3_CUSTOM_DOMAIN = config('AWS_S3_CUSTOM_DOMAIN', default='') # Optional, e.g. pub-xxxx.r2.dev or your custom domain
+AWS_DEFAULT_ACL = None # Required for some providers
+AWS_S3_FILE_OVERWRITE = False
 
 # Data Upload Settings
 DATA_UPLOAD_MAX_NUMBER_FILES = 10000  # Increased limit for bulk chapter uploads
