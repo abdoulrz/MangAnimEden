@@ -127,6 +127,15 @@
     --color-bg-card: #FFFFFF;
     --color-bg-input: #F3F4F6;
 
+    /* Enhanced contrast for light theme */
+    --color-purple-primary: #7C3AED;
+    --color-purple-hover: #6D28D9;
+    --color-pink-primary: #DB2777;
+    --color-pink-hover: #BE185D;
+
+    --gradient-purple-pink: linear-gradient(135deg, #7C3AED 0%, #DB2777 100%);
+    --gradient-purple-pink-hover: linear-gradient(135deg, #6D28D9 0%, #BE185D 100%);
+
     --color-text-primary: #050505;
     /* Quasi Noir */
     --color-text-secondary: #1F2937;
@@ -222,7 +231,7 @@ body {
 
 .btn-primary {
     background: var(--gradient-purple-pink);
-    color: var(--color-text-primary);
+    color: #ffffff;
     box-shadow: var(--shadow-purple);
 }
 
