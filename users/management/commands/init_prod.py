@@ -1,9 +1,11 @@
+import os
 from django.core.management.base import BaseCommand
 from django.contrib.sites.models import Site
 from django.conf import settings
 
+
 class Command(BaseCommand):
-    help = 'Initialize production data (Site, etc.)'
+    help = 'Initialize production data (Site, superuser from env vars, etc.)'
 
     def handle(self, *args, **options):
         # Initialize default site
@@ -11,18 +13,29 @@ class Command(BaseCommand):
         site.domain = 'manganimeden-374d1.web.app'
         site.name = 'MangAnimEDen'
         site.save()
-        
         self.stdout.write(self.style.SUCCESS(f'Successfully initialized Site: {site.domain}'))
 
-        # Create a test user for production testing (since SQLite is ephemeral)
+        # Create superuser from environment variables (set in Render dashboard)
         from users.models import User
-        test_email = 'test@manganimeden.com'
-        if not User.objects.filter(email=test_email).exists():
-            User.objects.create_superuser(
-                nickname='TestAdmin',
-                email=test_email,
-                password='Password123!'
-            )
-            self.stdout.write(self.style.SUCCESS(f'Created test admin: {test_email} / Password123!'))
-        else:
-            self.stdout.write(self.style.SUCCESS('Test user already exists.'))
+
+        username = os.environ.get('DJANGO_SUPERUSER_USERNAME')
+        email = os.environ.get('DJANGO_SUPERUSER_EMAIL')
+        password = os.environ.get('DJANGO_SUPERUSER_PASSWORD')
+
+        if not all([username, email, password]):
+            self.stdout.write(self.style.WARNING(
+                'Skipping superuser creation: DJANGO_SUPERUSER_USERNAME, '
+                'DJANGO_SUPERUSER_EMAIL, or DJANGO_SUPERUSER_PASSWORD not set.'
+            ))
+            return
+
+        if User.objects.filter(email=email).exists():
+            self.stdout.write(self.style.SUCCESS(f'Superuser already exists: {email}'))
+            return
+
+        User.objects.create_superuser(
+            nickname=username,
+            email=email,
+            password=password,
+        )
+        self.stdout.write(self.style.SUCCESS(f'Superuser created: {email}'))
