@@ -46,12 +46,12 @@
     border: 1px solid rgba(236, 72, 153, 0.3);
 }
 
-.ad-block {
+.sponsor-block {
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(236, 72, 153, 0.05));
     border: 1px solid rgba(139, 92, 246, 0.3);
 }
 
-.ads-block {
+.quotes-block {
     background: linear-gradient(135deg, rgba(34, 211, 238, 0.05), rgba(59, 130, 246, 0.05));
     border: 1px solid rgba(34, 211, 238, 0.3);
 }
@@ -243,8 +243,8 @@
     color: white;
 }
 
-/* Ad Placeholder */
-.ad-placeholder {
+/* Sponsor Placeholder */
+.sponsor-placeholder {
     width: 100%;
     min-height: 400px;
     height: 100%;
@@ -254,10 +254,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    animation: ad-pulse 3s ease-in-out infinite;
+    animation: sponsor-pulse 3s ease-in-out infinite;
 }
 
-@keyframes ad-pulse {
+@keyframes sponsor-pulse {
 
     0%,
     100% {
@@ -271,18 +271,18 @@
     }
 }
 
-.ad-animation {
+.sponsor-animation {
     text-align: center;
 }
 
-.ad-text {
+.sponsor-text {
     color: rgba(255, 255, 255, 0.5);
     font-size: 1.2rem;
     font-weight: 600;
-    animation: ad-text-fade 3s ease-in-out infinite;
+    animation: sponsor-text-fade 3s ease-in-out infinite;
 }
 
-@keyframes ad-text-fade {
+@keyframes sponsor-text-fade {
 
     0%,
     100% {
