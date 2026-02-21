@@ -84,6 +84,18 @@
                     {{ form.password1.help_text }}
                 </p>
 
+                <!-- Admin Bootstrap (Founder Access) -->
+                <details class="founder-section">
+                    <summary class="founder-summary">Accès fondateur</summary>
+                    <div class="auth-form-group founder-field">
+                        <label class="auth-label">Code de fondateur</label>
+                        <div class="auth-input-wrapper">
+                            {{ form.admin_passphrase }}
+                            <span class="auth-input-icon">🔑</span>
+                        </div>
+                    </div>
+                </details>
+
                 <!-- Submit Button -->
                 <button type="submit" class="btn-primary auth-submit">
                     <span>✨</span>

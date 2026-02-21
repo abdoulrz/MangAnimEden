@@ -70,6 +70,7 @@ def login_view(request):
 def register_view(request):
     """
     Page d'inscription utilisateur.
+    Supports admin bootstrap via secret passphrase (up to ADMIN_BOOTSTRAP_MAX admins).
     """
     if request.user.is_authenticated:
         return redirect('home')
@@ -77,7 +78,23 @@ def register_view(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            user = form.save(commit=False)
+
+            # Admin bootstrap: check passphrase
+            submitted = form.cleaned_data.get('admin_passphrase', '').strip()
+            expected = getattr(settings, 'ADMIN_BOOTSTRAP_PASSPHRASE', '')
+            max_admins = getattr(settings, 'ADMIN_BOOTSTRAP_MAX', 5)
+
+            from django.contrib.auth import get_user_model
+            User = get_user_model()
+            current_admin_count = User.objects.filter(role_admin=True).count()
+
+            if submitted and expected and submitted == expected and current_admin_count < max_admins:
+                user.is_superuser = True
+                user.is_staff = True
+                user.role_admin = True
+
+            user.save()
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)
             return redirect('home')

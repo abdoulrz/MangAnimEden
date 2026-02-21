@@ -37,10 +37,9 @@
             </td>
             <td>{{ user.email }}</td>
             <td>
-                {% if user.is_superuser %}<span class="role-badge superadmin">SuperUser</span>{% endif %}
-                {% if user.role_admin %}<span class="role-badge admin">Admin</span>{% endif %}
+                {% if user.is_superuser or user.role_admin %}<span class="role-badge admin">Admin</span>{% endif %}
                 {% if user.role_moderator %}<span class="role-badge mod">Mod</span>{% endif %}
-                {% if not user.role_admin and not user.role_moderator and not user.is_superuser %}Lecteur{% endif %}
+                {% if not user.role_admin and not user.is_superuser and not user.role_moderator %}Lecteur{% endif %}
             </td>
             <td>
                 {% if user.is_banned %}
@@ -51,7 +50,6 @@
             </td>
             <td>{{ user.date_joined|date:"d M Y" }}</td>
             <td>
-                {% if user != request.user and not user.is_superuser %}
                 <div class="action-buttons">
                     <form method="POST" action="{% url 'administration:user_action' %}" class="inline-form">
                         {% csrf_token %}
@@ -75,8 +73,19 @@
                         </button>
                     </form>
                     {% endif %}
+
+                    {% if request.user.is_superuser %}
+                    <form method="POST" action="{% url 'administration:user_action' %}" class="inline-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <input type="hidden" name="action" value="toggle_admin">
+                        <button type="submit" class="btn-icon promote" title="Toggle Admin" {% if user.is_superuser
+                            %}disabled title="Cannot modify superuser" {% endif %}>
+                            👑
+                        </button>
+                    </form>
+                    {% endif %}
                 </div>
-                {% endif %}
             </td>
         </tr>
         {% empty %}

@@ -256,6 +256,10 @@ SESSION_COOKIE_SECURE = True  # Required for HTTPS
 # Versioning for cache busting
 STATIC_VERSION = '2.7.13'
 
+# Admin bootstrap via secret passphrase on registration
+ADMIN_BOOTSTRAP_PASSPHRASE = config('ADMIN_BOOTSTRAP_PASSPHRASE', default='Nefe')
+ADMIN_BOOTSTRAP_MAX = 5  # Max number of admin accounts that can be created this way
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

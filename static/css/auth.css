@@ -166,3 +166,38 @@
     color: #71717A;
     margin-bottom: 1rem;
 }
+
+/* Founder / Admin Bootstrap section */
+.founder-section {
+    margin-bottom: var(--space-lg);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-sm);
+    padding: var(--space-sm) var(--space-md);
+}
+
+.founder-summary {
+    cursor: pointer;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-sm);
+    user-select: none;
+    list-style: none;
+    padding: var(--space-xs) 0;
+}
+
+.founder-summary::-webkit-details-marker {
+    display: none;
+}
+
+.founder-summary::before {
+    content: "▶ ";
+    font-size: 0.65rem;
+}
+
+.founder-section[open] .founder-summary::before {
+    content: "▼ ";
+}
+
+.founder-field {
+    margin-top: var(--space-md);
+    margin-bottom: 0;
+}

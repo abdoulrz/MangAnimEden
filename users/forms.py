@@ -3,6 +3,16 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .models import User
 
 class CustomUserCreationForm(UserCreationForm):
+    admin_passphrase = forms.CharField(
+        required=False,
+        label='Code de fondateur',
+        widget=forms.PasswordInput(attrs={
+            'class': 'input auth-input',
+            'placeholder': '••••••••',
+            'autocomplete': 'off',
+        })
+    )
+
     class Meta:
         model = User
         fields = ('nickname', 'email')
