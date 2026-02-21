@@ -46,9 +46,28 @@
     border: 1px solid rgba(236, 72, 153, 0.3);
 }
 
-.sponsor-block {
+.promo-panel {
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(236, 72, 153, 0.05));
     border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.promo-inner {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: var(--space-lg);
+}
+
+.promo-body {
+    text-align: center;
+}
+
+.promo-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
 }
 
 .quotes-block {
