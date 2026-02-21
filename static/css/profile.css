@@ -173,6 +173,7 @@
     margin-top: 0.5rem;
     background: linear-gradient(135deg, #8b5cf6, #22d3ee);
     color: white;
+    /* Badge text can stay white against gradient */
     padding: 0.35rem 0.9rem;
     border-radius: 20px;
     font-size: 0.85rem;
@@ -738,7 +739,7 @@
 .error-message {
     text-align: center;
     padding: 2rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--glass-text-secondary);
     font-size: 0.9rem;
 }
 
