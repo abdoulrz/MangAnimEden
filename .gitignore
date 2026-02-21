@@ -15,6 +15,16 @@ db.sqlite3-journal
 /static_collected
 /staticfiles
 
+# Root media uploads (due to historic DEFAULT_FILE_STORAGE behavior without MEDIA_ROOT)
+/scans
+/stories
+/Background
+/avatars
+/badges
+/covers
+/group_icons
+/temp_uploads
+
 # Virtual Environment
 venv/
 env/
