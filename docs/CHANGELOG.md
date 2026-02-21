@@ -11,6 +11,16 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 - Phase 2.5.3: Système de Badges (Achievements)
 - Phase 2.5.4: Système de Création de Groupes
 
+## [1.9.1] - 2026-02-22 ([Phase 3.4 - Infrastructure & Storage])
+
+### Changed Storage
+
+- **Object Storage Migration** :
+  - Migration complète depuis Cloudinary (stockage local éphémère de Render avec limites strictes) vers **Cloudflare R2** (S3-compatible).
+  - Implémentation de `django-storages` avec le backend `S3Boto3Storage` pour remplacer la gestion des fichiers statiques et médias.
+  - Transfert réussi et sans perte de plus de 4GB d'assets locaux existants (covers, backgrounds, avatars, scans .cbz/.cbr) vers le bucket R2 en garantissant zéro 404 en production.
+  - Résolution du crash Git Push (`RPC failed; HTTP 500`) en expurgeant les uploads massifs de l'historique et de l'index Git (mise à jour propre du `.gitignore`).
+
 ## [1.9.0] - 2026-02-17 ([Phase 2.4.1 - Profile & UX Polish])
 
 ### Added Profile Features
