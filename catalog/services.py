@@ -171,46 +171,60 @@ class FileProcessor:
                     logger.warning(f"Failed to delete temp file {temp_path}: {e}")
 
     def _process_and_save_pages(self, chapter, tasks, file_path=None, archive_type=None):
-        """Helper to process page creations in parallel using ThreadPoolExecutor."""
+        """Process page creations sequentially with per-image error handling."""
         from django.db.models import F
+        from django.db import close_old_connections
         from administration.models import ChunkedUpload
 
-        def process_task(args):
-            # Extract image data dynamically inside the thread to save RAM
-            if archive_type == 'zip':
-                i, inner_filename, filename = args
-                with zipfile.ZipFile(file_path, 'r') as zf:
-                    with zf.open(inner_filename) as f:
-                        image_data = f.read()
-            elif archive_type == 'rar':
-                i, inner_filename, filename = args
-                with rarfile.RarFile(file_path, 'r') as rf:
-                    with rf.open(inner_filename) as f:
-                        image_data = f.read()
-            elif archive_type == 'pdf':
-                i, page_num, img_idx, filename = args
-                reader = pypdf.PdfReader(file_path)
-                image_data = reader.pages[page_num].images[img_idx].data
-            else:
-                # Direct image upload fallback
-                i, image_data, filename = args
-
-            page = self._save_page_image(chapter, image_data, i + 1, filename)
-            
-            # Update progress tracking after remote save succeeds
-            if self.upload_id:
-                ChunkedUpload.objects.filter(upload_id=self.upload_id).update(processed_files=F('processed_files') + 1)
-                
-            return page
-            
         # Initialize total count
         if self.upload_id:
             ChunkedUpload.objects.filter(upload_id=self.upload_id).update(total_files_to_process=len(tasks), processed_files=0)
-            
-        # VERY IMPORTANT: Keep max_workers low (2-3) on constrained environments (like 512MB RAM)
-        # Boto3 uploads and Pillow hold memory per thread. 10 workers will cause OOM crashes.
-        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-            list(executor.map(process_task, tasks))
+
+        saved_count = 0
+        failed_count = 0
+
+        for args in tasks:
+            try:
+                # Close stale DB connections before each iteration (important on long-running tasks)
+                close_old_connections()
+
+                # Extract image data
+                if archive_type == 'zip':
+                    i, inner_filename, filename = args
+                    with zipfile.ZipFile(file_path, 'r') as zf:
+                        with zf.open(inner_filename) as f:
+                            image_data = f.read()
+                elif archive_type == 'rar':
+                    i, inner_filename, filename = args
+                    with rarfile.RarFile(file_path, 'r') as rf:
+                        with rf.open(inner_filename) as f:
+                            image_data = f.read()
+                elif archive_type == 'pdf':
+                    i, page_num, img_idx, filename = args
+                    reader = pypdf.PdfReader(file_path)
+                    image_data = reader.pages[page_num].images[img_idx].data
+                else:
+                    i, image_data, filename = args
+
+                # Save page (uploads to R2 + saves to DB atomically)
+                self._save_page_image(chapter, image_data, i + 1, filename)
+                saved_count += 1
+
+                # Free memory immediately
+                del image_data
+
+                # Update progress tracking
+                if self.upload_id:
+                    ChunkedUpload.objects.filter(upload_id=self.upload_id).update(processed_files=F('processed_files') + 1)
+
+            except Exception as e:
+                failed_count += 1
+                page_idx = args[0] if args else '?'
+                logger.error(f"Failed to process page {page_idx} of {chapter}: {e}")
+                # Continue to next image — don't let one failure kill the whole chapter
+                continue
+
+        logger.info(f"Finished processing {chapter}: {saved_count} saved, {failed_count} failed out of {len(tasks)}")
 
     def _save_page_image(self, chapter, image_data, page_number, filename):
         """Create a Page object and save the image data remotely, returns the Page instance."""
