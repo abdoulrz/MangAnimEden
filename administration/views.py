@@ -2,6 +2,7 @@ import logging
 import os
 from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect
+from django.http import HttpResponseRedirect
 from django.views.generic import TemplateView, ListView, View, CreateView, UpdateView, DeleteView
 from django.db.models import Count, Q
 from django.utils.decorators import method_decorator
@@ -272,7 +273,7 @@ class AdminChapterCreateView(CreateView):
         return reverse_lazy('administration:chapter_list', kwargs={'series_id': self.object.series.id})
 
     def form_valid(self, form):
-        response = super().form_valid(form)
+        self.object = form.save()
         
         # Start background processing for the chapter file
         if self.object.source_file:
@@ -280,8 +281,22 @@ class AdminChapterCreateView(CreateView):
             threading.Thread(target=processor.process_chapter, args=(self.object,)).start()
             
         create_system_log(self.request, 'CHAPTER_CREATE', details=f"Chapitre créé : {self.object.number} pour {self.object.series.title}")
+        
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'success',
+                'message': "Chapitre créé avec succès. Extraction des pages en cours...",
+                'redirect_url': str(self.get_success_url()),
+            })
+        
         messages.success(self.request, "Chapitre créé avec succès. L'extraction des pages est en cours en arrière-plan.")
-        return response
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            errors = {field: errs.get_json_data() for field, errs in form.errors.items()}
+            return JsonResponse({'error': 'Erreurs de validation', 'errors': errors}, status=400)
+        return super().form_invalid(form)
 
 @method_decorator(requires_admin, name='dispatch')
 class AdminChapterUpdateView(UpdateView):
@@ -300,20 +315,34 @@ class AdminChapterUpdateView(UpdateView):
         return reverse_lazy('administration:chapter_list', kwargs={'series_id': self.object.series.id})
 
     def form_valid(self, form):
-        response = super().form_valid(form)
+        self.object = form.save()
         
         # Process the file if a new one was uploaded
         if 'source_file' in form.changed_data and self.object.source_file:
-            # Delete existing pages first since it's an update
             self.object.pages.all().delete()
             processor = FileProcessor()
             threading.Thread(target=processor.process_chapter, args=(self.object,)).start()
-            messages.success(self.request, "Chapitre mis à jour. L'extraction des nouvelles pages est en cours en arrière-plan.")
+            msg = "Chapitre mis à jour. Extraction des nouvelles pages en cours..."
         else:
-            messages.success(self.request, "Chapitre mis à jour.")
+            msg = "Chapitre mis à jour."
             
         create_system_log(self.request, 'CHAPTER_UPDATE', details=f"Chapitre modifié : {self.object.number} pour {self.object.series.title}")
-        return response
+        
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({
+                'status': 'success',
+                'message': msg,
+                'redirect_url': str(self.get_success_url()),
+            })
+        
+        messages.success(self.request, msg)
+        return HttpResponseRedirect(self.get_success_url())
+
+    def form_invalid(self, form):
+        if self.request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            errors = {field: errs.get_json_data() for field, errs in form.errors.items()}
+            return JsonResponse({'error': 'Erreurs de validation', 'errors': errors}, status=400)
+        return super().form_invalid(form)
 
 @method_decorator(requires_admin, name='dispatch')
 class AdminChapterDeleteView(DeleteView):

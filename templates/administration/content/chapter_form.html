@@ -5,7 +5,8 @@
     <div class="breadcrumb">
         <a href="{% url 'administration:series_list' %}" class="breadcrumb-link">Séries</a>
         <span class="breadcrumb-separator">/</span>
-        <a href="{% url 'administration:chapter_list' current_series.id %}" class="breadcrumb-link">{{ current_series.title }}</a>
+        <a href="{% url 'administration:chapter_list' current_series.id %}" class="breadcrumb-link">{{
+            current_series.title }}</a>
         <span class="breadcrumb-separator">/</span>
         <span class="breadcrumb-current">{% if object %}Modifier{% else %}Nouveau{% endif %} Chapitre</span>
     </div>
@@ -13,7 +14,10 @@
 </div>
 
 <div class="form-container">
-    <form method="post" enctype="multipart/form-data" class="admin-form">
+    <div id="form-alert"
+        style="display:none; padding:12px 18px; border-radius:10px; margin-bottom:20px; font-weight:600;"></div>
+
+    <form id="chapter-form" method="post" enctype="multipart/form-data" class="admin-form">
         {% csrf_token %}
         <input type="hidden" name="series" value="{{ current_series.id }}">
 
@@ -21,13 +25,13 @@
             <div class="form-group">
                 <label for="id_number">🔢 Numéro du Chapitre</label>
                 {{ form.number }}
-                {% if form.number.errors %}<div class="text-danger">{{ form.number.errors }}</div>{% endif %}
+                <div class="field-error" id="error-number" style="color:#f87171;font-size:0.85em;display:none;"></div>
             </div>
 
             <div class="form-group">
                 <label for="id_title">📝 Titre (Optionnel)</label>
                 {{ form.title }}
-                {% if form.title.errors %}<div class="text-danger">{{ form.title.errors }}</div>{% endif %}
+                <div class="field-error" id="error-title" style="color:#f87171;font-size:0.85em;display:none;"></div>
             </div>
 
             <div class="form-group span-2">
@@ -35,17 +39,96 @@
                 <div class="django-file-input">
                     {{ form.source_file }}
                 </div>
-                {% if form.source_file.errors %}<div class="text-danger">{{ form.source_file.errors }}</div>{% endif %}
+                <div class="field-error" id="error-source_file" style="color:#f87171;font-size:0.85em;display:none;">
+                </div>
                 <small class="form-help-text">Formats supportés : PDF, CBR, CBZ, EPUB.</small>
             </div>
         </div>
 
         <div class="form-actions">
             <a href="{% url 'administration:chapter_list' current_series.id %}" class="btn btn-secondary">Annuler</a>
-            <button type="submit" class="btn btn-primary">
+            <button type="submit" id="submit-btn" class="btn btn-primary">
                 {% if object %}Modifier{% else %}Créer{% endif %}
             </button>
         </div>
     </form>
 </div>
+
+<script>
+document.getElementById('chapter-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const btn = document.getElementById('submit-btn');
+    const alert = document.getElementById('form-alert');
+    const formData = new FormData(form);
+    
+    // Clear previous errors
+    document.querySelectorAll('.field-error').forEach(el => { el.style.display = 'none'; el.textContent = ''; });
+    alert.style.display = 'none';
+    
+    // Disable button
+    btn.disabled = true;
+    btn.textContent = 'Envoi en cours...';
+    
+    fetch(form.action || window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json().then(data => ({ status: response.status, data })))
+    .then(({ status, data }) => {
+        if (status === 200 && data.status === 'success') {
+            // Success — show message and redirect
+            alert.textContent = data.message || 'Chapitre créé ! Extraction des pages en cours...';
+            alert.style.background = 'rgba(16, 185, 129, 0.15)';
+            alert.style.color = '#34d399';
+            alert.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                window.location.href = data.redirect_url || '{% url "administration:chapter_list" current_series.id %}';
+            }, 1500);
+        } else if (data.errors) {
+            // Validation errors — show inline
+            for (const [field, errors] of Object.entries(data.errors)) {
+                const errorDiv = document.getElementById('error-' + field);
+                if (errorDiv) {
+                    const messages = errors.map(e => typeof e === 'object' ? e.message : e);
+                    errorDiv.textContent = messages.join(', ');
+                    errorDiv.style.display = 'block';
+                }
+            }
+            // Also handle __all__ errors (like unique_together)
+            if (data.errors.__all__) {
+                const messages = data.errors.__all__.map(e => typeof e === 'object' ? e.message : e);
+                alert.textContent = messages.join(', ');
+                alert.style.background = 'rgba(239, 68, 68, 0.15)';
+                alert.style.color = '#f87171';
+                alert.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+                alert.style.display = 'block';
+            }
+            btn.disabled = false;
+            btn.textContent = '{% if object %}Modifier{% else %}Créer{% endif %}';
+        } else {
+            alert.textContent = data.error || 'Erreur inattendue.';
+            alert.style.background = 'rgba(239, 68, 68, 0.15)';
+            alert.style.color = '#f87171';
+            alert.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+            alert.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = '{% if object %}Modifier{% else %}Créer{% endif %}';
+        }
+    })
+    .catch(err => {
+        alert.textContent = 'Erreur réseau : ' + err.message;
+        alert.style.background = 'rgba(239, 68, 68, 0.15)';
+        alert.style.color = '#f87171';
+        alert.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+        alert.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = '{% if object %}Modifier{% else %}Créer{% endif %}';
+    });
+});
+</script>
 {% endblock %}
