@@ -581,7 +581,8 @@ class UploadProgressStatusView(View):
             else:
                 stats['percentage'] = 0
                 
-            if stats['completed_uploads'] == len(upload_ids) and stats['total_files'] > 0:
+            # If all found uploads are completed, OR no uploads were found at all (deleted backend data), mark finished so the UI doesn't hang forever
+            if (stats['completed_uploads'] == len(upload_ids) and stats['total_files'] > 0) or len(uploads) == 0:
                  stats['status'] = 'finished'
                  
             return JsonResponse(stats)
