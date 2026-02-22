@@ -5,6 +5,23 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
+<style>
+    .search-results-info {
+        margin-bottom: 1.5rem;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .user-level-label {
+        font-size: 0.85rem;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+    }
+
+    .no-results-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -36,7 +53,7 @@
     </div>
 
     <!-- Results Count -->
-    <div style="margin-bottom: 1.5rem; color: rgba(255,255,255,0.6);">
+    <div class="search-results-info">
         {% if query or min_level or max_level %}
         Found {{ total_results }} user{{ total_results|pluralize }} matching your filters
         {% else %}
@@ -58,7 +75,7 @@
 
             <div class="user-info">
                 <h3><a href="{% url 'users:public_profile' user.id %}">{{ user.nickname }}</a></h3>
-                <div style="font-size: 0.85rem; color: var(--primary); margin-bottom: 0.5rem;">
+                <div class="user-level-label">
                     Level {{ user.level }}
                 </div>
             </div>
@@ -82,7 +99,7 @@
     </div>
     {% else %}
     <div class="no-results">
-        <div style="font-size: 3rem; margin-bottom: 1rem;">🔍</div>
+        <div class="no-results-icon">🔍</div>
         <h3>Aucun utilisateur trouvé</h3>
         <p>Essayez de modifier vos filtres de recherche.</p>
     </div>

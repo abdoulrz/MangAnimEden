@@ -1,6 +1,6 @@
 # **SPEC-009-Chunked-Uploads : Robustesse des Gros Transferts**
 
-*Statut : Brouillon | Priorité : Haute*
+**Statut :** Brouillon | **Priorité :** Haute
 
 ## **1. Contexte & Intention ("The Why")**
 

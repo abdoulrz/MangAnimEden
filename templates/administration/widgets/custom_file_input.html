@@ -28,7 +28,9 @@
             <span class="file-icon-large">📂</span>
             <span class="file-label-text">Choisir un fichier...</span>
         </label>
-        <input type="{{ widget.type }}" name="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}class="hidden-file-input" onchange="updateFileLabel(this)">
+        <input type="{{ widget.type }}" name="{{ widget.name }}" {% include "django/forms/widgets/attrs.html" %}
+            class="hidden-file-input" onchange="updateFileLabel(this)" aria-label="Choisir un fichier"
+            title="Choisir un fichier">
         <span class="selected-filename" id="filename-{{ widget.name }}">Aucun fichier sélectionné</span>
     </div>
 </div>

@@ -5,6 +5,17 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/chat.css' %}?v={{ STATIC_VERSION }}">
+<style>
+    .forum-sender-link {
+        color: inherit;
+        text-decoration: none;
+        transition: opacity 0.3s;
+    }
+
+    .reply-banner-hidden {
+        display: none;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -199,18 +210,19 @@
                         id="msg-{{ message.id }}">
                         <div class="message-bubble">
                             <div class="message-info">
-                                <a href="{% url 'users:public_profile' message.sender.id %}" class="sender-name"style="color: inherit; text-decoration: none; transition: opacity 0.3s;">{{ message.sender.nickname }}</a>
+                                <a href="{% url 'users:public_profile' message.sender.id %}"
+                                    class="sender-name forum-sender-link">{{ message.sender.nickname }}</a>
                                 <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
 
                                 {% if active_group.owner == user and message.sender != user %}
-                                <button class="btn-ban"onclick="banUser({{ active_group.id }}, {{ message.sender.id }}, '{{ message.sender.nickname }}')"
-                                    title="Bannir ce membre">🚫</button>
+                                <button class="btn-ban"onclick="banUser({{ active_group.id }}, {{ message.sender.id }}, '{{ message.sender.nickname }}')"title="Bannir ce membre">🚫</button>
                                 {% endif %}
                             </div>
 
                             {% if message.parent %}
                             <div class="reply-context">
-                                <small>Réponse à <strong>{{ message.parent.sender.nickname }}</strong> : {{ message.parent.content|truncatechars:30 }}</small>
+                                <small>Réponse à <strong>{{ message.parent.sender.nickname }}</strong> : {{
+                                    message.parent.content|truncatechars:30 }}</small>
                             </div>
                             {% endif %}
 
@@ -218,11 +230,15 @@
 
                             <!-- Interactions -->
                             <div class="message-actions">
-                                <button class="action-btn like-btn {% if user in message.likes.all %}liked{% endif %}"data-message-id="{{ message.id }}"onclick="toggleLike(this,{{ message.id }})">
-                                    <i class="{% if user in message.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                                <button class="action-btn like-btn {% if user in message.likes.all %}liked{% endif %}"
+                                    data-message-id="{{ message.id }}" onclick="toggleLike(this,{{ message.id }})">
+                                    <i
+                                        class="{% if user in message.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
                                     <span class="like-count">{{ message.like_count }}</span>
                                 </button>
-                                <button type="button" class="action-btn reply-btn"onclick="startReply({{ message.id }}, '{{ message.sender.nickname }}')">
+                                <button type="button" class="action-btn reply-btn" title="Répondre"
+                                    aria-label="Répondre"
+                                    onclick="startReply({{ message.id }}, '{{ message.sender.nickname }}')">
                                     <i class="fas fa-reply"></i>
                                 </button>
                             </div>
@@ -242,7 +258,7 @@
                 {% if is_member and not is_banned or active_group.owner == user %}
                 <div class="chat-input-area">
                     <!-- Reply Banner (Hidden by default) -->
-                    <div id="replyBanner" class="reply-banner" style="display: none;">
+                    <div id="replyBanner" class="reply-banner reply-banner-hidden">
                         <span>Réponse à <strong id="replyTargetName">User</strong></span>
                         <button class="btn-close-small" onclick="cancelReply()">×</button>
                     </div>

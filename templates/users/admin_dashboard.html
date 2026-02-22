@@ -5,6 +5,12 @@
 {% block extra_css %}
 {% load static %}
 <link rel="stylesheet" href="{% static 'css/admin.css' %}?v={{ STATIC_VERSION }}">
+<style>
+    .admin-btn-spacing {
+        background: var(--color-bg-elevated);
+        margin-left: 10px;
+    }
+</style>
 {% endblock %}
 
 {% block content %}
@@ -110,8 +116,7 @@
                 <a href="/admin/catalog/series/add/" target="_blank" class="add-btn">
                     <span>+</span> Ajouter une Série
                 </a>
-                <a href="/admin/catalog/genre/" target="_blank" class="add-btn btn-secondary"
-                    style="background: var(--color-bg-elevated); margin-left: 10px;">
+                <a href="/admin/catalog/genre/" target="_blank" class="add-btn btn-secondary admin-btn-spacing">
                     <span>#</span> Gérer les Genres
                 </a>
             </div>
