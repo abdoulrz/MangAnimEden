@@ -83,6 +83,16 @@
 
 .auth-input-icon.clickable {
     cursor: pointer;
+    user-select: none;
+}
+
+/* Hide native browser password reveal eye icons */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear,
+input[type="password"]::-webkit-credentials-auto-fill-button {
+    display: none;
+    visibility: hidden;
+    pointer-events: none;
 }
 
 .auth-submit {
