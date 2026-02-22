@@ -245,6 +245,8 @@ class AdminChapterListView(ListView):
         return context
 
 from .forms import ChapterForm
+from catalog.services import FileProcessor
+import threading
 
 @method_decorator(requires_admin, name='dispatch')
 class AdminChapterCreateView(CreateView):
@@ -271,8 +273,14 @@ class AdminChapterCreateView(CreateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        
+        # Start background processing for the chapter file
+        if self.object.source_file:
+            processor = FileProcessor()
+            threading.Thread(target=processor.process_chapter, args=(self.object,)).start()
+            
         create_system_log(self.request, 'CHAPTER_CREATE', details=f"Chapitre créé : {self.object.number} pour {self.object.series.title}")
-        messages.success(self.request, "Chapitre créé avec succès.")
+        messages.success(self.request, "Chapitre créé avec succès. L'extraction des pages est en cours en arrière-plan.")
         return response
 
 @method_decorator(requires_admin, name='dispatch')
@@ -293,8 +301,18 @@ class AdminChapterUpdateView(UpdateView):
 
     def form_valid(self, form):
         response = super().form_valid(form)
+        
+        # Process the file if a new one was uploaded
+        if 'source_file' in form.changed_data and self.object.source_file:
+            # Delete existing pages first since it's an update
+            self.object.pages.all().delete()
+            processor = FileProcessor()
+            threading.Thread(target=processor.process_chapter, args=(self.object,)).start()
+            messages.success(self.request, "Chapitre mis à jour. L'extraction des nouvelles pages est en cours en arrière-plan.")
+        else:
+            messages.success(self.request, "Chapitre mis à jour.")
+            
         create_system_log(self.request, 'CHAPTER_UPDATE', details=f"Chapitre modifié : {self.object.number} pour {self.object.series.title}")
-        messages.success(self.request, "Chapitre mis à jour.")
         return response
 
 @method_decorator(requires_admin, name='dispatch')
