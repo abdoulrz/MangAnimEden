@@ -519,11 +519,24 @@ def background_process_chapters(series_id, upload_ids):
                 
                 # Clean up assembled file after processing
                 os.remove(temp_path)
+                
+                # Mark as completed
+                upload.status = 'completed'
+                upload.save(update_fields=['status'])
             else:
-                 logger.error(f"Assembled file not found for upload {upload_id}")
+                logger.error(f"Assembled file not found for upload {upload_id}")
+                upload.status = 'failed'
+                upload.save(update_fields=['status'])
                  
         except Exception as e:
             logger.error(f"Error background processing upload {upload_id}: {e}")
+            # Always mark as failed so the widget can clear itself
+            try:
+                upload = ChunkedUpload.objects.get(upload_id=upload_id)
+                upload.status = 'failed'
+                upload.save(update_fields=['status'])
+            except ChunkedUpload.DoesNotExist:
+                pass
 
 @method_decorator(requires_admin, name='dispatch')
 class ProcessChapterFromUploadView(View):
@@ -554,6 +567,9 @@ class ProcessChapterFromUploadView(View):
 @method_decorator(requires_admin, name='dispatch')
 class UploadProgressStatusView(View):
     def get(self, request, *args, **kwargs):
+        from django.utils import timezone
+        from datetime import timedelta
+        
         upload_ids_str = request.GET.get('upload_ids', '')
         if not upload_ids_str:
             return JsonResponse({'error': 'Paramètres manquants'}, status=400)
@@ -562,10 +578,12 @@ class UploadProgressStatusView(View):
         
         try:
             uploads = ChunkedUpload.objects.filter(upload_id__in=upload_ids)
+            stale_threshold = timezone.now() - timedelta(minutes=30)
+            
             stats = {
                 'total_files': 0,
                 'processed_files': 0,
-                'completed_uploads': 0,
+                'terminal_uploads': 0,  # completed + failed + stale
                 'total_uploads': len(upload_ids),
                 'status': 'processing'
             }
@@ -573,17 +591,32 @@ class UploadProgressStatusView(View):
             for upload in uploads:
                 stats['total_files'] += upload.total_files_to_process
                 stats['processed_files'] += upload.processed_files
-                if upload.status == 'completed' and upload.processed_files >= upload.total_files_to_process and upload.total_files_to_process > 0:
-                     stats['completed_uploads'] += 1
+                
+                # Count terminal states: completed, failed, or stale
+                if upload.status in ('completed', 'failed'):
+                    stats['terminal_uploads'] += 1
+                elif upload.status == 'processing' and upload.created_at < stale_threshold and upload.processed_files == 0:
+                    # Stuck for >30 min with no progress → mark as failed
+                    upload.status = 'failed'
+                    upload.save(update_fields=['status'])
+                    stats['terminal_uploads'] += 1
+                elif upload.status == 'completed' and upload.processed_files >= upload.total_files_to_process and upload.total_files_to_process > 0:
+                    stats['terminal_uploads'] += 1
                      
             if stats['total_files'] > 0:
                 stats['percentage'] = round((stats['processed_files'] / stats['total_files']) * 100)
             else:
                 stats['percentage'] = 0
                 
-            # If all found uploads are completed, OR no uploads were found at all (deleted backend data), mark finished so the UI doesn't hang forever
-            if (stats['completed_uploads'] == len(upload_ids) and stats['total_files'] > 0) or len(uploads) == 0:
-                 stats['status'] = 'finished'
+            # Finished if: all uploads reached a terminal state, OR no records exist at all (deleted)
+            if stats['terminal_uploads'] >= len(upload_ids) or uploads.count() == 0:
+                stats['status'] = 'finished'
+                
+                # Check if any failed
+                failed_count = uploads.filter(status='failed').count()
+                if failed_count > 0:
+                    stats['status'] = 'failed'
+                    stats['message'] = f"{failed_count} upload(s) ont échoué."
                  
             return JsonResponse(stats)
         except Exception as e:

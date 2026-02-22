@@ -111,6 +111,11 @@
     <div class="progress-container">
         <div id="bgProgressBar"></div>
     </div>
+    <button id="bgDismissBtn"
+        style="display:none; margin-top:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#aaa; padding:6px 16px; border-radius:6px; cursor:pointer; font-size:0.85rem;"
+        onclick="localStorage.removeItem('activeUploads'); document.getElementById('backgroundProgressContainer').style.display='none';">
+        ✕ Fermer
+    </button>
 </div>
 
 <script>
@@ -121,8 +126,10 @@
         const container = document.getElementById('backgroundProgressContainer');
         const bar = document.getElementById('bgProgressBar');
         const text = document.getElementById('bgProgressText');
+        const dismissBtn = document.getElementById('bgDismissBtn');
 
         container.style.display = 'block';
+        let pollCount = 0; // Track number of polls for client-side timeout
 
         const pollProgress = async () => {
             try {
@@ -130,6 +137,7 @@
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
 
+                // SUCCESS: all uploads completed
                 if (data.status === 'finished') {
                     bar.style.width = `100%`;
                     text.innerText = "Traitement terminé avec succès !";
@@ -142,6 +150,18 @@
                     return;
                 }
 
+                // FAILURE: server detected crashed/failed uploads
+                if (data.status === 'failed') {
+                    bar.style.width = `${data.percentage || 0}%`;
+                    bar.style.background = '#ef4444';
+                    text.innerText = data.message || "Le traitement a échoué.";
+                    text.style.color = '#ef4444';
+                    localStorage.removeItem('activeUploads');
+                    dismissBtn.style.display = 'inline-block';
+                    return;
+                }
+
+                // PROCESSING: update progress bar
                 if (data.status === 'processing') {
                     bar.style.width = `${data.percentage}%`;
                     if (data.total_files > 0) {
@@ -151,13 +171,24 @@
                     }
                 }
 
+                pollCount++;
+
+                // Client-side safety net: if 0% after 40 polls (60 seconds), show dismiss
+                if (pollCount > 40 && data.processed_files === 0) {
+                    text.innerText = "Le traitement semble bloqué. Vous pouvez fermer ce panneau.";
+                    text.style.color = '#f59e0b';
+                    dismissBtn.style.display = 'inline-block';
+                    return; // Stop polling
+                }
+
                 // Poll every 1.5 seconds
                 setTimeout(pollProgress, 1500);
 
             } catch (err) {
                 console.error("Erreur de suivi background:", err);
                 text.innerText = "Traitement en cours (suivi indisponible)";
-                // Stop polling on error to avoid flooding
+                dismissBtn.style.display = 'inline-block';
+                // Stop polling on repeated errors
                 setTimeout(pollProgress, 10000);
             }
         };
