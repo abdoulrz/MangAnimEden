@@ -22,6 +22,10 @@ class ChunkedUpload(models.Model):
     received_chunks = models.IntegerField(default=0)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='uploading')
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # Progress tracking for extraction
+    total_files_to_process = models.IntegerField(default=0)
+    processed_files = models.IntegerField(default=0)
 
     def get_temp_path(self):
         return os.path.join(settings.MEDIA_ROOT, 'temp_uploads', str(self.upload_id))

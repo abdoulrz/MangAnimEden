@@ -113,7 +113,7 @@ class AdminSeriesListView(ListView):
     ordering = ['-updated_at']
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().annotate(chapter_count=Count('chapters'))
         query = self.request.GET.get('q')
         if query:
             queryset = queryset.filter(title__icontains=query)
@@ -481,16 +481,10 @@ class CompleteChunkedUploadView(View):
             return JsonResponse({'error': str(e)}, status=500)
 
 from catalog.services import process_single_chapter_from_temp
+import threading
 
-@method_decorator(requires_admin, name='dispatch')
-class ProcessChapterFromUploadView(View):
-    def post(self, request, *args, **kwargs):
-        upload_id = request.POST.get('upload_id')
-        series_id = request.POST.get('series_id')
-        
-        if not upload_id or not series_id:
-            return JsonResponse({'error': 'Paramètres manquants'}, status=400)
-            
+def background_process_chapters(series_id, upload_ids):
+    for upload_id in upload_ids:
         try:
             upload = ChunkedUpload.objects.get(upload_id=upload_id)
             # Find the assembled file path
@@ -501,22 +495,79 @@ class ProcessChapterFromUploadView(View):
                 safe_filename = os.path.basename(upload.filename)
                 temp_path = os.path.join(settings.MEDIA_ROOT, 'temp_uploads', safe_filename)
                 
-            if not os.path.exists(temp_path):
-                 return JsonResponse({'error': 'Fichier assemblé introuvable'}, status=404)
-            
-            chapter = process_single_chapter_from_temp(series_id, temp_path)
-            
-            # Clean up assembled file after processing
             if os.path.exists(temp_path):
+                chapter = process_single_chapter_from_temp(series_id, temp_path, upload_id=upload_id)
+                logger.info(f"Background processed chapter {chapter.number} for series {series_id}")
+                
+                # Clean up assembled file after processing
                 os.remove(temp_path)
+            else:
+                 logger.error(f"Assembled file not found for upload {upload_id}")
+                 
+        except Exception as e:
+            logger.error(f"Error background processing upload {upload_id}: {e}")
+
+@method_decorator(requires_admin, name='dispatch')
+class ProcessChapterFromUploadView(View):
+    def post(self, request, *args, **kwargs):
+        upload_ids_str = request.POST.get('upload_ids')
+        series_id = request.POST.get('series_id')
+        
+        if not upload_ids_str or not series_id:
+            return JsonResponse({'error': 'Paramètres manquants'}, status=400)
+            
+        try:
+            upload_ids = [uid.strip() for uid in upload_ids_str.split(',') if uid.strip()]
+            
+            if upload_ids:
+                # Spawn a background thread to process all uploaded chapter archives
+                thread = threading.Thread(target=background_process_chapters, args=(series_id, upload_ids))
+                thread.daemon = True
+                thread.start()
                 
             return JsonResponse({
-                'status': 'processed',
-                'chapter_id': chapter.id,
-                'chapter_number': chapter.number
+                'status': 'processing_started',
+                'message': f"{len(upload_ids)} chapitres en cours de traitement en arrière-plan."
             })
         except Exception as e:
-            logger.error(f"Error in ProcessChapterFromUploadView: {e}")
+            logger.error(f"Error starting background processing: {e}")
+            return JsonResponse({'error': str(e)}, status=500)
+
+@method_decorator(requires_admin, name='dispatch')
+class UploadProgressStatusView(View):
+    def get(self, request, *args, **kwargs):
+        upload_ids_str = request.GET.get('upload_ids', '')
+        if not upload_ids_str:
+            return JsonResponse({'error': 'Paramètres manquants'}, status=400)
+            
+        upload_ids = [uid.strip() for uid in upload_ids_str.split(',') if uid.strip()]
+        
+        try:
+            uploads = ChunkedUpload.objects.filter(upload_id__in=upload_ids)
+            stats = {
+                'total_files': 0,
+                'processed_files': 0,
+                'completed_uploads': 0,
+                'total_uploads': len(upload_ids),
+                'status': 'processing'
+            }
+            
+            for upload in uploads:
+                stats['total_files'] += upload.total_files_to_process
+                stats['processed_files'] += upload.processed_files
+                if upload.status == 'completed' and upload.processed_files >= upload.total_files_to_process and upload.total_files_to_process > 0:
+                     stats['completed_uploads'] += 1
+                     
+            if stats['total_files'] > 0:
+                stats['percentage'] = round((stats['processed_files'] / stats['total_files']) * 100)
+            else:
+                stats['percentage'] = 0
+                
+            if stats['completed_uploads'] == len(upload_ids) and stats['total_files'] > 0:
+                 stats['status'] = 'finished'
+                 
+            return JsonResponse(stats)
+        except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
 

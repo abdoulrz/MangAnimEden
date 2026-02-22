@@ -4,6 +4,7 @@ import shutil
 import tempfile
 import logging
 from io import BytesIO
+import concurrent.futures
 
 from django.core.files.base import ContentFile
 from django.conf import settings
@@ -38,7 +39,7 @@ from .utils import extract_chapter_number
 
 logger = logging.getLogger(__name__)
 
-def process_single_chapter_from_temp(series_id, temp_file_path):
+def process_single_chapter_from_temp(series_id, temp_file_path, upload_id=None):
     """
     Processes a single chapter file from temp_uploads and links it to a series.
     Returns the Chapter object.
@@ -63,7 +64,7 @@ def process_single_chapter_from_temp(series_id, temp_file_path):
         chapter.source_file.save(filename, File(f), save=True)
     
     # Process file to extract pages
-    processor = FileProcessor()
+    processor = FileProcessor(upload_id=upload_id)
     processor.process_chapter(chapter)
     
     return chapter
@@ -99,8 +100,9 @@ def bulk_create_chapters_from_folder(series, files):
     return processed_count
 
 class FileProcessor:
-    def __init__(self):
+    def __init__(self, upload_id=None):
         self.supported_extensions = {'.pdf', '.cbz', '.cbr', '.zip', '.epub'}
+        self.upload_id = upload_id
 
     def process_chapter(self, chapter):
         """
@@ -168,13 +170,40 @@ class FileProcessor:
                 except OSError as e:
                     logger.warning(f"Failed to delete temp file {temp_path}: {e}")
 
+    def _process_and_save_pages(self, chapter, tasks):
+        """Helper to process page creations in parallel using ThreadPoolExecutor."""
+        from django.db.models import F
+        from administration.models import ChunkedUpload
+
+        def process_task(args):
+            i, image_data, filename = args
+            page = self._save_page_image(chapter, image_data, i + 1, filename)
+            
+            # Update progress tracking after remote save succeeds
+            if self.upload_id:
+                ChunkedUpload.objects.filter(upload_id=self.upload_id).update(processed_files=F('processed_files') + 1)
+                
+            return page
+            
+        pages_to_create = []
+        
+        # Initialize total count
+        if self.upload_id:
+            ChunkedUpload.objects.filter(upload_id=self.upload_id).update(total_files_to_process=len(tasks), processed_files=0)
+            
+        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+            pages_to_create = list(executor.map(process_task, tasks))
+            
+        if pages_to_create:
+            Page.objects.bulk_create(pages_to_create)
+
     def _save_page_image(self, chapter, image_data, page_number, filename):
-        """Create a Page object and save the image data."""
+        """Create a Page object and save the image data remotely (save=False), returns the Page instance."""
         page = Page(chapter=chapter, page_number=page_number)
-        final_filename = f"{chapter.id}_{page_number}_{filename}"
-        PAGE_IMAGE_FIELD_NAME = 'image' # Assuming the field name is 'image' in Page model
-        # Check if we should use save=True. Usually yes.
-        page.image.save(final_filename, ContentFile(image_data), save=True)
+        # We don't prepend the chapter id to the filename anymore since we use a logical folder path
+        # from the page_image_upload_path method in models.py
+        page.image.save(filename, ContentFile(image_data), save=False)
+        return page
 
     def _extract_from_pdf(self, chapter, file_path):
         """Extract images from PDF files."""
@@ -182,11 +211,14 @@ class FileProcessor:
         
         reader = pypdf.PdfReader(file_path)
         
+        tasks = []
         count = 0 
         for i, page in enumerate(reader.pages):
             for image_file_object in page.images:
-                self._save_page_image(chapter, image_file_object.data, count + 1, image_file_object.name)
+                tasks.append((count, image_file_object.data, image_file_object.name))
                 count += 1
+                
+        self._process_and_save_pages(chapter, tasks)
 
     def _extract_from_rar(self, chapter, file_path):
         """Extract images from RAR/CBR archives."""
@@ -208,11 +240,14 @@ class FileProcessor:
                 
                 image_files.sort()
                 
+                tasks = []
                 for i, filename in enumerate(image_files):
                     with rf.open(filename) as f:
                         image_data = f.read()
                         clean_name = os.path.basename(filename)
-                        self._save_page_image(chapter, image_data, i + 1, clean_name)
+                        tasks.append((i, image_data, clean_name))
+                        
+                self._process_and_save_pages(chapter, tasks)
         except rarfile.BadRarFile:
             # Some .cbr files are actually ZIP-compressed (mislabeled)
             logger.warning(f"CBR file {file_path} is not a valid RAR, trying as ZIP...")
@@ -231,8 +266,11 @@ class FileProcessor:
             
             image_files.sort()
             
+            tasks = []
             for i, filename in enumerate(image_files):
                 with zf.open(filename) as f:
                     image_data = f.read()
                     clean_name = os.path.basename(filename)
-                    self._save_page_image(chapter, image_data, i + 1, clean_name)
+                    tasks.append((i, image_data, clean_name))
+                    
+            self._process_and_save_pages(chapter, tasks)

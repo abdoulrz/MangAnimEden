@@ -3,6 +3,15 @@ from django.conf import settings  # Import settings for AUTH_USER_MODEL
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 
+def page_image_upload_path(instance, filename):
+    """
+    Génère un chemin logique pour les images de pages :
+    mangas/<series_slug>/chapter_<number>/<filename>
+    """
+    series_slug = instance.chapter.series.slug
+    chapter_num = instance.chapter.number
+    return f'mangas/{series_slug}/chapter_{chapter_num}/{filename}'
+
 
 
 
@@ -65,8 +74,9 @@ class Series(models.Model):
     # Analytics
     views_count = models.PositiveIntegerField(default=0, verbose_name="Nombre de vues")
     
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
     
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -128,7 +138,7 @@ class Page(models.Model):
     )
     page_number = models.PositiveIntegerField(verbose_name="Numéro de page")
     image = models.ImageField(
-        upload_to='mangas/%Y/%m/',
+        upload_to=page_image_upload_path,
         verbose_name="Image"
     )
     

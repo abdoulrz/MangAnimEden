@@ -11,89 +11,91 @@
     </div>
 </div>
 
-<table class="admin-table">
-    <thead>
-        <tr>
-            <th>Utilisateur</th>
-            <th>Email</th>
-            <th>Rôles</th>
-            <th>Statut</th>
-            <th>Inscrit le</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for user in users %}
-        <tr>
-            <td>
-                <div class="user-cell">
-                    {% if user.avatar %}
-                    <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-small">
+<div class="table-responsive">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Utilisateur</th>
+                <th>Email</th>
+                <th>Rôles</th>
+                <th>Statut</th>
+                <th>Inscrit le</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>
+                    <div class="user-cell">
+                        {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="avatar" class="avatar-small">
+                        {% else %}
+                        <div class="avatar-placeholder-small">{{ user.nickname|first|upper }}</div>
+                        {% endif %}
+                        <span class="username">{{ user.nickname }}</span>
+                    </div>
+                </td>
+                <td>{{ user.email }}</td>
+                <td>
+                    {% if user.is_superuser or user.role_admin %}<span class="role-badge admin">Admin</span>{% endif %}
+                    {% if user.role_moderator %}<span class="role-badge mod">Mod</span>{% endif %}
+                    {% if not user.role_admin and not user.is_superuser and not user.role_moderator %}Lecteur{% endif %}
+                </td>
+                <td>
+                    {% if user.is_banned %}
+                    <span class="status-badge banned">Banni</span>
                     {% else %}
-                    <div class="avatar-placeholder-small">{{ user.nickname|first|upper }}</div>
+                    <span class="status-badge active">Actif</span>
                     {% endif %}
-                    <span class="username">{{ user.nickname }}</span>
-                </div>
-            </td>
-            <td>{{ user.email }}</td>
-            <td>
-                {% if user.is_superuser or user.role_admin %}<span class="role-badge admin">Admin</span>{% endif %}
-                {% if user.role_moderator %}<span class="role-badge mod">Mod</span>{% endif %}
-                {% if not user.role_admin and not user.is_superuser and not user.role_moderator %}Lecteur{% endif %}
-            </td>
-            <td>
-                {% if user.is_banned %}
-                <span class="status-badge banned">Banni</span>
-                {% else %}
-                <span class="status-badge active">Actif</span>
-                {% endif %}
-            </td>
-            <td>{{ user.date_joined|date:"d M Y" }}</td>
-            <td>
-                <div class="action-buttons">
-                    <form method="POST" action="{% url 'administration:user_action' %}" class="inline-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="user_id" value="{{ user.id }}">
-                        <input type="hidden" name="action" value="toggle_ban">
-                        <button type="submit"
-                            class="btn-small {% if user.is_banned %}btn-success{% else %}btn-danger{% endif %}"
-                            title="{% if user.is_banned %}Débannir{% else %}Bannir{% endif %}">
-                            {% if user.is_banned %}🔓{% else %}🚫{% endif %}
-                            {% if user.is_banned %}Débannir{% else %}Bannir{% endif %}
-                        </button>
-                    </form>
+                </td>
+                <td>{{ user.date_joined|date:"d M Y" }}</td>
+                <td>
+                    <div class="action-buttons">
+                        <form method="POST" action="{% url 'administration:user_action' %}" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <input type="hidden" name="action" value="toggle_ban">
+                            <button type="submit"
+                                class="btn-small {% if user.is_banned %}btn-success{% else %}btn-danger{% endif %}"
+                                title="{% if user.is_banned %}Débannir{% else %}Bannir{% endif %}">
+                                {% if user.is_banned %}🔓{% else %}🚫{% endif %}
+                                {% if user.is_banned %}Débannir{% else %}Bannir{% endif %}
+                            </button>
+                        </form>
 
-                    {% if request.user.role_admin %}
-                    <form method="POST" action="{% url 'administration:user_action' %}" class="inline-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="user_id" value="{{ user.id }}">
-                        <input type="hidden" name="action" value="toggle_moderator">
-                        <button type="submit" class="btn-icon promote" title="Toggle Modérateur">
-                            🛡️
-                        </button>
-                    </form>
-                    {% endif %}
+                        {% if request.user.role_admin or request.user.is_superuser %}
+                        <form method="POST" action="{% url 'administration:user_action' %}" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <input type="hidden" name="action" value="toggle_moderator">
+                            <button type="submit" class="btn-icon promote" title="Toggle Modérateur">
+                                🛡️
+                            </button>
+                        </form>
+                        {% endif %}
 
-                    {% if request.user.is_superuser %}
-                    <form method="POST" action="{% url 'administration:user_action' %}" class="inline-form">
-                        {% csrf_token %}
-                        <input type="hidden" name="user_id" value="{{ user.id }}">
-                        <input type="hidden" name="action" value="toggle_admin">
-                        <button type="submit" class="btn-icon promote" title="Toggle Admin" {% if user.is_superuser %}disabled title="Cannot modify superuser" {% endif %}>
-                            👑
-                        </button>
-                    </form>
-                    {% endif %}
-                </div>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="6" class="empty-state">Aucun utilisateur trouvé.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                        {% if request.user.is_superuser %}
+                        <form method="POST" action="{% url 'administration:user_action' %}" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ user.id }}">
+                            <input type="hidden" name="action" value="toggle_admin">
+                            <button type="submit" class="btn-icon promote" title="Toggle Admin" {% if user.is_superuser %}disabled title="Cannot modify superuser" {% endif %}>
+                                👑
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="empty-state">Aucun utilisateur trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 <!-- Pagination -->
 {% if is_paginated %}

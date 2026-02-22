@@ -34,7 +34,7 @@
         <div class="series-info">
             <h3 class="series-title">{{ series.title }}</h3>
             <div class="series-meta">
-                {{ series.chapters.count }} chapitres • {{ series.views_count }} vues
+                {{ series.chapter_count }} chapitres • {{ series.views_count }} vues
             </div>
 
             <div class="series-actions">
@@ -58,4 +58,112 @@
 </div>
 
 <!-- Pagination code (reused from user_list or similar) -->
+
+<style>
+    /* Upload Background Progress Widget */
+    #backgroundProgressContainer {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 350px;
+        background: var(--bg-surface, #1e1e24);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        border: 1px solid var(--border-color, #333);
+    }
+
+    #backgroundProgressContainer h4 {
+        margin-top: 0;
+        margin-bottom: 10px;
+        font-size: 1rem;
+        color: var(--text-primary, #fff);
+    }
+
+    #bgProgressText {
+        font-size: 0.85rem;
+        color: var(--text-secondary, #aaa);
+        margin-bottom: 8px;
+    }
+
+    #backgroundProgressContainer .progress-container {
+        height: 10px;
+        background-color: var(--bg-hover, #2a2a35);
+        border-radius: 5px;
+        overflow: hidden;
+        margin-bottom: 0;
+    }
+
+    #bgProgressBar {
+        width: 0%;
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent-color, #bb86fc), var(--accent-hover, #9c27b0));
+        transition: width 0.3s ease;
+    }
+</style>
+
+<div id="backgroundProgressContainer" style="display: none;">
+    <h4>Traitement en arrière-plan</h4>
+    <div id="bgProgressText">
+        Initialisation...
+    </div>
+    <div class="progress-container">
+        <div id="bgProgressBar"></div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const uploadIdsStr = localStorage.getItem('activeUploads');
+        if (!uploadIdsStr) return;
+
+        const container = document.getElementById('backgroundProgressContainer');
+        const bar = document.getElementById('bgProgressBar');
+        const text = document.getElementById('bgProgressText');
+
+        container.style.display = 'block';
+
+        const pollProgress = async () => {
+            try {
+                const response = await fetch(`{% url "administration:upload_process_status" %}?upload_ids=${uploadIdsStr}`);
+                if (!response.ok) throw new Error('Network response was not ok');
+                const data = await response.json();
+
+                if (data.status === 'finished') {
+                    bar.style.width = `100%`;
+                    text.innerText = "Traitement terminé avec succès !";
+                    text.style.color = "var(--success-color)";
+                    localStorage.removeItem('activeUploads');
+                    setTimeout(() => {
+                        container.style.display = 'none';
+                        window.location.reload();
+                    }, 3000);
+                    return;
+                }
+
+                if (data.status === 'processing') {
+                    bar.style.width = `${data.percentage}%`;
+                    if (data.total_files > 0) {
+                        text.innerText = `Extraction : ${data.processed_files} / ${data.total_files} images (${data.percentage}%)`;
+                    } else {
+                        text.innerText = `Analyse de l'archive en cours...`;
+                    }
+                }
+
+                // Poll every 1.5 seconds
+                setTimeout(pollProgress, 1500);
+
+            } catch (err) {
+                console.error("Erreur de suivi background:", err);
+                text.innerText = "Traitement en cours (suivi indisponible)";
+                // Stop polling on error to avoid flooding
+                setTimeout(pollProgress, 10000);
+            }
+        };
+
+        pollProgress();
+    });
+</script>
+
 {% endblock %}

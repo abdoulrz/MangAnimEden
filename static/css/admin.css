@@ -12,6 +12,14 @@
     min-height: calc(100vh - 80px);
     gap: 30px;
     padding: 30px;
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.admin-container *,
+.admin-container *::before,
+.admin-container *::after {
+    box-sizing: border-box;
 }
 
 .admin-sidebar {
@@ -1090,6 +1098,27 @@
 }
 
 /* Responsive */
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 20px;
+}
+
+.table-responsive .admin-table {
+    margin-bottom: 0;
+    /* Remove double margin */
+}
+
 /* Pagination */
 .admin-pagination {
     display: flex;
@@ -1116,12 +1145,139 @@
 @media (max-width: 1024px) {
     .admin-container {
         grid-template-columns: 1fr;
-        padding: 20px;
+        padding: 15px;
+        gap: 15px;
+    }
+
+    .admin-sidebar,
+    .admin-content {
+        min-width: 0;
+        /* Fixes grid blowout for scrollable children */
     }
 
     .admin-sidebar {
         position: relative;
         top: 0;
+        margin-bottom: 10px;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        gap: 10px;
+        padding: 12px;
+        border-radius: var(--radius-lg);
+        /* Hide scrollbar for a cleaner look */
+        scrollbar-width: none;
+    }
+
+    .admin-sidebar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .admin-nav-header {
+        display: none;
+        /* Hide headers to maintain horizontal pill layout */
+    }
+
+    .admin-nav-item {
+        flex: 0 0 auto;
+        justify-content: center;
+        margin-bottom: 0;
+        padding: 10px 18px;
+        font-size: 0.9em;
+        white-space: nowrap;
+    }
+
+    .admin-content {
+        padding: 15px;
+        box-sizing: border-box;
+        width: 100%;
+        overflow-x: hidden;
+        /* Preventive */
+    }
+
+    .metrics-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
         margin-bottom: 30px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .form-group.span-2 {
+        grid-column: span 1;
+    }
+
+    .series-grid,
+    .genres-grid,
+    .badge-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 15px;
+    }
+
+    .admin-header {
+        flex-direction: column;
+        align-items: center;
+        /* Don't stretch user info boxes */
+        gap: 15px;
+        margin-bottom: 25px;
+        padding-bottom: 15px;
+    }
+
+    .admin-search-form {
+        flex-direction: column;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .admin-search-form input {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+    .admin-search-form button {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .section-logs {
+        max-width: 100%;
+        /* Add max-width constraint */
+        overflow-x: auto;
+    }
+
+
+
+    .admin-table {
+        min-width: 600px;
+    }
+
+    .admin-page-title {
+        text-align: center;
+        font-size: 1.5em;
+    }
+}
+
+@media (max-width: 480px) {
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .series-grid,
+    .genres-grid,
+    .badge-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-container {
+        padding: 10px;
+    }
+
+    .admin-content {
+        padding: 15px;
     }
 }
