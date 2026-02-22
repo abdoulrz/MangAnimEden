@@ -11,53 +11,56 @@
     </div>
 </div>
 
-<table class="admin-table">
-    <thead>
-        <tr>
-            <th>Nom</th>
-            <th>Créateur</th>
-            <th>Membres</th>
-            <th>Créé le</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for group in groups %}
-        <tr>
-            <td>
-                <div class="group-cell">
-                    {% if group.icon %}
-                    <img src="{{ group.icon.url }}" alt="icon" class="group-icon">
+<div class="table-responsive">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Créateur</th>
+                <th>Membres</th>
+                <th>Créé le</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for group in groups %}
+            <tr>
+                <td>
+                    <div class="group-cell">
+                        {% if group.icon %}
+                        <img src="{{ group.icon.url }}" alt="icon" class="group-icon">
+                        {% else %}
+                        <div class="group-icon-placeholder">{{ group.name|first|upper }}</div>
+                        {% endif %}
+                        {{ group.name }}
+                    </div>
+                </td>
+                <td>
+                    {% if group.owner %}
+                    <a href="{% url 'administration:user_list' %}?q={{ group.owner.nickname }}">{{ group.owner.nickname
+                        }}</a>
                     {% else %}
-                    <div class="group-icon-placeholder">{{ group.name|first|upper }}</div>
+                    <span class="text-muted">Système</span>
                     {% endif %}
-                    {{ group.name }}
-                </div>
-            </td>
-            <td>
-                {% if group.owner %}
-                <a href="{% url 'administration:user_list' %}?q={{ group.owner.nickname }}">{{ group.owner.nickname }}</a>
-                {% else %}
-                <span class="text-muted">Système</span>
-                {% endif %}
-            </td>
-            <td>{{ group.memberships.count }}</td>
-            <td>{{ group.created_at|date:"d M Y" }}</td>
-            <td>
-                <a href="{% url 'administration:group_edit' group.id %}" class="btn-icon"
-                    title="Éditer / Modérer">⚙️</a>
-                <form action="{% url 'administration:group_delete' group.id %}" method="POST" class="inline-form"
-                    onsubmit="return confirm('Supprimer ce groupe ?');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-icon delete" title="Supprimer">🗑️</button>
-                </form>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" class="empty-state">Aucun groupe trouvé.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+                </td>
+                <td>{{ group.memberships.count }}</td>
+                <td>{{ group.created_at|date:"d M Y" }}</td>
+                <td>
+                    <a href="{% url 'administration:group_edit' group.id %}" class="btn-icon"
+                        title="Éditer / Modérer">⚙️</a>
+                    <form action="{% url 'administration:group_delete' group.id %}" method="POST" class="inline-form"
+                        onsubmit="return confirm('Supprimer ce groupe ?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-icon delete" title="Supprimer">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="empty-state">Aucun groupe trouvé.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}

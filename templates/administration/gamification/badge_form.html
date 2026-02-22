@@ -45,13 +45,13 @@
             {% if form.icon.errors %}<div class="error">{{ form.icon.errors }}</div>{% endif %}
         </div>
 
-        <div class="row">
-            <div class="col-md-6 form-group mb-3">
+        <div class="form-grid">
+            <div class="form-group">
                 <label for="{{ form.condition_type.id_for_label }}">Condition d'obtention</label>
                 {{ form.condition_type }}
                 {% if form.condition_type.errors %}<div class="error">{{ form.condition_type.errors }}</div>{% endif %}
             </div>
-            <div class="col-md-6 form-group mb-3">
+            <div class="form-group">
                 <label for="{{ form.threshold.id_for_label }}">Seuil (Quantité)</label>
                 {{ form.threshold }}
                 <small class="form-text text-muted">Ex: 100 pour 100 chapitres.</small>
