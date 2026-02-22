@@ -112,7 +112,7 @@
         <div id="bgProgressBar"></div>
     </div>
     <button id="bgDismissBtn"
-        style="display:none; margin-top:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#aaa; padding:6px 16px; border-radius:6px; cursor:pointer; font-size:0.85rem;"
+        style="margin-top:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#aaa; padding:6px 16px; border-radius:6px; cursor:pointer; font-size:0.85rem;"
         onclick="localStorage.removeItem('activeUploads'); document.getElementById('backgroundProgressContainer').style.display='none';">
         ✕ Fermer
     </button>
@@ -129,7 +129,9 @@
         const dismissBtn = document.getElementById('bgDismissBtn');
 
         container.style.display = 'block';
-        let pollCount = 0; // Track number of polls for client-side timeout
+        let pollCount = 0;
+        let lastPercentage = -1;
+        let stallCount = 0; // How many polls with no progress change
 
         const pollProgress = async () => {
             try {
@@ -173,11 +175,19 @@
 
                 pollCount++;
 
-                // Client-side safety net: if 0% after 40 polls (60 seconds), show dismiss
-                if (pollCount > 40 && data.processed_files === 0) {
+                // Track stalled progress (percentage hasn't changed)
+                if (data.percentage === lastPercentage) {
+                    stallCount++;
+                } else {
+                    stallCount = 0;
+                    lastPercentage = data.percentage;
+                }
+
+                // If stalled for ~2 minutes (80 polls × 1.5s), mark as stuck
+                if (stallCount > 80) {
                     text.innerText = "Le traitement semble bloqué. Vous pouvez fermer ce panneau.";
                     text.style.color = '#f59e0b';
-                    dismissBtn.style.display = 'inline-block';
+                    localStorage.removeItem('activeUploads');
                     return; // Stop polling
                 }
 

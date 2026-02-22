@@ -607,7 +607,7 @@ class UploadProgressStatusView(View):
         
         try:
             uploads = ChunkedUpload.objects.filter(upload_id__in=upload_ids)
-            stale_threshold = timezone.now() - timedelta(minutes=30)
+            stale_threshold = timezone.now() - timedelta(minutes=5)
             
             stats = {
                 'total_files': 0,

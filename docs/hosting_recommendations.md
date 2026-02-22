@@ -80,7 +80,66 @@
 
 ---
 
+## **Upload Performance Scaling**
+
+The chapter upload pipeline (extract images from archive → upload each to R2 → save to DB) runs in a background thread on the web process. On constrained environments (512MB RAM), this can be slow or unstable. Two options to improve this:
+
+### Option A: Celery Worker + Redis (Recommended)
+
+**Architecture**: Offload image processing to a dedicated background worker.
+
+```
+Current:
+[Web Process 512MB] → upload → extract → R2 upload (all in same process)
+
+With Celery:
+[Web Process] → upload → send task to Celery → respond immediately ✅
+[Worker]      → receive task → extract → R2 upload (dedicated process)
+```
+
+* **Redis**: Render Free Tier (25MB — sufficient as Celery message broker)
+* **Background Worker**: Render Free or Starter ($0–$7/mo)
+* **Dependencies**: `celery`, `redis`
+
+**Pros**:
+
+* Web process never slows down during uploads
+* Worker has its own RAM allocation → safe to parallelize
+* Automatic retry on failure
+* Standard Django architecture for async tasks
+
+**Cons**:
+
+* Adds 2 services to manage (Redis + Worker)
+* Slight setup complexity (`celery.py`, `@shared_task` decorators)
+
+---
+
+### Option B: Render Plan Upgrade
+
+Upgrade the web service to get more RAM for in-process parallel uploads:
+
+| Plan | RAM | CPU | Price | Upload Speed (est.) |
+|------|-----|-----|-------|---------------------|
+| Free | 512MB | Shared | $0 | ~3 min / 100 images (sequential) |
+| Starter | 512MB | Shared | $7/mo | Same as Free |
+| **Standard** | **2GB** | 1 vCPU | **$25/mo** | **~1 min / 100 images (3 threads)** |
+| Pro | 4GB | 2 vCPU | $85/mo | ~30s / 100 images (6 threads) |
+
+**Pros**:
+
+* Zero code changes — just re-enable `ThreadPoolExecutor`
+* Simpler infrastructure (no Redis/Worker to manage)
+
+**Cons**:
+
+* Monthly cost increase
+* Still uses web process RAM for background work
+
+---
+
 ## **Recommendation**
 
 1. **For Now (Simplest)**: Stick with **Option 1 (Render + Cloudflare R2)**. It requires the least setup change (just swapping Cloudinary for R2 later) and keeps costs effectively zero/low until you scale massively.
 2. **For Pure Value (Cheapest)**: **Option 2 (Contabo)** is unbeatable (200GB SSD for €5), but be prepared to learn Linux system administration (Security, Firewalls, Docker).
+3. **For Upload Speed**: Add **Celery + Redis** (Option A above) — both free on Render. This is the standard Django pattern for long-running tasks and doesn't require a plan upgrade.
