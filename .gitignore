@@ -52,4 +52,5 @@ package-lock.json
 
 # Migrations (optionnel, décommenter si nécessaire)
 # */migrations/*.py
-# !*/migrations/__init__.py
+# JSON Data Dumps
+*.json

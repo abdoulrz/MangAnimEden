@@ -22,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('DJANGO_SECRET_KEY', default='django-insecure-l=yy7+4k^aw!u^b5v)!^b_*!sjx6*1wrocj^h=faz7n!rp=jnv')
+SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=False, cast=bool)
@@ -232,8 +232,8 @@ SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APPS': [
             {
-                'client_id': config('GOOGLE_CLIENT_ID', default='998805449587-mvkim50ag8mqpqba2q3cn5p9uobbjk43q.apps.googleusercontent.com'),
-                'secret': config('GOOGLE_CLIENT_SECRET', default='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'),
+                'client_id': config('GOOGLE_CLIENT_ID'),
+                'secret': config('GOOGLE_CLIENT_SECRET'),
                 'key': ''
             },
         ],
