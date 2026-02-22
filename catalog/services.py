@@ -203,8 +203,6 @@ class FileProcessor:
                 
             return page
             
-        pages_to_create = []
-        
         # Initialize total count
         if self.upload_id:
             ChunkedUpload.objects.filter(upload_id=self.upload_id).update(total_files_to_process=len(tasks), processed_files=0)
@@ -212,17 +210,13 @@ class FileProcessor:
         # VERY IMPORTANT: Keep max_workers low (2-3) on constrained environments (like 512MB RAM)
         # Boto3 uploads and Pillow hold memory per thread. 10 workers will cause OOM crashes.
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-            pages_to_create = list(executor.map(process_task, tasks))
-            
-        if pages_to_create:
-            Page.objects.bulk_create(pages_to_create)
+            list(executor.map(process_task, tasks))
 
     def _save_page_image(self, chapter, image_data, page_number, filename):
-        """Create a Page object and save the image data remotely (save=False), returns the Page instance."""
+        """Create a Page object and save the image data remotely, returns the Page instance."""
         page = Page(chapter=chapter, page_number=page_number)
-        # We don't prepend the chapter id to the filename anymore since we use a logical folder path
-        # from the page_image_upload_path method in models.py
-        page.image.save(filename, ContentFile(image_data), save=False)
+        # save=True: commit each page individually so a DB error doesn't lose all pages
+        page.image.save(filename, ContentFile(image_data), save=True)
         return page
 
     def _extract_from_pdf(self, chapter, file_path):

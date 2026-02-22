@@ -595,7 +595,7 @@ class UploadProgressStatusView(View):
                 # Count terminal states: completed, failed, or stale
                 if upload.status in ('completed', 'failed'):
                     stats['terminal_uploads'] += 1
-                elif upload.status == 'processing' and upload.created_at < stale_threshold and upload.processed_files == 0:
+                elif upload.status in ('processing', 'assembled') and upload.created_at < stale_threshold and upload.processed_files == 0:
                     # Stuck for >30 min with no progress → mark as failed
                     upload.status = 'failed'
                     upload.save(update_fields=['status'])

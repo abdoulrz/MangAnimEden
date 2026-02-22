@@ -53,7 +53,7 @@ class ChunkedUploadService:
                 with open(chunk_path, 'rb') as chunk:
                     final_file.write(chunk.read())
         
-        upload.status = 'completed'
+        upload.status = 'assembled'
         upload.save()
         
         # Cleanup chunks (but keep the assembled file for the processor)
