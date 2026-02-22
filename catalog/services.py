@@ -170,13 +170,31 @@ class FileProcessor:
                 except OSError as e:
                     logger.warning(f"Failed to delete temp file {temp_path}: {e}")
 
-    def _process_and_save_pages(self, chapter, tasks):
+    def _process_and_save_pages(self, chapter, tasks, file_path=None, archive_type=None):
         """Helper to process page creations in parallel using ThreadPoolExecutor."""
         from django.db.models import F
         from administration.models import ChunkedUpload
 
         def process_task(args):
-            i, image_data, filename = args
+            # Extract image data dynamically inside the thread to save RAM
+            if archive_type == 'zip':
+                i, inner_filename, filename = args
+                with zipfile.ZipFile(file_path, 'r') as zf:
+                    with zf.open(inner_filename) as f:
+                        image_data = f.read()
+            elif archive_type == 'rar':
+                i, inner_filename, filename = args
+                with rarfile.RarFile(file_path, 'r') as rf:
+                    with rf.open(inner_filename) as f:
+                        image_data = f.read()
+            elif archive_type == 'pdf':
+                i, page_num, img_idx, filename = args
+                reader = pypdf.PdfReader(file_path)
+                image_data = reader.pages[page_num].images[img_idx].data
+            else:
+                # Direct image upload fallback
+                i, image_data, filename = args
+
             page = self._save_page_image(chapter, image_data, i + 1, filename)
             
             # Update progress tracking after remote save succeeds
@@ -191,7 +209,9 @@ class FileProcessor:
         if self.upload_id:
             ChunkedUpload.objects.filter(upload_id=self.upload_id).update(total_files_to_process=len(tasks), processed_files=0)
             
-        with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        # VERY IMPORTANT: Keep max_workers low (2-3) on constrained environments (like 512MB RAM)
+        # Boto3 uploads and Pillow hold memory per thread. 10 workers will cause OOM crashes.
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             pages_to_create = list(executor.map(process_task, tasks))
             
         if pages_to_create:
@@ -213,12 +233,13 @@ class FileProcessor:
         
         tasks = []
         count = 0 
-        for i, page in enumerate(reader.pages):
-            for image_file_object in page.images:
-                tasks.append((count, image_file_object.data, image_file_object.name))
+        for page_num, page in enumerate(reader.pages):
+            for img_idx, image_file_object in enumerate(page.images):
+                # Don't preload data. Pass coordinates to thread.
+                tasks.append((count, page_num, img_idx, image_file_object.name))
                 count += 1
                 
-        self._process_and_save_pages(chapter, tasks)
+        self._process_and_save_pages(chapter, tasks, file_path=file_path, archive_type='pdf')
 
     def _extract_from_rar(self, chapter, file_path):
         """Extract images from RAR/CBR archives."""
@@ -242,12 +263,11 @@ class FileProcessor:
                 
                 tasks = []
                 for i, filename in enumerate(image_files):
-                    with rf.open(filename) as f:
-                        image_data = f.read()
-                        clean_name = os.path.basename(filename)
-                        tasks.append((i, image_data, clean_name))
+                    clean_name = os.path.basename(filename)
+                    # Don't preload data into memory
+                    tasks.append((i, filename, clean_name))
                         
-                self._process_and_save_pages(chapter, tasks)
+                self._process_and_save_pages(chapter, tasks, file_path=file_path, archive_type='rar')
         except rarfile.BadRarFile:
             # Some .cbr files are actually ZIP-compressed (mislabeled)
             logger.warning(f"CBR file {file_path} is not a valid RAR, trying as ZIP...")
@@ -268,9 +288,8 @@ class FileProcessor:
             
             tasks = []
             for i, filename in enumerate(image_files):
-                with zf.open(filename) as f:
-                    image_data = f.read()
-                    clean_name = os.path.basename(filename)
-                    tasks.append((i, image_data, clean_name))
+                clean_name = os.path.basename(filename)
+                # Don't preload data into memory
+                tasks.append((i, filename, clean_name))
                     
-            self._process_and_save_pages(chapter, tasks)
+            self._process_and_save_pages(chapter, tasks, file_path=file_path, archive_type='zip')
