@@ -4,7 +4,7 @@ import shutil
 import tempfile
 import logging
 from io import BytesIO
-import concurrent.futures
+
 
 from django.core.files.base import ContentFile
 from django.conf import settings
@@ -227,11 +227,47 @@ class FileProcessor:
         logger.info(f"Finished processing {chapter}: {saved_count} saved, {failed_count} failed out of {len(tasks)}")
 
     def _save_page_image(self, chapter, image_data, page_number, filename):
-        """Create a Page object and save the image data remotely, returns the Page instance."""
-        page = Page(chapter=chapter, page_number=page_number)
-        # save=True: commit each page individually so a DB error doesn't lose all pages
-        page.image.save(filename, ContentFile(image_data), save=True)
-        return page
+        """Compress, resize, and save a page image to R2."""
+        try:
+            img = Image.open(BytesIO(image_data))
+            # Free the raw data immediately
+            del image_data
+
+            # Convert to RGB if necessary (strips alpha channel, handles palette PNGs)
+            if img.mode in ('RGBA', 'P', 'LA'):
+                img = img.convert('RGB')
+
+            # Resize: cap width at 1400px (standard manga reader width)
+            MAX_WIDTH = 1400
+            if img.width > MAX_WIDTH:
+                ratio = MAX_WIDTH / img.width
+                new_height = int(img.height * ratio)
+                img = img.resize((MAX_WIDTH, new_height), Image.LANCZOS)
+
+            # Compress to JPEG at 82% quality (~200-400KB per page)
+            buffer = BytesIO()
+            img.save(buffer, format='JPEG', quality=82, optimize=True)
+            img.close()
+
+            compressed_data = buffer.getvalue()
+            buffer.close()
+
+            # Force .jpg extension
+            base = os.path.splitext(filename)[0]
+            filename = f"{base}.jpg"
+
+            page = Page(chapter=chapter, page_number=page_number)
+            page.image.save(filename, ContentFile(compressed_data), save=True)
+
+            del compressed_data
+            return page
+
+        except Exception as e:
+            # Fallback: save raw data if compression fails
+            logger.warning(f"Image compression failed for page {page_number}, saving raw: {e}")
+            page = Page(chapter=chapter, page_number=page_number)
+            page.image.save(filename, ContentFile(image_data if 'image_data' in dir() else b''), save=True)
+            return page
 
     def _extract_from_pdf(self, chapter, file_path):
         """Extract images from PDF files."""
