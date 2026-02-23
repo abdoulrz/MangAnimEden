@@ -1,5 +1,6 @@
 import os
 import shutil
+import tempfile
 from django.conf import settings
 from .models import ChunkedUpload
 
@@ -7,7 +8,7 @@ class ChunkedUploadService:
     @staticmethod
     def get_upload_dir(upload_id):
         """Returns the directory where chunks for a specific upload are stored."""
-        path = os.path.join(settings.MEDIA_ROOT, 'temp_uploads', str(upload_id))
+        path = os.path.join(tempfile.gettempdir(), 'manga_temp_uploads', str(upload_id))
         if not os.path.exists(path):
             os.makedirs(path, exist_ok=True)
         return path
@@ -36,11 +37,13 @@ class ChunkedUploadService:
         """Assembles all chunks into a final file."""
         upload = ChunkedUpload.objects.get(upload_id=upload_id)
         upload_dir = ChunkedUploadService.get_upload_dir(upload_id)
-        final_file_path = os.path.join(settings.MEDIA_ROOT, 'temp_uploads', upload.filename)
+        
+        base_temp_dir = os.path.join(tempfile.gettempdir(), 'manga_temp_uploads')
+        os.makedirs(base_temp_dir, exist_ok=True)
         
         # Ensure the filename is safe
         safe_filename = os.path.basename(upload.filename)
-        final_file_path = os.path.join(settings.MEDIA_ROOT, 'temp_uploads', safe_filename)
+        final_file_path = os.path.join(base_temp_dir, safe_filename)
 
         with open(final_file_path, 'wb') as final_file:
             for i in range(upload.total_chunks):

@@ -585,18 +585,20 @@ class CompleteChunkedUploadView(View):
 
 from catalog.services import process_single_chapter_from_temp
 import threading
+import tempfile
 
 def background_process_chapters(series_id, upload_ids):
     for upload_id in upload_ids:
         try:
             upload = ChunkedUpload.objects.get(upload_id=upload_id)
             # Find the assembled file path
-            temp_path = os.path.join(settings.MEDIA_ROOT, 'temp_uploads', upload.filename)
+            base_temp_dir = os.path.join(tempfile.gettempdir(), 'manga_temp_uploads')
+            temp_path = os.path.join(base_temp_dir, upload.filename)
             
             if not os.path.exists(temp_path):
                 # Try assembled path with safe filename if logic assembly used it
                 safe_filename = os.path.basename(upload.filename)
-                temp_path = os.path.join(settings.MEDIA_ROOT, 'temp_uploads', safe_filename)
+                temp_path = os.path.join(base_temp_dir, safe_filename)
                 
             if os.path.exists(temp_path):
                 chapter = process_single_chapter_from_temp(series_id, temp_path, upload_id=upload_id)
