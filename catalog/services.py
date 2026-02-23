@@ -170,6 +170,35 @@ class FileProcessor:
                 except OSError as e:
                     logger.warning(f"Failed to delete temp file {temp_path}: {e}")
 
+    def _process_from_path(self, chapter, file_path):
+        """Process a chapter directly from a local file path (no R2 download needed)."""
+        ext = os.path.splitext(file_path)[1].lower()
+
+        if ext not in self.supported_extensions:
+            logger.warning(f"Unsupported file extension: {ext}")
+            return False
+
+        logger.info(f"Processing {chapter} from local path ({ext})...")
+
+        try:
+            if ext == '.pdf':
+                self._extract_from_pdf(chapter, file_path)
+            elif ext == '.cbr':
+                self._extract_from_rar(chapter, file_path)
+            elif ext in ['.cbz', '.zip', '.epub']:
+                self._extract_from_zip(chapter, file_path)
+            elif ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                with open(file_path, 'rb') as f:
+                    page_count = chapter.pages.count()
+                    self._save_page_image(chapter, f.read(), page_count + 1, os.path.basename(file_path))
+
+            logger.info(f"Successfully processed {chapter}. Total pages: {chapter.pages.count()}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error processing {chapter} from path: {e}")
+            return False
+
     def _process_and_save_pages(self, chapter, tasks, file_path=None, archive_type=None):
         """Process page creations sequentially with per-image error handling."""
         from django.db.models import F

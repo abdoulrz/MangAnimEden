@@ -273,12 +273,40 @@ class AdminChapterCreateView(CreateView):
         return reverse_lazy('administration:chapter_list', kwargs={'series_id': self.object.series.id})
 
     def form_valid(self, form):
+        uploaded_file = self.request.FILES.get('source_file')
+        
+        # Save the chapter WITHOUT the source_file to avoid uploading the huge archive to R2
+        # (We only need the extracted page images on R2, not the raw CBZ/PDF)
+        if uploaded_file:
+            form.instance.source_file = None
         self.object = form.save()
         
-        # Start background processing for the chapter file
-        if self.object.source_file:
-            processor = FileProcessor()
-            threading.Thread(target=processor.process_chapter, args=(self.object,)).start()
+        if uploaded_file:
+            # Stream uploaded file to temp disk in chunks (never holds full file in RAM)
+            import tempfile
+            ext = os.path.splitext(uploaded_file.name)[1].lower()
+            temp_fd, temp_path = tempfile.mkstemp(suffix=ext, dir=settings.MEDIA_ROOT)
+            try:
+                with os.fdopen(temp_fd, 'wb') as tmp:
+                    for chunk in uploaded_file.chunks(chunk_size=2 * 1024 * 1024):  # 2MB chunks
+                        tmp.write(chunk)
+            except Exception:
+                os.close(temp_fd)
+                raise
+            
+            # Process in background thread from the temp file on disk
+            def process_from_temp(chapter, path):
+                try:
+                    processor = FileProcessor()
+                    processor._process_from_path(chapter, path)
+                    logger.info(f"Processed chapter {chapter.number} from temp file")
+                except Exception as e:
+                    logger.error(f"Error processing chapter {chapter}: {e}")
+                finally:
+                    if os.path.exists(path):
+                        os.unlink(path)
+            
+            threading.Thread(target=process_from_temp, args=(self.object, temp_path)).start()
             
         create_system_log(self.request, 'CHAPTER_CREATE', details=f"Chapitre créé : {self.object.number} pour {self.object.series.title}")
         
@@ -315,13 +343,41 @@ class AdminChapterUpdateView(UpdateView):
         return reverse_lazy('administration:chapter_list', kwargs={'series_id': self.object.series.id})
 
     def form_valid(self, form):
+        uploaded_file = self.request.FILES.get('source_file')
+        
+        # Clear source_file before saving to avoid uploading archive to R2
+        if uploaded_file:
+            form.instance.source_file = None
         self.object = form.save()
         
         # Process the file if a new one was uploaded
-        if 'source_file' in form.changed_data and self.object.source_file:
+        if uploaded_file:
             self.object.pages.all().delete()
-            processor = FileProcessor()
-            threading.Thread(target=processor.process_chapter, args=(self.object,)).start()
+            
+            # Stream uploaded file to temp disk in chunks
+            import tempfile
+            ext = os.path.splitext(uploaded_file.name)[1].lower()
+            temp_fd, temp_path = tempfile.mkstemp(suffix=ext, dir=settings.MEDIA_ROOT)
+            try:
+                with os.fdopen(temp_fd, 'wb') as tmp:
+                    for chunk in uploaded_file.chunks(chunk_size=2 * 1024 * 1024):
+                        tmp.write(chunk)
+            except Exception:
+                os.close(temp_fd)
+                raise
+            
+            def process_from_temp(chapter, path):
+                try:
+                    processor = FileProcessor()
+                    processor._process_from_path(chapter, path)
+                    logger.info(f"Updated chapter {chapter.number} from temp file")
+                except Exception as e:
+                    logger.error(f"Error processing chapter {chapter}: {e}")
+                finally:
+                    if os.path.exists(path):
+                        os.unlink(path)
+            
+            threading.Thread(target=process_from_temp, args=(self.object, temp_path)).start()
             msg = "Chapitre mis à jour. Extraction des nouvelles pages en cours..."
         else:
             msg = "Chapitre mis à jour."
