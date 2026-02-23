@@ -285,7 +285,7 @@ class AdminChapterCreateView(CreateView):
             # Stream uploaded file to temp disk in chunks (never holds full file in RAM)
             import tempfile
             ext = os.path.splitext(uploaded_file.name)[1].lower()
-            temp_fd, temp_path = tempfile.mkstemp(suffix=ext, dir=settings.MEDIA_ROOT)
+            temp_fd, temp_path = tempfile.mkstemp(suffix=ext)
             try:
                 with os.fdopen(temp_fd, 'wb') as tmp:
                     for chunk in uploaded_file.chunks(chunk_size=2 * 1024 * 1024):  # 2MB chunks
