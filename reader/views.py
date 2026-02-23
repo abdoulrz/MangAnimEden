@@ -3,7 +3,7 @@ from django.conf import settings
 from catalog.models import Chapter, Page
 
 
-def demo_view(request, chapter_id=None):
+def chap_view(request, chapter_id=None):
     """
     Vue de démonstration du lecteur de manga.
     Peut afficher un chapitre spécifique ou le premier disponible.
@@ -14,10 +14,10 @@ def demo_view(request, chapter_id=None):
         # Récupère le premier chapitre disponible
         chapter = Chapter.objects.select_related('series').first()
         if chapter:
-            return redirect('reader:demo_chapter', chapter_id=chapter.id)
+            return redirect('reader:chap_chapter', chapter_id=chapter.id)
 
     if not chapter:
-        return render(request, 'reader/demo.html', {
+        return render(request, 'reader/chap.html', {
             'page': None,
             'STATIC_VERSION': settings.STATIC_VERSION
         })
@@ -51,4 +51,4 @@ def demo_view(request, chapter_id=None):
         'STATIC_VERSION': settings.STATIC_VERSION
     }
     
-    return render(request, 'reader/demo.html', context)
+    return render(request, 'reader/chap.html', context)

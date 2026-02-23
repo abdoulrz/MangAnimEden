@@ -4,6 +4,6 @@ from . import views
 app_name = 'reader'
 
 urlpatterns = [
-    path('demo/', views.demo_view, name='demo'),
-    path('demo/<int:chapter_id>/', views.demo_view, name='demo_chapter'),
+    path('chap/', views.chap_view, name='chap'),
+    path('chap/<int:chapter_id>/', views.chap_view, name='chap_chapter'),
 ]

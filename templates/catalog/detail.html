@@ -77,7 +77,7 @@
 
             <div class="detail-actions">
                 {% if last_read_chapter %}
-                <a href="{% url 'reader:demo_chapter' last_read_chapter.id %}" class="btn btn-primary btn-lg">
+                <a href="{% url 'reader:chap_chapter' last_read_chapter.id %}" class="btn btn-primary btn-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -85,7 +85,7 @@
                     Lire (Ch. {{ last_read_chapter.number }})
                 </a>
                 {% elif chapters.first %}
-                <a href="{% url 'reader:demo_chapter' chapters.first.id %}" class="btn btn-primary btn-lg">
+                <a href="{% url 'reader:chap_chapter' chapters.first.id %}" class="btn btn-primary btn-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <polygon points="5 3 19 12 5 21 5 3"></polygon>
@@ -182,7 +182,7 @@
             {% if chapters %}
             <div class="chapters-grid scrollable-chapters">
                 {% for chapter in chapters %}
-                <a href="{% url 'reader:demo_chapter' chapter.id %}" class="chapter-item">
+                <a href="{% url 'reader:chap_chapter' chapter.id %}" class="chapter-item">
                     <div class="chapter-info">
                         <span class="chapter-number">Chapter {{ chapter.number|stringformat:".1f" }}</span>
                         {% if chapter.title and "Chapter" not in chapter.title and "Chapitre" not in chapter.title %}

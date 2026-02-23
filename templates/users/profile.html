@@ -414,7 +414,7 @@
                         <h3 class="series-title">{{ series.title }}</h3>
                         {% for progress in progress_list %}
                         <div class="history-item">
-                            <a href="{% url 'reader:demo_chapter' progress.chapter.id %}">
+                            <a href="{% url 'reader:chap_chapter' progress.chapter.id %}">
                                 {% if series.cover %}
                                 <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="history-cover">
                                 {% else %}

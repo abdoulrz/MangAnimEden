@@ -32,13 +32,13 @@
     <!-- Navigation Top -->
     <div class="chapter-nav">
         {% if prev_chapter %}
-        <a href="{% url 'reader:demo_chapter' prev_chapter.id %}" class="nav-btn">← Précédent</a>
+        <a href="{% url 'reader:chap_chapter' prev_chapter.id %}" class="nav-btn">← Précédent</a>
         {% else %}
         <span class="nav-btn disabled">← Précédent</span>
         {% endif %}
 
         {% if next_chapter %}
-        <a href="{% url 'reader:demo_chapter' next_chapter.id %}" class="nav-btn">Suivant →</a>
+        <a href="{% url 'reader:chap_chapter' next_chapter.id %}" class="nav-btn">Suivant →</a>
         {% else %}
         <span class="nav-btn disabled">Suivant →</span>
         {% endif %}
@@ -63,13 +63,13 @@
     <!-- Navigation Bottom -->
     <div class="chapter-nav">
         {% if prev_chapter %}
-        <a href="{% url 'reader:demo_chapter' prev_chapter.id %}" class="nav-btn">← Précédent</a>
+        <a href="{% url 'reader:chap_chapter' prev_chapter.id %}" class="nav-btn">← Précédent</a>
         {% else %}
         <span class="nav-btn disabled">← Précédent</span>
         {% endif %}
 
         {% if next_chapter %}
-        <a href="{% url 'reader:demo_chapter' next_chapter.id %}" class="nav-btn">Suivant →</a>
+        <a href="{% url 'reader:chap_chapter' next_chapter.id %}" class="nav-btn">Suivant →</a>
         {% else %}
         <span class="nav-btn disabled">Suivant →</span>
         {% endif %}
