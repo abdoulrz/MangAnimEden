@@ -5,8 +5,7 @@
     <div class="breadcrumb">
         <a href="{% url 'administration:series_list' %}" class="breadcrumb-link">Séries</a>
         <span class="breadcrumb-separator">/</span>
-        <a href="{% url 'administration:chapter_list' current_series.id %}" class="breadcrumb-link">{{
-            current_series.title }}</a>
+        <a href="{% url 'administration:chapter_list' current_series.id %}" class="breadcrumb-link">{{ current_series.title }}</a>
         <span class="breadcrumb-separator">/</span>
         <span class="breadcrumb-current">{% if object %}Modifier{% else %}Nouveau{% endif %} Chapitre</span>
     </div>
@@ -14,8 +13,7 @@
 </div>
 
 <div class="form-container">
-    <div id="form-alert"
-        style="display:none; padding:12px 18px; border-radius:10px; margin-bottom:20px; font-weight:600;"></div>
+    <div id="form-alert" style="display:none; padding:12px 18px; border-radius:10px; margin-bottom:20px; font-weight:600;"></div>
 
     <form id="chapter-form" method="post" enctype="multipart/form-data" class="admin-form">
         {% csrf_token %}
