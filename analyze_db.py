@@ -1,29 +1,21 @@
 import os
 import django
 
-# Setup django environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
-def analyze():
-    from users.models import User, Friendship
-    from catalog.models import Series, Chapter, Page
-    from social.models import Group, Badge, UserBadge
-    from reader.models import ReadingProgress
-    
-    print("\n--- 📊 MANGANIMEDEN DATABASE INVENTORY ---")
-    print(f"Users: {User.objects.count()}")
-    print(f"Friendships: {Friendship.objects.count()}")
-    print(f"Groups: {Group.objects.count()}")
-    print("------------------------------------------")
-    print(f"Manga Series: {Series.objects.count()}")
-    print(f"Chapters: {Chapter.objects.count()}")
-    print(f"Pages Extraites: {Page.objects.count()}")
-    print("------------------------------------------")
-    print(f"Badges Existing: {Badge.objects.count()}")
-    print(f"Badges Unlocked by Users: {UserBadge.objects.count()}")
-    print(f"Reading Progress logs: {ReadingProgress.objects.count()}")
-    print("------------------------------------------\n")
-
-if __name__ == '__main__':
-    analyze()
+from catalog.models import Series, Chapter, Page
+with open('db_output_utf8.txt', 'w', encoding='utf-8') as f:
+    series = Series.objects.filter(title__icontains='boxer').first()
+    if not series:
+        f.write("Series not found\n")
+    else:
+        f.write(f"Series: {series.title}\n")
+        for chapter in series.chapters.all().order_by('number'):
+            f.write(f"Chapter {chapter.number}\n")
+            if chapter.source_file:
+                f.write(f"  Source file: {chapter.source_file.name}\n")
+            pages = chapter.pages.all()
+            f.write(f"  Pages count: {pages.count()}\n")
+            if pages.exists():
+                f.write(f"  First 3 pages: {[p.image.name for p in pages[:3]]}\n")

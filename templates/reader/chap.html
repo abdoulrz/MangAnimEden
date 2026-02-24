@@ -5,10 +5,6 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/reader.css' %}?v={{ STATIC_VERSION }}">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-</script>
 {% endblock %}
 
 {% block content %}
@@ -44,12 +40,7 @@
         {% endif %}
     </div>
 
-    {% if chapter.is_pdf %}
-    <!-- PDF MODE -->
-    <div id="pdf-render-container" data-url="{{ chapter.source_file.url }}">
-        <!-- Canvas elements will be injected here -->
-    </div>
-    {% elif pages %}
+    {% if pages %}
     <!-- IMAGE MODE -->
     {% for p in pages %}
     <img class="manga-page lazy reader-page" data-src="{{ p.image.url }}" alt="Page {{ p.page_number }}">
@@ -160,12 +151,7 @@
 
 <div id="reader-data" class="hidden" data-total="{{ chapter.pages.count|default:'1' }}" data-mode="vertical"></div>
 {% endblock %}
-
 {% block extra_js %}
-<script>
-
-</script>
-{% if chapter and not chapter.pdf_file %}
 <script src="{% static 'js/reader.js' %}?v={{ STATIC_VERSION }}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
@@ -174,57 +160,4 @@
         MangaReader.init(totalPages);
     });
 </script>
-{% endif %}
-
-{% if chapter and chapter.pdf_file %}
-<script>
-    document.addEventListener('DOMContentLoaded', async function () {
-        // Force scroll to top prevents "slightly scrolled" issue on refresh
-        if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
-        }
-        window.scrollTo(0, 0);
-
-        const container = document.getElementById('pdf-render-container');
-        const url = container.dataset.url;
-
-        if (!url) return;
-
-        try {
-            const loadingTask = pdfjsLib.getDocument(url);
-            const pdf = await loadingTask.promise;
-            console.log('PDF loaded');
-
-            // Render all pages
-            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                const page = await pdf.getPage(pageNum);
-
-                const scale = 1.5;
-                const viewport = page.getViewport({ scale: scale });
-
-                const canvas = document.createElement('canvas');
-                canvas.className = 'pdf-page';
-                const context = canvas.getContext('2d');
-                canvas.height = viewport.height;
-                canvas.width = viewport.width;
-
-                // Adjust styling max-width
-                canvas.style.maxWidth = '100%';
-                canvas.style.height = 'auto';
-
-                container.appendChild(canvas);
-
-                const renderContext = {
-                    canvasContext: context,
-                    viewport: viewport
-                };
-                page.render(renderContext);
-            }
-        } catch (error) {
-            console.error('Error loading PDF:', error);
-            container.innerHTML = '<p class="error">Erreur lors du chargement du PDF.</p>';
-        }
-    });
-</script>
-{% endif %}
 {% endblock %}
