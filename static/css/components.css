@@ -550,6 +550,51 @@
     color: var(--color-text-primary);
 }
 
+.footer-quote-container {
+    text-align: center;
+    max-width: 600px;
+    padding: var(--space-md) var(--space-xl);
+    background: linear-gradient(145deg, rgba(20, 20, 25, 0.6), rgba(10, 10, 15, 0.8));
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;
+    margin: 0 var(--space-md);
+}
+
+.footer-quote-container::before {
+    content: '"';
+    position: absolute;
+    top: -15px;
+    left: 15px;
+    font-size: 5rem;
+    font-family: serif;
+    color: var(--color-purple-primary);
+    opacity: 0.15;
+    line-height: 1;
+}
+
+.footer-quote-text {
+    font-style: italic;
+    color: var(--color-text-primary);
+    font-size: 1.05rem;
+    margin-bottom: var(--space-xs);
+    line-height: 1.6;
+    position: relative;
+    z-index: 1;
+}
+
+.footer-quote-author {
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--color-pink-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    padding-top: var(--space-xs);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 @media (max-width: 768px) {
     .footer-content {
         flex-direction: column;
