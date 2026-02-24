@@ -10,6 +10,7 @@
 
 
             <!-- Navigation Links (Grouped with Brand) -->
+            {% if request.resolver_match.view_name != 'login' and request.resolver_match.view_name != 'register' %}
             <div class="navbar-menu">
                 {% with url_name=request.resolver_match.view_name %}
                 <a href="{% url 'home' %}"
@@ -20,13 +21,15 @@
                     class="nav-link {% if 'social:' in url_name %}active{% endif %}">Forum</a>
                 {% endwith %}
             </div>
+            {% endif %}
         </div>
 
         <!-- 3. Right: Search + Icons + Profile -->
         <div class="navbar-right">
             <!-- Search Bar Navigation Logic -->
             {% with view_name=request.resolver_match.view_name namespace=request.resolver_match.namespace %}
-            {% if view_name != 'catalog:index' and view_name != 'users:profile' and view_name != 'users:edit_profile' and namespace != 'administration' %}
+            {% if view_name != 'catalog:index' and view_name != 'users:profile' and view_name != 'users:edit_profile'
+            and namespace != 'administration' %}
             <form method="get"
                 action="{% if namespace == 'social' %}{% url 'social:forum_home' %}{% else %}{% url 'catalog:index' %}{% endif %}"
                 class="navbar-search">
@@ -160,10 +163,14 @@
                 });
             </script>
             {% else %}
+            {% if request.resolver_match.view_name != 'login' and request.resolver_match.view_name != 'register' %}
             <a href="{% url 'login' %}" class="btn btn-primary">
                 Connexion
             </a>
             {% endif %}
+            {% endif %}
+
+            {% if request.resolver_match.view_name != 'login' and request.resolver_match.view_name != 'register' %}
             <!-- Mobile Menu Toggle (Moved to End) -->
             <button class="navbar-toggle" id="mobileMenuToggle" aria-label="Menu">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
@@ -173,6 +180,7 @@
                     <line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
             </button>
+            {% endif %}
         </div>
     </div>
 </nav>

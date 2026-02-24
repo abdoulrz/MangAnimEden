@@ -100,6 +100,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.static',
                 'core.context_processors.static_version',
+                'core.context_processors.random_quote',
                 'social.context_processors.notifications', # Phase 3.2 Notifications
             ],
         },

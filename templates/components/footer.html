@@ -8,6 +8,16 @@
                 <p class="footer-copyright">Made with ❤️ © 2026</p>
             </div>
 
+            <!-- Middle: Quote -->
+            {% if RANDOM_QUOTE %}
+            <div class="footer-quote"
+                style="text-align: center; max-width: 400px; font-style: italic; color: var(--color-text-secondary); font-size: 0.9rem;">
+                "{{ RANDOM_QUOTE.text }}"
+                <br>
+                <span style="font-weight: bold; font-size: 0.8rem; opacity: 0.8;">— {{ RANDOM_QUOTE.author }}</span>
+            </div>
+            {% endif %}
+
             <!-- Right: Links -->
             <div class="footer-links">
                 <a href="{% url 'catalog:index' %}" class="footer-link">Catalogue</a>

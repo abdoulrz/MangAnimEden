@@ -12,6 +12,11 @@ class CustomUserCreationForm(UserCreationForm):
             'autocomplete': 'off',
         })
     )
+    terms_accepted = forms.BooleanField(
+        required=True,
+        label="J'accepte les Conditions Générales d'Utilisation",
+        error_messages={'required': 'Vous devez accepter les conditions pour créer un compte.'}
+    )
 
     class Meta:
         model = User
