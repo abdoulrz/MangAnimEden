@@ -85,10 +85,10 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [x] **Forum** : Réparer le bouton "Ajouter une Story".
 - [x] **Forum UX** : Changer placeholder recherche manga -> "Rechercher un groupe".
 - [x] **Forum Fix** : Corriger les images de profil des groupes cassées.
-- [ ] **Forum Permissions** : Restreindre le chat aux membres du groupe.
+- [x] **Forum Permissions** : Restreindre le chat aux membres du groupe.
 - [x] **Thème** : Activer la logique du Theme Switcher (bouton existant).
-- [ ] **Thème Visibilité** : Ajuster les couleurs de texte en mode clair (ex: noir sur blanc).
-- [ ] **Search Bar** : Rendre l'icône loupe fonctionnelle (pas seulement Entrée).
+- [x] **Thème Visibilité** : Ajuster les couleurs de texte en mode clair (ex: noir sur blanc).
+- [x] **Search Bar** : Rendre l'icône loupe fonctionnelle (pas seulement Entrée).
 - [ ] **Quotes** : Utiliser la collection de citations originales en français.
 
 ### 2.5 Gamification & Système de Gestion de Groupes
@@ -192,8 +192,8 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 - [x] **Google Auth** : Inscription/Connexion via Google (OAuth2).
   - [x] **Fix** : Vérifier l'intégration OAuth, la connexion automatique et la redirection.
-- [ ] **Auth UX** :
-  - [ ] Icone "œil" pour afficher/masquer le mot de passe sur tous les navigateurs.
+- [x] **Auth UX** :
+  - [x] Icone "œil" pour afficher/masquer le mot de passe sur tous les navigateurs.
   - [ ] **Navbar Simplifiée** : Pendant l'inscription, ne laisser que Logo, Thème et Connexion.
 - [x] **Spec** : Rédiger `docs/specs/SPEC-005-Admin-Dashboard.md`.
 - [x] **Middleware** : Décorateur `@requires_role`.
