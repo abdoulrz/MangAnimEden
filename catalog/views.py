@@ -13,7 +13,7 @@ def catalog_index(request):
     genre = request.GET.get('genre', '')
     type_filter = request.GET.get('type', '')
 
-    series_list = Series.objects.all().order_by('title')
+    series_list = Series.objects.prefetch_related('genres').all().order_by('title')
 
     if query:
         series_list = series_list.filter(title__icontains=query)
@@ -24,7 +24,7 @@ def catalog_index(request):
     if type_filter:
         series_list = series_list.filter(type__iexact=type_filter)
 
-    trending_series = Series.objects.all().order_by('-views_count')[:5]
+    trending_series = Series.objects.prefetch_related('genres').all().order_by('-views_count')[:5]
     
     return render(request, 'catalog/index.html', {
         'series_list': series_list,

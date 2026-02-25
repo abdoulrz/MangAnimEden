@@ -135,7 +135,38 @@
 
 @media (max-width: 480px) {
     .catalog-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .manga-info {
+        padding: var(--space-sm);
+    }
+
+    .manga-title {
+        font-size: 0.95rem;
+    }
+
+    .manga-meta {
+        font-size: 0.75rem;
+    }
+
+    .badge-status,
+    .badge-type {
+        font-size: 0.55rem;
+        padding: 4px 8px;
+    }
+
+    .manga-badges {
+        top: 8px;
+        left: 8px;
+    }
+
+    .badge-rating {
+        font-size: 0.55rem;
+        padding: 4px 8px;
+        top: 8px;
+        right: 8px;
     }
 }
 
@@ -203,11 +234,19 @@
     filter: brightness(1.1);
 }
 
-/* Premium Badge */
-.badge-status {
+/* Premium Badges */
+.manga-badges {
     position: absolute;
     top: 12px;
     left: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 2;
+}
+
+.badge-status,
+.badge-type {
     background: rgba(0, 0, 0, 0.6);
     -webkit-backdrop-filter: blur(8px);
     backdrop-filter: blur(8px);
@@ -216,14 +255,14 @@
     font-weight: 700;
     padding: 6px 12px;
     border-radius: 20px;
-    z-index: 2;
     text-transform: uppercase;
     letter-spacing: 0.5px;
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 6px;
+    width: fit-content;
 }
 
 .badge-status::before {
@@ -233,6 +272,32 @@
     background-color: var(--color-accents-success, #10b981);
     border-radius: 50%;
     box-shadow: 0 0 6px #10b981;
+}
+
+.badge-type {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(236, 72, 153, 0.8));
+    border-color: rgba(236, 72, 153, 0.4);
+    box-shadow: 0 4px 10px rgba(236, 72, 153, 0.3);
+}
+
+.badge-rating {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 6px 12px;
+    background: rgba(0, 0, 0, 0.7);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #fbbf24;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    z-index: 2;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .manga-info {

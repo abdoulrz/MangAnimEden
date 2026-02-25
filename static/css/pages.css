@@ -105,6 +105,7 @@
     display: flex;
     align-items: center;
     gap: 0.5rem;
+    white-space: nowrap;
 }
 
 .section-link:hover {
@@ -157,110 +158,7 @@
     }
 }
 
-/* Manga Card */
-.manga-card {
-    text-decoration: none;
-    color: inherit;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-sm);
-    transition: transform 0.3s ease;
-}
-
-.manga-card:hover {
-    transform: translateY(-5px);
-}
-
-.manga-cover {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 2/3;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(34, 211, 238, 0.1));
-}
-
-.manga-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.3s ease;
-}
-
-.manga-card:hover .manga-image {
-    transform: scale(1.05);
-}
-
-/* Mock Covers */
-.mock-cover-1 {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.mock-cover-2 {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.mock-cover-3 {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.mock-cover-4 {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.mock-cover-5 {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-}
-
-.mock-cover-6 {
-    background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);
-}
-
-/* Card Badges */
-.badge-status {
-    position: absolute;
-    top: 0.5rem;
-    left: 0.5rem;
-    padding: 0.25rem 0.75rem;
-    background: rgba(139, 92, 246, 0.9);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    border-radius: var(--radius-full);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: white;
-}
-
-.badge-rating {
-    position: absolute;
-    top: 0.5rem;
-    right: 0.5rem;
-    padding: 0.25rem 0.75rem;
-    background: rgba(0, 0, 0, 0.7);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    border-radius: var(--radius-full);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #fbbf24;
-    display: flex;
-    align-items: center;
-    gap: 0.25rem;
-}
-
-.badge-chapter {
-    position: absolute;
-    bottom: 0.5rem;
-    left: 0.5rem;
-    padding: 0.25rem 0.75rem;
-    background: rgba(0, 0, 0, 0.7);
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-    border-radius: var(--radius-full);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: white;
-}
+/* Removed legacy manga card styles to use catalog.css globally */
 
 /* Sponsor Placeholder */
 .sponsor-placeholder {
@@ -313,36 +211,151 @@
     }
 }
 
-/* Quote Container */
-.quote-container {
-    padding: var(--space-xl);
-    text-align: center;
-    background: linear-gradient(135deg, rgba(34, 211, 238, 0.1), rgba(59, 130, 246, 0.1));
+/* Mini-Profile & Stats Block (Option 2) */
+.profile-stats-block {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(236, 72, 153, 0.05));
+    border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.mini-profile-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+    background: rgba(25, 25, 35, 0.4);
     border-radius: var(--radius-lg);
-    border: 1px solid rgba(34, 211, 238, 0.4);
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.quote-text {
-    font-size: 1.1rem;
-    font-style: italic;
+.mini-profile-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+}
+
+.mini-avatar-container {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid var(--color-accent-primary);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+
+.mini-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.placeholder-avatar {
+    background: linear-gradient(135deg, var(--color-accent-primary), var(--color-pink-primary));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+}
+
+.mini-profile-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.mini-nickname {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: var(--color-text-primary);
-    margin-bottom: var(--space-md);
-    line-height: 1.6;
 }
 
-.quote-author {
-    display: block;
-    color: var(--color-purple-primary);
-    font-size: 0.9rem;
+.mini-level-badge {
+    font-size: 0.8rem;
     font-weight: 600;
+    color: var(--color-pink-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.empty-text {
-    color: var(--color-text-muted);
+/* Progress Section */
+.mini-progress-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+/* Reusing .level-info, .progress-bar-bg, .progress-bar-fill from profile/navbar */
+
+/* Stats Grid */
+.mini-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-md);
+    padding-top: var(--space-md);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.mini-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     text-align: center;
-    padding: var(--space-xl);
-    font-size: 0.95rem;
+    padding: var(--space-sm);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: var(--radius-md);
+}
+
+.mini-stat-item .stat-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    line-height: 1;
+    margin-bottom: 0.25rem;
+}
+
+.mini-stat-item .stat-label {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Guest CTA */
+.guest-stats-cta {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: var(--space-xl) var(--space-md);
+    background: rgba(25, 25, 35, 0.4);
+    border-radius: var(--radius-lg);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+}
+
+.guest-cta-icon {
+    font-size: 3rem;
+    margin-bottom: var(--space-md);
+    animation: bounce 2s infinite ease-in-out;
+}
+
+.guest-stats-cta h3 {
+    margin-bottom: var(--space-sm);
+    color: var(--color-text-primary);
+}
+
+.guest-stats-cta p {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+    line-height: 1.5;
+}
+
+.guest-cta-actions {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    width: 100%;
 }
 
 

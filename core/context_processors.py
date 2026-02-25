@@ -1,4 +1,5 @@
 from django.conf import settings
+from .models import Quote
 import random
 
 MANGA_QUOTES = [
@@ -17,9 +18,17 @@ MANGA_QUOTES = [
 def random_quote(request):
     """
     Context processor that adds a random manga quote to the context.
+    Fetches an active quote from the database, or falls back to hardcoded list.
     """
+    quote = Quote.objects.filter(is_active=True).order_by('?').first()
+    
+    if quote:
+        quote_data = {"text": quote.text, "author": quote.author}
+    else:
+        quote_data = random.choice(MANGA_QUOTES)
+        
     return {
-        'RANDOM_QUOTE': random.choice(MANGA_QUOTES)
+        'RANDOM_QUOTE': quote_data
     }
 
 def static_version(request):

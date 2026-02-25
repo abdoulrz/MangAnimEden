@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}MangAnimEDen - Accueil{% endblock %}
+
+{% block extra_css %}
+<!-- Base pages styles -->
+<link rel="stylesheet" href="{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
+<!-- Include catalog styles specifically for the manga cards -->
+<link rel="stylesheet" href="{% static 'css/catalog.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
 
 {% block content %}
 <div class="container home-container">
@@ -66,12 +74,23 @@
                             {% else %}
                             <div class="manga-image mock-cover-{{ forloop.counter }}"></div>
                             {% endif %}
-                            <span class="badge-status">{{ series.get_status_display|default:"En cours" }}</span>
+                            <div class="manga-badges">
+                                <span class="badge-status">{{ series.get_status_display|default:"En cours" }}</span>
+                                <span class="badge-type">{{ series.get_type_display }}</span>
+                            </div>
                             <div class="badge-rating"><span>★</span> 4.5</div>
                             <span class="badge-chapter">{{ series.chapters.count }} ch.</span>
                         </div>
-                        <h3 class="manga-title">{{ series.title }}</h3>
-                        <p class="manga-meta">{{ series.updated_at|timesince }}</p>
+                        <div class="manga-info">
+                            <h3 class="manga-title">{{ series.title }}</h3>
+                            <p class="manga-meta">
+                                {% for genre in series.genres.all %}
+                                {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                {{ series.updated_at|timesince }}
+                                {% endfor %}
+                            </p>
+                        </div>
                     </a>
                     {% empty %}
                     <p class="empty-text">Aucun manga récent.</p>
@@ -107,11 +126,22 @@
                             {% else %}
                             <div class="manga-image mock-cover-{{ forloop.counter|add:3 }}"></div>
                             {% endif %}
-                            <span class="badge-status">{{ series.get_status_display }}</span>
+                            <div class="manga-badges">
+                                <span class="badge-status">{{ series.get_status_display }}</span>
+                                <span class="badge-type">{{ series.get_type_display }}</span>
+                            </div>
                             <div class="badge-rating"><span>★</span> 4.9</div>
                         </div>
-                        <h3 class="manga-title">{{ series.title }}</h3>
-                        <p class="manga-meta">Action, Aventure</p>
+                        <div class="manga-info">
+                            <h3 class="manga-title">{{ series.title }}</h3>
+                            <p class="manga-meta">
+                                {% for genre in series.genres.all %}
+                                {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                Action, Aventure
+                                {% endfor %}
+                            </p>
+                        </div>
                     </a>
                     {% empty %}
                     <p class="empty-text">Aucun manga populaire.</p>
@@ -120,17 +150,66 @@
             </div>
         </section>
 
-        <!-- Bottom Right: Wisdom/Quotes Block -->
-        <section class="home-block quotes-block">
-            <div class="block-content centered-content">
-                <div class="quote-container" id="wisdom-container">
-                    <!-- Content injected by static/js/app.js -->
-                    <noscript>
-                        <p class="quote-text">"The world isn't perfect. But it's there for us, doing the best it
-                            can..."</p>
-                        <span class="quote-author">— Roy Mustang</span>
-                    </noscript>
+        <!-- Bottom Right: Mini-Profile & Stats Block -->
+        <section class="home-block profile-stats-block">
+            <div class="block-header">
+                <h2 class="block-title"><span>🌟</span> Votre Profil</h2>
+                {% if user.is_authenticated %}
+                <a href="{% url 'users:profile' %}" class="section-link">Voir Profil <span>→</span></a>
+                {% endif %}
+            </div>
+
+            <div class="block-content">
+                {% if user.is_authenticated %}
+                <div class="mini-profile-card">
+                    <div class="mini-profile-header">
+                        <div class="mini-avatar-container">
+                            {% if user.avatar %}
+                            <img src="{{ user.avatar.url }}" alt="Avatar" class="mini-avatar">
+                            {% else %}
+                            <div class="mini-avatar placeholder-avatar">{{ user.nickname|make_list|first|upper }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="mini-profile-info">
+                            <h3 class="mini-nickname">{{ user.nickname }}</h3>
+                            <span class="mini-level-badge">Niveau {{ user.level }}</span>
+                        </div>
+                    </div>
+
+                    <div class="mini-progress-section">
+                        <div class="level-info">
+                            <span>XP: {{ user_stats.progress.current }}</span>
+                            <span>Prochain: {{ user_stats.progress.next }}</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill"
+                                style="--progress-width: {{ user_stats.progress.percent_int }}%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mini-stats-grid">
+                        <div class="mini-stat-item">
+                            <span class="stat-value">{{ user_stats.chapters_read }}</span>
+                            <span class="stat-label">Chapitres lus</span>
+                        </div>
+                        <div class="mini-stat-item">
+                            <span class="stat-value">{{ user_stats.friends_count }}</span>
+                            <span class="stat-label">Amis</span>
+                        </div>
+                    </div>
                 </div>
+                {% else %}
+                <div class="guest-stats-cta">
+                    <div class="guest-cta-icon">🎯</div>
+                    <h3>Rejoignez l'Aventure</h3>
+                    <p>Créez un compte pour gagner de l'XP à chaque lecture, rejoindre des groupes et vous faire des
+                        amis !</p>
+                    <div class="guest-cta-actions">
+                        <a href="{% url 'register' %}" class="btn-primary">Créer un compte</a>
+                    </div>
+                </div>
+                {% endif %}
             </div>
         </section>
     </div>

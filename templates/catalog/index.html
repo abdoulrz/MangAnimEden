@@ -36,12 +36,23 @@
                             {% else %}
                             <div class="manga-image placeholder"></div>
                             {% endif %}
-                            <span class="badge-status">{{ series.get_status_display }}</span>
+                            <div class="manga-badges">
+                                <span class="badge-status">{{ series.get_status_display }}</span>
+                                <span class="badge-type">{{ series.get_type_display }}</span>
+                            </div>
                             <!-- Rating is hardcoded or needs a field, using placeholder for now -->
-                            <!-- <div class="badge-rating"><span>★</span> 4.X</div> -->
+                            <div class="badge-rating"><span>★</span> 4.9</div>
                         </div>
-                        <h3 class="manga-title">{{ series.title }}</h3>
-                        <p class="manga-meta">{{ series.author }}</p>
+                        <div class="manga-info">
+                            <h3 class="manga-title">{{ series.title }}</h3>
+                            <p class="manga-meta">
+                                {% for genre in series.genres.all %}
+                                {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                                {% empty %}
+                                Action, Aventure
+                                {% endfor %}
+                            </p>
+                        </div>
                     </a>
                     {% empty %}
                     <p>Aucun manga trouvé.</p>

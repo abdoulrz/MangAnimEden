@@ -28,8 +28,7 @@
         <div class="navbar-right">
             <!-- Search Bar Navigation Logic -->
             {% with view_name=request.resolver_match.view_name namespace=request.resolver_match.namespace %}
-            {% if view_name != 'catalog:index' and view_name != 'users:profile' and view_name != 'users:edit_profile'
-            and namespace != 'administration' %}
+            {% if view_name != 'catalog:index' and view_name != 'users:profile' and view_name != 'users:edit_profile' and namespace != 'administration' %}
             <form method="get"
                 action="{% if namespace == 'social' %}{% url 'social:forum_home' %}{% else %}{% url 'catalog:index' %}{% endif %}"
                 class="navbar-search">

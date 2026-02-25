@@ -13,20 +13,22 @@ def home_view(request):
     Accessible seulement aux utilisateurs connectés.
     """
     # Fetch series for the homepage
-    latest_updates = Series.objects.all().order_by('-updated_at')[:3]
-    popular_series = Series.objects.all().order_by('?')[:3] # Random for now as popular
+    latest_updates = Series.objects.prefetch_related('genres').all().order_by('-updated_at')[:3]
+    popular_series = Series.objects.prefetch_related('genres').all().order_by('?')[:3] # Random for now as popular
     
-    # Continue Reading logic
+    # Continue Reading & Stats logic
     continue_reading = None
+    user_stats = {}
+    
     if request.user.is_authenticated:
         from reader.models import ReadingProgress
         
+        # --- Continue Reading ---
         last_progress = ReadingProgress.objects.filter(
             user=request.user
         ).select_related('chapter__series').order_by('-last_read').first()
         
         if last_progress:
-            # If completed, get next chapter
             if last_progress.completed:
                 next_chapter = Chapter.objects.filter(
                     series=last_progress.chapter.series,
@@ -35,11 +37,23 @@ def home_view(request):
                 continue_reading = next_chapter or last_progress.chapter
             else:
                 continue_reading = last_progress.chapter
+                
+        # --- User Stats (Option 2) ---
+        total_chapters_read = ReadingProgress.objects.filter(user=request.user, completed=True).count()
+        progress_data = request.user.get_level_progress()
+        progress_data['percent_int'] = int(progress_data['percent'])
+        
+        user_stats = {
+            'chapters_read': total_chapters_read,
+            'friends_count': request.user.get_friend_count(),
+            'progress': progress_data
+        }
 
     return render(request, 'home.html', {
         'latest_updates': latest_updates,
         'popular_series': popular_series,
         'continue_reading': continue_reading,
+        'user_stats': user_stats,
         'STATIC_VERSION': settings.STATIC_VERSION
     })
 
