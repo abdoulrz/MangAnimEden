@@ -4,7 +4,7 @@ Plateforme de lecture de manga/manhwa avec fonctionnalités de réseau social.
 
 ## 🎯 État Actuel: Tracer Bullet Opérationnel
 
-Le projet suit les principes du **Guide Méthodologique** avec une approche "Tracer Bullets" - nous avons construit une tranche fine qui traverse tout le système pour valider la chaîne technique complète.
+Le projet suit les principes du **03_METHODOLOGY_AND_CHECKLISTS.md** avec une approche "Tracer Bullets" - nous avons construit une tranche fine qui traverse tout le système pour valider la chaîne technique complète.
 
 ### ✅ Ce qui fonctionne
 
@@ -102,11 +102,10 @@ MangaAnimEden/
 
 ## 📚 Documentation
 
-- **[Guide Méthodologique](Guide%20Méthodologique.md)**: Principes de développement
-- **[Architecture Dossiers](Architecture%20Dossiers.md)**: Structure détaillée
+- **[03_METHODOLOGY_AND_CHECKLISTS](docs/03_METHODOLOGY_AND_CHECKLISTS.md)**: Principes de développement et listes de vérification
+- **[02_ARCHITECTURE](docs/02_ARCHITECTURE.md)**: Structure détaillée
 - **[SPEC-001](docs/specs/SPEC-001-Tracer-Bullet.md)**: Spécification du Tracer Bullet
-- **[Checklists Qualité](Checklists%20Qualité.md)**: Listes de vérification
-- **[DEBT.md](DEBT.md)**: Dette technique
+- **[DEBT.md](docs/DEBT.md)**: Dette technique
 
 ---
 
@@ -140,7 +139,7 @@ Voir le fichier de tâches pour la roadmap détaillée. Les prochaines fonctionn
 
 ## 📝 Contribuer
 
-Ce projet suit des checklists strictes avant chaque commit. Voir `Checklists Qualité.md` pour les phases de développement.
+Ce projet suit des checklists strictes avant chaque commit. Voir `docs/03_METHODOLOGY_AND_CHECKLISTS.md` pour les phases de développement.
 
 ---
 
