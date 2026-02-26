@@ -1,10 +1,12 @@
 <!-- Navigation Bar Component -->
+{% load static %}
 <nav class="navbar">
     <div class="container navbar-container">
         <!-- 1. Left: Logo + Brand + Menu -->
         <div class="navbar-left">
             <a href="{% url 'home' %}" class="navbar-brand">
-                <div class="navbar-logo">⛩️</div>
+                <img src="{% static 'images/logo.jpeg' %}" alt="Logo" class="navbar-logo"
+                    style="width: 32px; height: 32px; object-fit: contain; border-radius: 4px;">
                 <span class="gradient-text navbar-brand-text">MangAnimEDen</span>
             </a>
 
