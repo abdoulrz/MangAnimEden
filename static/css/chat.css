@@ -1524,6 +1524,7 @@ input[type="file"] {
 @media (max-width: 768px) {
     .chat-page-container {
         padding: 1rem 0.5rem;
+        overflow-x: hidden;
     }
 
     .chat-main-layout {
@@ -1533,8 +1534,10 @@ input[type="file"] {
     }
 
     .groups-sidebar,
-    .events-sidebar {
+    .events-sidebar,
+    .chat-window-container {
         width: 100%;
+        max-width: 100%;
         flex-shrink: 1;
     }
 
