@@ -1547,6 +1547,7 @@ input[type="file"] {
     }
 
     .chat-window {
+        flex: 1;
         border-radius: 12px;
     }
 
