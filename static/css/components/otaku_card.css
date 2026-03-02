@@ -258,3 +258,30 @@
     background: rgba(255, 255, 255, 0.2);
     transform: scale(1.1);
 }
+
+/* Responsive */
+@media (max-width: 520px) {
+    .otaku-card-container {
+        width: 100%;
+        height: auto;
+        min-height: 260px;
+    }
+
+    .otaku-id-card {
+        padding: 16px;
+    }
+
+    .close-card-btn {
+        right: 5px;
+        top: -45px;
+    }
+
+    .card-body {
+        gap: 12px;
+    }
+
+    .card-avatar {
+        width: 70px;
+        height: 90px;
+    }
+}
