@@ -332,7 +332,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [ ] Livrer le code source final (Zip ou Transfert de repo GitHub/GitLab).
   - [ ] Fournir le guide "Gestion des Clés API" et "Manuel d'Administration".
   
-# Future Ideas & Features: MangaAnimEden
+# *Future Ideas & Features: MangaAnimEden*
 
 This document collects innovative ideas and potential features to enhance the originality and user engagement of the platform.
 
@@ -366,6 +366,10 @@ A special status or digital card for dedicated users.
 
 - **PWA (Progressive Web App)**: Installable on phone home screens.
 - **Offline Mode**: Download chapters for offline reading (via App wrapper).
+
+## 📝 Stories Enrichies (Forum / Social)
+
+- **Text Nodes & Custom Backgrounds pour Stories** : Permettre aux créateurs/administrateurs de groupes de ne pas seulement uploader des images pour les Stories, mais de créer des "Text Stories" (comme sur Instagram/Snapchat). Ajouter du texte natif (HTML/CSS) avec des fonds personnalisables (couleurs, dégradés, images de fond) pour faire des annonces ou animer la communauté.
 
 ## ?? Fil d'Activité / Leaderboard
 

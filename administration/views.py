@@ -126,7 +126,6 @@ class AdminSeriesListView(ListView):
         return context
 
 from catalog.services import bulk_create_chapters_from_folder
-from catalog.services import bulk_create_chapters_from_folder
 from .forms import SeriesForm, BadgeForm
 
 @method_decorator(requires_admin, name='dispatch')
@@ -294,19 +293,12 @@ class AdminChapterCreateView(CreateView):
                 os.close(temp_fd)
                 raise
             
-            # Process in background thread from the temp file on disk
-            def process_from_temp(chapter, path):
-                try:
-                    processor = FileProcessor()
-                    processor._process_from_path(chapter, path)
-                    logger.info(f"Processed chapter {chapter.number} from temp file")
-                except Exception as e:
-                    logger.error(f"Error processing chapter {chapter}: {e}")
-                finally:
-                    if os.path.exists(path):
-                        os.unlink(path)
-            
-            threading.Thread(target=process_from_temp, args=(self.object, temp_path)).start()
+            # Process in background — thread wraps Celery dispatch
+            # (needed because CELERY_TASK_ALWAYS_EAGER makes .delay() synchronous)
+            def _dispatch():
+                from catalog.tasks import task_process_chapter
+                task_process_chapter.delay(self.object.series.id, None, temp_path)
+            threading.Thread(target=_dispatch, daemon=True).start()
             
         create_system_log(self.request, 'CHAPTER_CREATE', details=f"Chapitre créé : {self.object.number} pour {self.object.series.title}")
         
@@ -366,18 +358,11 @@ class AdminChapterUpdateView(UpdateView):
                 os.close(temp_fd)
                 raise
             
-            def process_from_temp(chapter, path):
-                try:
-                    processor = FileProcessor()
-                    processor._process_from_path(chapter, path)
-                    logger.info(f"Updated chapter {chapter.number} from temp file")
-                except Exception as e:
-                    logger.error(f"Error processing chapter {chapter}: {e}")
-                finally:
-                    if os.path.exists(path):
-                        os.unlink(path)
-            
-            threading.Thread(target=process_from_temp, args=(self.object, temp_path)).start()
+            # Process in background — thread wraps Celery dispatch
+            def _dispatch():
+                from catalog.tasks import task_process_chapter
+                task_process_chapter.delay(self.object.series.id, None, temp_path)
+            threading.Thread(target=_dispatch, daemon=True).start()
             msg = "Chapitre mis à jour. Extraction des nouvelles pages en cours..."
         else:
             msg = "Chapitre mis à jour."
@@ -584,40 +569,32 @@ class CompleteChunkedUploadView(View):
             return JsonResponse({'error': str(e)}, status=500)
 
 from catalog.services import process_single_chapter_from_temp
-import threading
 import tempfile
 
 def background_process_chapters(series_id, upload_ids):
+    """Dispatch each chapter to a Celery task for processing."""
+    from catalog.tasks import task_process_chapter
+    import tempfile as tmpmod
+
     for upload_id in upload_ids:
         try:
             upload = ChunkedUpload.objects.get(upload_id=upload_id)
-            # Find the assembled file path
-            base_temp_dir = os.path.join(tempfile.gettempdir(), 'manga_temp_uploads')
+            base_temp_dir = os.path.join(tmpmod.gettempdir(), 'manga_temp_uploads')
             temp_path = os.path.join(base_temp_dir, upload.filename)
-            
+
             if not os.path.exists(temp_path):
-                # Try assembled path with safe filename if logic assembly used it
                 safe_filename = os.path.basename(upload.filename)
                 temp_path = os.path.join(base_temp_dir, safe_filename)
-                
+
             if os.path.exists(temp_path):
-                chapter = process_single_chapter_from_temp(series_id, temp_path, upload_id=upload_id)
-                logger.info(f"Background processed chapter {chapter.number} for series {series_id}")
-                
-                # Clean up assembled file after processing
-                os.remove(temp_path)
-                
-                # Mark as completed
-                upload.status = 'completed'
-                upload.save(update_fields=['status'])
+                task_process_chapter.delay(series_id, str(upload_id), temp_path)
             else:
                 logger.error(f"Assembled file not found for upload {upload_id}")
                 upload.status = 'failed'
                 upload.save(update_fields=['status'])
-                 
+
         except Exception as e:
-            logger.error(f"Error background processing upload {upload_id}: {e}")
-            # Always mark as failed so the widget can clear itself
+            logger.error(f"Error dispatching upload {upload_id}: {e}")
             try:
                 upload = ChunkedUpload.objects.get(upload_id=upload_id)
                 upload.status = 'failed'
@@ -638,9 +615,13 @@ class ProcessChapterFromUploadView(View):
             upload_ids = [uid.strip() for uid in upload_ids_str.split(',') if uid.strip()]
             
             if upload_ids:
-                # Spawn a background thread to process all uploaded chapter archives
-                thread = threading.Thread(target=background_process_chapters, args=(series_id, upload_ids))
-                thread.daemon = True
+                # Dispatch in a background thread so the HTTP response returns immediately
+                # (CELERY_TASK_ALWAYS_EAGER makes .delay() synchronous, which would block)
+                thread = threading.Thread(
+                    target=background_process_chapters,
+                    args=(series_id, upload_ids),
+                    daemon=True
+                )
                 thread.start()
                 
             return JsonResponse({
@@ -665,7 +646,7 @@ class UploadProgressStatusView(View):
         
         try:
             uploads = ChunkedUpload.objects.filter(upload_id__in=upload_ids)
-            stale_threshold = timezone.now() - timedelta(minutes=5)
+            stale_threshold = timezone.now() - timedelta(minutes=30)  # Match Celery hard limit
             
             stats = {
                 'total_files': 0,
@@ -682,8 +663,8 @@ class UploadProgressStatusView(View):
                 # Count terminal states: completed, failed, or stale
                 if upload.status in ('completed', 'failed'):
                     stats['terminal_uploads'] += 1
-                elif upload.status in ('processing', 'assembled') and upload.created_at < stale_threshold and upload.processed_files == 0:
-                    # Stuck for >30 min with no progress → mark as failed
+                elif upload.status == 'uploading' and upload.created_at < stale_threshold:
+                    # Only mark 'uploading' as stale (never 'processing' — task may still be working)
                     upload.status = 'failed'
                     upload.save(update_fields=['status'])
                     stats['terminal_uploads'] += 1

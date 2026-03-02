@@ -126,18 +126,50 @@ def forum_home(request):
         
     if request.method == 'POST':
         # 3. Stories Upload Logic
-        if 'story_image' in request.FILES:
+        if 'story_image' in request.FILES or 'story_text' in request.POST:
             if can_post_story:
                 target_group_id = request.POST.get('target_group_id')
                 target_group = None
                 if target_group_id:
                     target_group = get_object_or_404(Group, id=target_group_id)
-                    
-                Story.objects.create(
-                    user=request.user,
-                    image=request.FILES['story_image'],
-                    group=target_group
-                )
+
+                # Text Story
+                if 'story_text' in request.POST and request.POST.get('story_text', '').strip():
+                    Story.objects.create(
+                        user=request.user,
+                        group=target_group,
+                        node_type='text',
+                        text_content=request.POST['story_text'],
+                        background_color=request.POST.get('story_bg_color', '#6c5ce7'),
+                    )
+                # Media Story
+                elif 'story_image' in request.FILES:
+                    uploaded = request.FILES['story_image']
+
+                    # Magic bytes validation
+                    valid_image = True
+                    try:
+                        import magic
+                        file_mime = magic.from_buffer(uploaded.read(2048), mime=True)
+                        uploaded.seek(0)  # Reset after reading
+                        if not file_mime.startswith('image/'):
+                            valid_image = False
+                    except ImportError:
+                        pass  # python-magic not installed, skip validation
+
+                    if valid_image:
+                        story = Story.objects.create(
+                            user=request.user,
+                            image=uploaded,
+                            group=target_group,
+                            node_type='media',
+                        )
+                        # Dispatch async media optimization
+                        try:
+                            from social.tasks import task_process_story_media
+                            task_process_story_media.delay(story.id)
+                        except Exception:
+                            pass  # If Celery unavailable, image is saved as-is
             return redirect('social:forum_home')
             
         # 4. Chat Logic (Post Message)

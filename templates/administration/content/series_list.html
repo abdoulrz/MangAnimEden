@@ -132,12 +132,17 @@
         let pollCount = 0;
         let lastPercentage = -1;
         let stallCount = 0; // How many polls with no progress change
+        let errorCount = 0; // Consecutive error counter
+        const MAX_ERRORS = 5; // After this many consecutive errors, give up
 
         const pollProgress = async () => {
             try {
                 const response = await fetch(`{% url "administration:upload_process_status" %}?upload_ids=${uploadIdsStr}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
+
+                // Reset error count on successful response
+                errorCount = 0;
 
                 // SUCCESS: all uploads completed
                 if (data.status === 'finished') {
@@ -195,11 +200,21 @@
                 setTimeout(pollProgress, 1500);
 
             } catch (err) {
-                console.error("Erreur de suivi background:", err);
-                text.innerText = "Traitement en cours (suivi indisponible)";
-                dismissBtn.style.display = 'inline-block';
-                // Stop polling on repeated errors
-                setTimeout(pollProgress, 10000);
+                errorCount++;
+                console.warn(`Erreur de suivi (#${errorCount}/${MAX_ERRORS}):`, err.message);
+
+                if (errorCount >= MAX_ERRORS) {
+                    // Too many errors - give up but show a helpful message
+                    text.innerText = "Suivi interrompu (serveur injoignable). Le traitement peut continuer en arrière-plan.";
+                    text.style.color = '#f59e0b';
+                    dismissBtn.style.display = 'inline-block';
+                    return; // Stop polling
+                }
+
+                // Retry with exponential backoff: 3s, 6s, 12s, 24s...
+                const retryDelay = 3000 * Math.pow(2, errorCount - 1);
+                text.innerText = `Tentative de reconnexion... (${errorCount}/${MAX_ERRORS})`;
+                setTimeout(pollProgress, retryDelay);
             }
         };
 

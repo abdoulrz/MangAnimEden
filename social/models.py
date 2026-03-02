@@ -127,13 +127,30 @@ from django.db.models.signals import post_delete
 import os
 
 class Story(models.Model):
+    """
+    Modèle polymorphique pour les Stories de groupe.
+    Supporte deux types de noeud : Media (image/vidéo) et Texte (fond coloré + texte).
+    """
+    NODE_TYPES = [
+        ('media', 'Image/Video Media'),
+        ('text', 'Rich Text Block'),
+    ]
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='stories', on_delete=models.CASCADE)
-    image = models.ImageField(upload_to='stories/')
-    created_at = models.DateTimeField(auto_now_add=True)
-    # expires_at could be a field if we want custom expiration, but 24h rule is standard
-    # We can calculate it on the fly or store it. Let's store it for index performance on cleanup
-    expires_at = models.DateTimeField(null=True, blank=True)
     group = models.ForeignKey(Group, related_name='stories', on_delete=models.SET_NULL, null=True, blank=True)
+    node_type = models.CharField(max_length=10, choices=NODE_TYPES, default='media')
+
+    # Common Fields
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    # For Media Stories (Images/Videos)
+    image = models.ImageField(upload_to='stories/', null=True, blank=True)
+
+    # For Text Stories
+    text_content = models.TextField(null=True, blank=True)
+    background_color = models.CharField(max_length=7, default='#6c5ce7')  # Hex code
+    background_image = models.ImageField(upload_to='forum/stories/backgrounds/', null=True, blank=True)
 
     def save(self, *args, **kwargs):
         if not self.expires_at:
@@ -145,7 +162,7 @@ class Story(models.Model):
         return timezone.now() > self.expires_at
 
     def __str__(self):
-        return f"Story by {self.user} ({self.created_at})"
+        return f"Story ({self.get_node_type_display()}) by {self.user} ({self.created_at})"
 
     class Meta:
         ordering = ['-created_at']
@@ -154,10 +171,14 @@ class Story(models.Model):
 
 @receiver(post_delete, sender=Story)
 def cleanup_story_file(sender, instance, **kwargs):
-    """Supprime le fichier physique lors de la suppression de la Story"""
-    if instance.image:
-        if os.path.isfile(instance.image.path):
-            os.remove(instance.image.path)
+    """Supprime les fichiers physiques lors de la suppression de la Story."""
+    for field in [instance.image, instance.background_image]:
+        if field:
+            try:
+                if os.path.isfile(field.path):
+                    os.remove(field.path)
+            except Exception:
+                pass  # Gracefully handle R2/cloud files that don't have a local path
 
 
 class Friendship(models.Model):

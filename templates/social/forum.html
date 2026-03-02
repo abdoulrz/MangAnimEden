@@ -58,13 +58,22 @@
                 <h3>Nouvelle Story de Groupe</h3>
                 <span class="close-modal" onclick="closeStoryModal()">×</span>
             </div>
-            <form method="post" enctype="multipart/form-data" class="story-form-styled">
+
+            <!-- Tabs for Image vs Text story -->
+            <div class="story-modal-tabs">
+                <button class="story-modal-tab active" data-tab="image" onclick="switchStoryTab('image')">📸
+                    Image</button>
+                <button class="story-modal-tab" data-tab="text" onclick="switchStoryTab('text')">✏️ Texte</button>
+            </div>
+
+            <!-- Image Story Form -->
+            <form id="imageStoryForm" method="post" enctype="multipart/form-data" class="story-form-styled">
                 {% csrf_token %}
                 <div class="form-group">
-                    <label for="group-select">Choisir le groupe</label>
-                    <select name="target_group_id" id="group-select" class="modal-select" required>
+                    <label for="group-select-img">Choisir le groupe</label>
+                    <select name="target_group_id" id="group-select-img" class="modal-select" required>
                         <option value="">-- Sélectionner --</option>
-                        {% for g in groups %}
+                        {% for g in my_groups %}
                         <option value="{{ g.id }}">{{ g.name }}</option>
                         {% endfor %}
                     </select>
@@ -76,6 +85,53 @@
                     <input type="file" name="story_image" id="story_file" accept="image/*" required
                         onchange="updateFileName(this)">
                     <span id="file-name" class="file-name-display">Aucun fichier choisi</span>
+                </div>
+                <button type="submit" class="modal-submit-btn">Publier</button>
+            </form>
+
+            <!-- Text Story Form -->
+            <form id="textStoryForm" method="post" class="story-form-styled hidden-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="group-select-txt">Choisir le groupe</label>
+                    <select name="target_group_id" id="group-select-txt" class="modal-select" required>
+                        <option value="">-- Sélectionner --</option>
+                        {% for g in my_groups %}
+                        <option value="{{ g.id }}">{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="story_text_input">Votre texte</label>
+                    <textarea name="story_text" id="story_text_input" class="modal-textarea" rows="3" maxlength="280"
+                        required placeholder="Écrivez votre message..." oninput="updateTextPreview()"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Couleur de fond</label>
+                    <div class="color-picker-row">
+                        <input type="color" name="story_bg_color" id="story_bg_color" value="#6c5ce7"
+                            class="color-input" onchange="updateTextPreview()">
+                        <div class="color-presets">
+                            <span class="color-dot color-dot-purple" data-color="#6c5ce7"
+                                onclick="selectColor('#6c5ce7')"></span>
+                            <span class="color-dot color-dot-red" data-color="#e74c3c"
+                                onclick="selectColor('#e74c3c')"></span>
+                            <span class="color-dot color-dot-teal" data-color="#00cec9"
+                                onclick="selectColor('#00cec9')"></span>
+                            <span class="color-dot color-dot-yellow" data-color="#fdcb6e"
+                                onclick="selectColor('#fdcb6e')"></span>
+                            <span class="color-dot color-dot-pink" data-color="#e84393"
+                                onclick="selectColor('#e84393')"></span>
+                            <span class="color-dot color-dot-dark" data-color="#2d3436"
+                                onclick="selectColor('#2d3436')"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Aperçu</label>
+                    <div id="textStoryPreview" class="text-story-preview">
+                        <span>Écrivez quelque chose...</span>
+                    </div>
                 </div>
                 <button type="submit" class="modal-submit-btn">Publier</button>
             </form>
@@ -230,15 +286,12 @@
 
                             <!-- Interactions -->
                             <div class="message-actions">
-                                <button class="action-btn like-btn {% if user in message.likes.all %}liked{% endif %}"
-                                    data-message-id="{{ message.id }}" onclick="toggleLike(this,{{ message.id }})">
+                                <button class="action-btn like-btn {% if user in message.likes.all %}liked{% endif %}data-message-id="{{ message.id }}"onclick="toggleLike(this,{{ message.id }})">
                                     <i
                                         class="{% if user in message.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
                                     <span class="like-count">{{ message.like_count }}</span>
                                 </button>
-                                <button type="button" class="action-btn reply-btn" title="Répondre"
-                                    aria-label="Répondre"
-                                    onclick="startReply({{ message.id }}, '{{ message.sender.nickname }}')">
+                                <button type="button" class="action-btn reply-btn" title="Répondre"aria-label="Répondre"onclick="startReply({{ message.id }},'{{ message.sender.nickname }}')">
                                     <i class="fas fa-reply"></i>
                                 </button>
                             </div>
@@ -284,7 +337,13 @@
                 <div class="story-carousel">
                     {% for story in active_group_stories %}
                     <div class="story-card-full">
+                        {% if story.node_type == 'text' %}
+                        <div class="story-text-display" style="background-color:{{ story.background_color }};">
+                            <p>{{ story.text_content }}</p>
+                        </div>
+                        {% else %}
                         <img src="{{ story.image.url }}" alt="Story">
+                        {% endif %}
                         <a href="?group_id={{ active_story_group.id }}" class="discuss-btn">
                             💬 Discuter ici
                         </a>
@@ -396,6 +455,34 @@
         } else {
             display.textContent = "Aucun fichier choisi";
         }
+    }
+
+    // Story Modal Tab Switching
+    function switchStoryTab(tab) {
+        document.querySelectorAll('.story-modal-tab').forEach(t => t.classList.remove('active'));
+        document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+
+        if (tab === 'image') {
+            document.getElementById('imageStoryForm').classList.remove('hidden-form');
+            document.getElementById('textStoryForm').classList.add('hidden-form');
+        } else {
+            document.getElementById('imageStoryForm').classList.add('hidden-form');
+            document.getElementById('textStoryForm').classList.remove('hidden-form');
+        }
+    }
+
+    // Text Story Preview
+    function updateTextPreview() {
+        const text = document.getElementById('story_text_input').value || 'Écrivez quelque chose...';
+        const color = document.getElementById('story_bg_color').value;
+        const preview = document.getElementById('textStoryPreview');
+        preview.style.backgroundColor = color;
+        preview.querySelector('span').textContent = text;
+    }
+
+    function selectColor(color) {
+        document.getElementById('story_bg_color').value = color;
+        updateTextPreview();
     }
 
     // Close modal on outside click

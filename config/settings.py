@@ -258,11 +258,24 @@ SESSION_COOKIE_SECURE = not DEBUG  # True in prod (HTTPS), False in dev (HTTP)
 CSRF_COOKIE_SECURE = not DEBUG
 
 # Versioning for cache busting
-STATIC_VERSION = '2.7.35'
+STATIC_VERSION = '2.10.0'
 
 # Admin bootstrap via secret passphrase on registration
 ADMIN_BOOTSTRAP_PASSPHRASE = config('ADMIN_BOOTSTRAP_PASSPHRASE', default='Nefe')
 ADMIN_BOOTSTRAP_MAX = 5  # Max number of admin accounts that can be created this way
+
+# --- Celery Configuration ---
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 min hard limit per task
+CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60  # 25 min soft limit (raises SoftTimeLimitExceeded)
+# Graceful fallback: if Celery/Redis unavailable, tasks run synchronously
+CELERY_TASK_ALWAYS_EAGER = config('CELERY_TASK_ALWAYS_EAGER', default='True', cast=bool)
 
 LOGGING = {
     'version': 1,
