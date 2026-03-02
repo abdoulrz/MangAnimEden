@@ -1539,8 +1539,6 @@ input[type="file"] {
     }
 
     .chat-window-container {
-        order: -1;
-        /* Center block appears first on mobile */
         min-height: 400px;
     }
 
