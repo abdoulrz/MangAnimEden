@@ -1530,6 +1530,7 @@ input[type="file"] {
     .chat-main-layout {
         flex-direction: column;
         height: auto;
+        min-height: calc(100vh - 150px);
         gap: 1rem;
     }
 
