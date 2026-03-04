@@ -585,6 +585,94 @@
                         });
                 }
 
+                // ========== FRIENDSHIP ACCEPT/REJECT HANDLERS ==========
+                document.querySelectorAll('.btn-accept-friend').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const requestId = this.getAttribute('data-request-id');
+                        fetch(`/forum/friends/accept/${requestId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken'),
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Remove the request item from DOM
+                                    const item = document.querySelector(`.friend-request-item[data-request-id="${requestId}"]`);
+                                    if (item) item.remove();
+
+                                    // Update pending count badge
+                                    const pendingBadge = document.querySelector('.pending-badge');
+                                    if (pendingBadge) {
+                                        const count = parseInt(pendingBadge.textContent) - 1;
+                                        if (count <= 0) {
+                                            pendingBadge.remove();
+                                        } else {
+                                            pendingBadge.textContent = count;
+                                        }
+                                    }
+
+                                    // Update friends count
+                                    const friendCountEl = document.querySelector('#friends-card-toggle .stat-value');
+                                    if (friendCountEl) {
+                                        friendCountEl.textContent = parseInt(friendCountEl.textContent) + 1;
+                                    }
+
+                                    // Reload friends list if panel is open
+                                    if (friendsPanel && !friendsPanel.classList.contains('friends-panel-hidden')) {
+                                        loadFriendsList();
+                                    }
+                                } else {
+                                    alert(data.error || 'Erreur lors de l\'acceptation.');
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Accept friend error:', err);
+                                alert('Erreur réseau. Réessayez.');
+                            });
+                    });
+                });
+
+                document.querySelectorAll('.btn-reject-friend').forEach(btn => {
+                    btn.addEventListener('click', function () {
+                        const requestId = this.getAttribute('data-request-id');
+                        fetch(`/forum/friends/reject/${requestId}/`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken'),
+                                'Content-Type': 'application/json'
+                            }
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    // Remove the request item from DOM
+                                    const item = document.querySelector(`.friend-request-item[data-request-id="${requestId}"]`);
+                                    if (item) item.remove();
+
+                                    // Update pending count badge
+                                    const pendingBadge = document.querySelector('.pending-badge');
+                                    if (pendingBadge) {
+                                        const count = parseInt(pendingBadge.textContent) - 1;
+                                        if (count <= 0) {
+                                            pendingBadge.remove();
+                                        } else {
+                                            pendingBadge.textContent = count;
+                                        }
+                                    }
+                                } else {
+                                    alert(data.error || 'Erreur lors du rejet.');
+                                }
+                            })
+                            .catch(err => {
+                                console.error('Reject friend error:', err);
+                                alert('Erreur réseau. Réessayez.');
+                            });
+                    });
+                });
+
                 // ========== PROGRESS BAR FIX ==========
                 const progressBar = document.querySelector('.progress-bar-fill');
                 if (progressBar) {
