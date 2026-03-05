@@ -2,6 +2,8 @@ from django.db import models
 from django.conf import settings  # Import settings for AUTH_USER_MODEL
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 
 def page_image_upload_path(instance, filename):
     """
@@ -173,6 +175,22 @@ class Favorite(models.Model):
         return f"{self.user} ❤️ {self.series}"
 
 
+# --- SIGNALS FOR AUTO-DELETING FILES ---
 
+@receiver(post_delete, sender=Series)
+def auto_delete_series_cover_on_delete(sender, instance, **kwargs):
+    """Deletes the cover image from storage when the Series object is deleted."""
+    if instance.cover:
+        instance.cover.delete(save=False)
 
+@receiver(post_delete, sender=Chapter)
+def auto_delete_chapter_source_on_delete(sender, instance, **kwargs):
+    """Deletes the source zip/pdf file from storage when the Chapter is deleted."""
+    if instance.source_file:
+        instance.source_file.delete(save=False)
 
+@receiver(post_delete, sender=Page)
+def auto_delete_page_image_on_delete(sender, instance, **kwargs):
+    """Deletes the page image file from storage when the Page is deleted."""
+    if instance.image:
+        instance.image.delete(save=False)
