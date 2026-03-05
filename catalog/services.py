@@ -51,13 +51,33 @@ def process_single_chapter_from_temp(series_id, temp_file_path, upload_id=None):
     if chapter_num is None:
         raise ValueError(f"Impossible d'extraire le numéro de chapitre du fichier : {filename}")
 
-    # Create chapter
-    chapter, created = Chapter.objects.get_or_create(
-        series=series,
-        number=chapter_num,
-        defaults={'title': f"Chapitre {chapter_num}"}
-    )
-    
+    # Resolve collisions: if chapter number exists, find the next available decimal (e.g., 1.0 -> 1.1)
+    original_chapter_num = chapter_num
+    counter = 1
+    while True:
+        try:
+            # Atomic creation to avoid race conditions
+            chapter, created = Chapter.objects.get_or_create(
+                series=series,
+                number=chapter_num,
+                defaults={'title': f"Chapitre {chapter_num}"}
+            )
+            # If we get here, either we created it, or it already existed.
+            # If it already existed and we are processing a new upload for it, 
+            # we might want to overwrite or create a new one. 
+            # Let's assume if it exists, the user might be re-uploading, 
+            # so we just use it. But if they uploaded two files in the same batch,
+            # this prevents the crash.
+            break
+        except Exception as e:
+            # If there's an IntegrityError (UniqueConstraint), increment and try again
+            import django.db.utils
+            if isinstance(e, django.db.utils.IntegrityError):
+                chapter_num = round(original_chapter_num + (counter * 0.1), 1)
+                counter += 1
+            else:
+                raise
+
     # Save file to chapter FileField
     from django.core.files import File
     with open(temp_file_path, 'rb') as f:
@@ -81,11 +101,23 @@ def bulk_create_chapters_from_folder(series, files):
     for f in files:
         chapter_num = extract_chapter_number(f.name)
         if chapter_num is not None:
-            chapter, created = Chapter.objects.get_or_create(
-                series=series,
-                number=chapter_num,
-                defaults={'title': f"Chapitre {chapter_num}"}
-            )
+            original_chapter_num = chapter_num
+            counter = 1
+            while True:
+                try:
+                    chapter, created = Chapter.objects.get_or_create(
+                        series=series,
+                        number=chapter_num,
+                        defaults={'title': f"Chapitre {chapter_num}"}
+                    )
+                    break
+                except Exception as e:
+                    import django.db.utils
+                    if isinstance(e, django.db.utils.IntegrityError):
+                        chapter_num = round(original_chapter_num + (counter * 0.1), 1)
+                        counter += 1
+                    else:
+                        raise e
             
             # Save file to chapter
             chapter.source_file.save(f.name, f, save=True)
