@@ -134,15 +134,34 @@
 
         if (!form || !folderInput) return;
 
-        // Helper: fetch with detailed error info
-        async function safeFetch(url, options, label) {
-            const res = await fetch(url, options);
-            if (!res.ok) {
-                const body = await res.text();
-                console.error(`[${label}] FAILED`, { url, status: res.status, body: body.substring(0, 500) });
-                throw new Error(`[${label}] ${res.status} — ${body.substring(0, 150)}`);
+        // Helper: safeFetch with exponential fallback retries (max 3 retries)
+        async function safeFetchWithRetry(url, options, label, retries = 3) {
+            for (let i = 0; i < retries; i++) {
+                try {
+                    const res = await fetch(url, options);
+                    if (!res.ok) {
+                        const body = await res.text();
+                        console.error(`[${label}] FAILED (Attempt ${i + 1}/${retries})`, { url, status: res.status, body: body.substring(0, 500) });
+                        if (i === retries - 1) {
+                            throw new Error(`[${label}] ${res.status} — ${body.substring(0, 150)}`);
+                        }
+                    } else {
+                        return res; // Success
+                    }
+                } catch (err) {
+                    if (i === retries - 1) {
+                        console.error(`[${label}] NETWORK ERROR (Final Attempt)`, err);
+                        throw new Error(`[${label}] Erreur réseau: ${err.message}`);
+                    }
+                    console.warn(`[${label}] Network glitch, retrying in ${Math.pow(2, i)}s...`);
+                    await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+                }
             }
-            return res;
+        }
+
+        // Keep the old signature but map it to the retry logic to minimize changes
+        async function safeFetch(url, options, label) {
+            return safeFetchWithRetry(url, options, label, 3);
         }
 
         let completedUploadIds = [];
@@ -159,16 +178,41 @@
             progressContainer.style.display = 'block';
 
             try {
-                // Background UPLOAD Phase
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const overallPercent = Math.round((i / files.length) * 100);
-                    progressBar.style.width = `${overallPercent}%`;
-                    statusText.innerText = `[${i + 1}/${files.length}] Upload de ${file.name}...`;
+                // Background UPLOAD Phase with Bounded Concurrency (Worker Pool)
+                let completedFiles = 0;
+                let activeWorkers = 0;
+                const maxConcurrent = 5; // Upload 5 files at a time
+                const fileQueue = [...files];
 
-                    const uploadId = await uploadFileInChunks(file);
-                    completedUploadIds.push(uploadId);
+                statusText.innerText = `[0/${files.length}] Démarrage de l'upload (5 fichiers en parallèle)...`;
+
+                // Worker function to process files from the queue
+                async function worker() {
+                    while (fileQueue.length > 0) {
+                        const file = fileQueue.shift(); // Get next file
+                        try {
+                            const uploadId = await uploadFileInChunks(file);
+                            completedUploadIds.push(uploadId);
+                        } catch (err) {
+                            console.error(`Échec pour ${file.name}:`, err);
+                            throw err; // Stop the whole process if one file completely fails all retries
+                        } finally {
+                            completedFiles++;
+                            const overallPercent = Math.round((completedFiles / files.length) * 100);
+                            progressBar.style.width = `${overallPercent}%`;
+                            statusText.innerText = `[${completedFiles}/${files.length}] Upload en cours...`;
+                        }
+                    }
                 }
+
+                // Start the initial workers
+                const workers = [];
+                for (let i = 0; i < Math.min(maxConcurrent, files.length); i++) {
+                    workers.push(worker());
+                }
+
+                // Wait for all workers to finish
+                await Promise.all(workers);
 
                 progressBar.style.width = '100%';
                 statusText.innerText = "Fichiers transférés ! Cliquez sur Enregistrer pour lancer l'extraction en arrière-plan.";
