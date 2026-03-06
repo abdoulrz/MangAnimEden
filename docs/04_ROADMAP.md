@@ -236,6 +236,11 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [ ] Backend : Soft Delete ou Anonymisation (ne pas casser les commentaires/posts).
 - [ ] **Legal Consent** :
   - [ ] Checkbox "J'accepte les CGU" à l'inscription.
+- [ ] **Pages Légales & Support** :
+  - [ ] Templates : `terms.html`, `privacy.html`, `dmca.html`.
+
+### 3.6 Modération & Stratégie de Conversion
+
 - [ ] **Reporting System** :
   - [ ] Backend : Modèle `Report` (Target: User/Comment, Reason, Status).
   - [ ] UI : Bouton "Signaler" (Flag icon).
@@ -250,7 +255,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [ ] Formulaire de Contact : `/contact/` (Envoi email aux admins).
 - [ ] **Cascades de Suppression** : Revoir les `on_delete` pour s'assurer que supprimer un User ne casse pas les discussions de groupe (passer en `SET_NULL` ou Soft Delete).
 
-### 3.6 Support Multi-Formats (CBR, CBZ, PDF, EPUB) ✅ (COMPLÉTÉ)
+### 3.7 Support Multi-Formats (CBR, CBZ, PDF, EPUB) ✅ (COMPLÉTÉ)
 
 - [x] **Spec** : Rédiger `docs/specs/SPEC-007-Multi-Format-Reader.md`. *(Intégré dans le développement de l'Upload Folder)*
 - [x] **Backend** :
@@ -262,13 +267,13 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [x] Reader unifié. (Le `FileProcessor` convertit tout en images standard `Page`, donc le lecteur actuel fonctionne pour tous les formats).
   - [x] Gestion du chargement progressif.
 
-### 3.7 Monétisation & Publicité
+### 3.8 Monétisation & Publicité
 
 - [ ] **Ajustement "Espace Publicitaire"** : Trouver un meilleur substitut visuel/textuel.
 - [ ] **Publicités PC/Mobile** : Bouton de fermeture fonctionnel et affichage cohérent.
 - [ ] **Ads Vidéo** : Intégrer une publicité vidéo obligatoire toutes les 10 minutes pendant la lecture.
 
-### 3.8 Infrastructure & Déploiement ✅ (COMPLÉTÉ)
+### 3.9 Infrastructure & Déploiement ✅ (COMPLÉTÉ)
 
 - [x] **Migration Contabo VPS** : Migration complète de l'application depuis Render vers un VPS Contabo dédié.
   - [x] Configuration serveur Ubuntu (Python, PostgreSQL, Nginx, Gunicorn).

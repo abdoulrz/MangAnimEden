@@ -2013,10 +2013,17 @@
 }
 
 /* ==================== GDPR DANGER ZONE ==================== */
+.profile-danger-zone-bottom {
+    margin-top: var(--space-xl);
+    margin-bottom: var(--space-xl);
+    max-width: 400px;
+}
+
 .profile-danger-section {
-    margin-top: var(--space-2xl);
-    padding-top: var(--space-md);
-    border-top: 1px solid var(--glass-border);
+    padding: var(--space-sm);
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+    background: rgba(239, 68, 68, 0.05);
 }
 
 .profile-danger-link {

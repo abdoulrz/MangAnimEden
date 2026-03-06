@@ -189,6 +189,15 @@ class FileProcessor:
             
             if result:
                 logger.info(f"Successfully processed {chapter}. Total pages: {chapter.pages.count()}")
+                
+                # Delete source file after successful processing to save space
+                if chapter.source_file:
+                    try:
+                        source_path = chapter.source_file.path
+                        chapter.source_file.delete(save=True) # This deletes the file from storage
+                        logger.info(f"Deleted source file: {source_path}")
+                    except Exception as e:
+                        logger.warning(f"Could not delete source file for chapter {chapter.id}: {e}")
             return result
 
         except Exception as e:
@@ -225,6 +234,15 @@ class FileProcessor:
                     self._save_page_image(chapter, f.read(), page_count + 1, os.path.basename(file_path))
 
             logger.info(f"Successfully processed {chapter}. Total pages: {chapter.pages.count()}")
+            
+            # Delete source file after successful processing to save space
+            if chapter.source_file:
+                try:
+                    source_path = chapter.source_file.path
+                    chapter.source_file.delete(save=True)
+                    logger.info(f"Deleted source file after local processing: {source_path}")
+                except Exception as e:
+                    logger.warning(f"Could not delete source file for chapter {chapter.id}: {e}")
             return True
 
         except Exception as e:

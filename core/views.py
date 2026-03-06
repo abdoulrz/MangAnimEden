@@ -149,6 +149,11 @@ from django.contrib import messages
 from .forms import ContactForm
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.contrib.auth.decorators import login_required
+from django.contrib.contenttypes.models import ContentType
+from administration.models import Report
 
 def contact_view(request):
     """
@@ -192,6 +197,70 @@ def contact_view(request):
 
     return render(request, 'core/contact.html', {
         'form': form,
-        'STATIC_VERSION': settings.STATIC_VERSION
+        'STATIC_VERSION': getattr(settings, 'STATIC_VERSION', '1.0')
     })
+
+@login_required
+@require_POST
+def submit_report(request):
+    """
+    Endpoint AJAX permettant aux utilisateurs de signaler un contenu.
+    Payload JSON attendu: target_type (ex: 'user', 'comment'), target_id, reason, description
+    """
+    try:
+        import json
+        data = json.loads(request.body)
+        target_type_str = data.get('target_type')
+        target_id = data.get('target_id')
+        reason = data.get('reason')
+        description = data.get('description', '')
+
+        if not target_type_str or not target_id or not reason:
+            return JsonResponse({'error': 'Données manquantes (target_type, target_id, reason requis)'}, status=400)
+
+        # Import local to avoid circular imports if any
+        from users.models import User
+        from social.models import Comment, Message, Topic
+
+        model_mapping = {
+            'user': User,
+            'comment': Comment,
+            'message': Message,
+            'topic': Topic,
+        }
+
+        target_model = model_mapping.get(target_type_str)
+        if not target_model:
+            return JsonResponse({'error': f'Type de signalement ({target_type_str}) non supporté'}, status=400)
+
+        target_ct = ContentType.objects.get_for_model(target_model)
+        
+        # Verify target exists
+        if not target_model.objects.filter(id=target_id).exists():
+            return JsonResponse({'error': 'Le contenu ciblé n\'existe plus ou est introuvable'}, status=404)
+
+        # Prevent duplicate pending reports from the same user for the same object
+        if Report.objects.filter(
+            reporter=request.user, 
+            target_type=target_ct, 
+            target_id=target_id,
+            status='pending'
+        ).exists():
+            return JsonResponse({'error': 'Vous avez déjà signalé ce contenu. En attente de modération.'}, status=409)
+
+        # Create report
+        Report.objects.create(
+            reporter=request.user,
+            target_type=target_ct,
+            target_id=target_id,
+            reason=reason,
+            description=description
+        )
+
+        return JsonResponse({'success': True, 'message': 'Votre signalement a bien été envoyé à l\'équipe de modération.'})
+
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Format JSON invalide'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': f"Une erreur interne s'est produite: {str(e)}"}, status=500)
 

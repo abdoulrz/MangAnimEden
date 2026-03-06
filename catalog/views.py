@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.conf import settings
-from .models import Series, Favorite
+from .models import Series, Favorite, Review
+import json
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -59,8 +60,10 @@ def manga_detail(request, series_id):
         last_active=Max('reading_progress__last_read')
     ).order_by('-last_active').distinct()[:10]
 
+    user_review = None
     if request.user.is_authenticated:
         is_favorite = Favorite.objects.filter(user=request.user, series=series).exists()
+        user_review = series.reviews.filter(user=request.user).first()
         # Avoid circular import if possible, or import inside
         from reader.models import ReadingProgress
         last_read = ReadingProgress.objects.filter(
@@ -76,6 +79,7 @@ def manga_detail(request, series_id):
         'last_read_chapter': last_read_chapter,
         'is_favorite': is_favorite,
         'readers': readers,
+        'user_review': user_review,
         'STATIC_VERSION': settings.STATIC_VERSION
     })
 
@@ -92,3 +96,32 @@ def toggle_favorite(request, series_id):
         is_favorite = True
         
     return JsonResponse({'is_favorite': is_favorite})
+
+@login_required
+@require_POST
+def submit_review(request, series_id):
+    series = get_object_or_404(Series, pk=series_id)
+    try:
+        data = json.loads(request.body)
+        rating = int(data.get('rating', 0))
+        content = data.get('content', '').strip()
+        
+        if not (1 <= rating <= 5):
+            return JsonResponse({'success': False, 'error': 'La note doit être entre 1 et 5.'})
+            
+        review, created = Review.objects.update_or_create(
+            series=series,
+            user=request.user,
+            defaults={'rating': rating, 'content': content}
+        )
+        
+        return JsonResponse({
+            'success': True, 
+            'message': 'Avis enregistré avec succès!',
+            'average_rating': series.average_rating,
+            'review_count': series.review_count
+        })
+    except ValueError:
+         return JsonResponse({'success': False, 'error': 'Données invalides.'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})

@@ -103,7 +103,7 @@
     }
 </style>
 
-<div id="backgroundProgressContainer" style="display: none;">
+<div id="backgroundProgressContainer">
     <h4>Traitement en arrière-plan</h4>
     <div id="bgProgressText">
         Initialisation...
@@ -112,7 +112,6 @@
         <div id="bgProgressBar"></div>
     </div>
     <button id="bgDismissBtn"
-        style="margin-top:8px; background:transparent; border:1px solid rgba(255,255,255,0.2); color:#aaa; padding:6px 16px; border-radius:6px; cursor:pointer; font-size:0.85rem;"
         onclick="localStorage.removeItem('activeUploads'); document.getElementById('backgroundProgressContainer').style.display='none';">
         ✕ Fermer
     </button>

@@ -753,17 +753,18 @@
                 <span class="block-icon">📚</span>
                 <span class="block-title">Historique</span>
             </a>
-
-            <!-- Suppression de compte (GDPR) -->
-            <div class="profile-danger-section">
-                <a href="{% url 'users:account_delete' %}" class="block-item profile-danger-link"
-                    title="Zone de Danger">
-                    <span class="block-icon">⚠️</span>
-                    <span class="block-title">Supprimer le compte</span>
-                </a>
-            </div>
         </div>
     </div>
 
+</div>
+
+<!-- Suppression de compte (GDPR) — Always at the bottom of the page, all screen sizes -->
+<div class="container profile-danger-zone-bottom">
+    <div class="profile-danger-section">
+        <a href="{% url 'users:account_delete' %}" class="block-item profile-danger-link" title="Zone de Danger">
+            <span class="block-icon">⚠️</span>
+            <span class="block-title">Supprimer le compte</span>
+        </a>
+    </div>
 </div>
 {% endblock %}

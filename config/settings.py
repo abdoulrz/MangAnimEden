@@ -186,7 +186,10 @@ if AWS_S3_CUSTOM_DOMAIN:
 
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        # Use S3/R2 only when a bucket name is provided, otherwise fall back to local filesystem
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage"
+        if AWS_STORAGE_BUCKET_NAME
+        else "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
@@ -251,8 +254,8 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = not DEBUG  # True in prod (HTTPS), False in dev (HTTP)
 CSRF_COOKIE_SECURE = not DEBUG
 
-# Versioning for cache busting
-STATIC_VERSION = '2.10.10'
+# Versioning for cache busting 
+STATIC_VERSION = '2.10.11'
 
 # Admin bootstrap via secret passphrase on registration
 ADMIN_BOOTSTRAP_PASSPHRASE = config('ADMIN_BOOTSTRAP_PASSPHRASE', default='Nefe')

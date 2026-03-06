@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Limite de Chapitres Atteinte - MangaAnimEden{% endblock %}
+
+{% block extra_css %}
+<style>
+    .limit-reached-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        padding: 20px;
+    }
+
+    .limit-card {
+        background: var(--color-bg-elevated);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-lg);
+        padding: 40px;
+        max-width: 600px;
+        text-align: center;
+        box-shadow: var(--shadow-xl);
+    }
+
+    .limit-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        color: var(--color-primary);
+    }
+
+    .limit-title {
+        color: var(--color-text-primary);
+        margin-bottom: 15px;
+        font-size: 2rem;
+    }
+
+    .limit-text {
+        color: var(--color-text-secondary);
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+
+    .benefits-list {
+        text-align: left;
+        margin-bottom: 30px;
+        color: var(--color-text-primary);
+        background: var(--color-bg-secondary);
+        padding: 20px;
+        border-radius: var(--radius-md);
+    }
+
+    .benefits-list h4 {
+        margin-bottom: 10px;
+        color: var(--color-primary);
+    }
+
+    .benefits-list ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .benefits-list li {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .benefits-list li i {
+        color: #22c55e;
+        margin-top: 4px;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .btn-register {
+        display: block;
+        background: var(--color-primary);
+        color: white;
+        padding: 15px 30px;
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-register:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        color: white;
+    }
+
+    .btn-login {
+        display: block;
+        background: transparent;
+        color: var(--color-primary);
+        border: 2px solid var(--color-primary);
+        padding: 12px 30px;
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+
+    .btn-login:hover {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--color-primary);
+    }
+
+    .return-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: var(--color-text-muted);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+    .return-link:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="limit-reached-container">
+    <div class="limit-card glass-panel">
+        <div class="limit-icon">📚</div>
+        <h1 class="limit-title">Vous aimez ce que vous lisez ?</h1>
+
+        <p class="limit-text">
+            Vous avez atteint votre limite de 3 chapitres gratuits en tant qu'utilisateur invité.
+            Rejoignez notre communauté grandissante pour continuer votre lecture sans interruption !
+        </p>
+
+        <div class="benefits-list">
+            <h4>Pourquoi créer un compte gratuit ?</h4>
+            <ul>
+                <li><i class="fas fa-check-circle"></i> <strong>Accès illimité</strong> à tous nos chapitres.</li>
+                <li><i class="fas fa-bookmark"></i> <strong>Suivi de lecture automatique</strong> pour reprendre où vous
+                    en étiez.</li>
+                <li><i class="fas fa-heart"></i> Mettez vos séries en <strong>favoris</strong> pour ne rater aucune
+                    sortie.</li>
+                <li><i class="fas fa-users"></i> Participez au <strong>forum</strong> et interagissez avec les autres
+                    fans.</li>
+                <li><i class="fas fa-star"></i> Gagnez de l'<strong>XP</strong> et débloquez des badges uniques !</li>
+            </ul>
+        </div>
+
+        <div class="action-buttons">
+            <a href="{% url 'account_signup' %}" class="btn-register">Créer un Compte Gratuit</a>
+            <a href="{% url 'account_login' %}" class="btn-login">J'ai déjà un compte</a>
+        </div>
+
+        <a href="{% url 'catalog:home' %}" class="return-link">← Retour à l'accueil</a>
+    </div>
+</div>
+{% endblock %}

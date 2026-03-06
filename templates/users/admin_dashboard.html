@@ -25,6 +25,12 @@
     <div class="dashboard-tabs">
         <button class="tab-btn active" onclick="switchTab('users')">Utilisateurs</button>
         <button class="tab-btn" onclick="switchTab('content')">Contenu</button>
+        <button class="tab-btn" onclick="switchTab('reports')">
+            Signalements
+            {% if pending_reports|length > 0 %}
+            <span class="reports-badge">{{ pending_reports|length }}</span>
+            {% endif %}
+        </button>
     </div>
 
     <!-- Users Tab -->
@@ -72,6 +78,7 @@
                         <div class="actions-container">
                             <form method="POST" class="form-inline">
                                 {% csrf_token %}
+                                <input type="hidden" name="action_type" value="user">
                                 <input type="hidden" name="user_id" value="{{ user.id }}">
                                 <input type="hidden" name="action" value="toggle_admin">
                                 <button type="submit" class="action-btn btn-toggle-admin" title="Toggle Admin">
@@ -80,6 +87,7 @@
                             </form>
                             <form method="POST" class="form-inline">
                                 {% csrf_token %}
+                                <input type="hidden" name="action_type" value="user">
                                 <input type="hidden" name="user_id" value="{{ user.id }}">
                                 <input type="hidden" name="action" value="toggle_moderator">
                                 <button type="submit" class="action-btn btn-toggle-mod" title="Toggle Mod">
@@ -88,6 +96,7 @@
                             </form>
                             <form method="POST" class="form-inline">
                                 {% csrf_token %}
+                                <input type="hidden" name="action_type" value="user">
                                 <input type="hidden" name="user_id" value="{{ user.id }}">
                                 <input type="hidden" name="action" value="toggle_ban">
                                 <button type="submit"
@@ -100,6 +109,70 @@
                         {% else %}
                         <span class="user-self-label">(Vous)</span>
                         {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Reports Tab -->
+    <div id="reports" class="tab-content">
+        <table class="users-table">
+            <thead>
+                <tr>
+                    <th>Signalé par</th>
+                    <th>Cible</th>
+                    <th>Raison</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in pending_reports %}
+                <tr>
+                    <td>{{ report.reporter.nickname }}</td>
+                    <td>
+                        <strong>{{ report.target_type.model|title }}</strong><br>
+                        <span class="report-target-id">ID: {{ report.target_id }}</span>
+                    </td>
+                    <td>
+                        <span class="report-reason-label">{{ report.get_reason_display }}</span><br>
+                        {% if report.description %}
+                        <p class="report-description-snippet" title="{{ report.description }}">{{ report.description }}
+                        </p>
+                        {% endif %}
+                    </td>
+                    <td>{{ report.created_at|date:"d M Y H:i" }}</td>
+                    <td>
+                        <div class="actions-container">
+                            <form method="POST" class="form-inline"
+                                onsubmit="return confirm('Marquer comme résolu ?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action_type" value="report">
+                                <input type="hidden" name="report_id" value="{{ report.id }}">
+                                <input type="hidden" name="action" value="resolve">
+                                <button type="submit" class="action-btn btn-resolve-report" title="Résoudre">
+                                    ✓ Résoudre
+                                </button>
+                            </form>
+                            <form method="POST" class="form-inline"
+                                onsubmit="return confirm('Rejeter ce signalement ?');">
+                                {% csrf_token %}
+                                <input type="hidden" name="action_type" value="report">
+                                <input type="hidden" name="report_id" value="{{ report.id }}">
+                                <input type="hidden" name="action" value="dismiss">
+                                <button type="submit" class="action-btn btn-dismiss-report" title="Ignorer">
+                                    ✗ Ignorer
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" class="table-empty-cell">
+                        Aucun signalement en attente.
                     </td>
                 </tr>
                 {% endfor %}
@@ -152,7 +225,12 @@
     function switchTab(tabId) {
         // Update Buttons
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
+        if (event && event.target) {
+            event.target.classList.add('active');
+        } else {
+            // Fallback if not triggered by event
+            document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        }
 
         // Update Content
         document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));

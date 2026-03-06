@@ -1,0 +1,112 @@
+<!-- Modal Signalement -->
+<div id="reportModal" class="report-modal-overlay">
+    <div class="report-modal-box">
+        <h2>Signaler un contenu</h2>
+
+        <form id="reportForm">
+            <input type="hidden" id="reportTargetType" name="target_type">
+            <input type="hidden" id="reportTargetId" name="target_id">
+
+            <div class="report-form-group">
+                <label for="reportReason">Raison du signalement *</label>
+                <select id="reportReason" name="reason" required>
+                    <option value="" disabled selected>Sélectionnez une raison</option>
+                    <option value="spam">Spam ou publicité</option>
+                    <option value="harassment">Harcèlement ou discours de haine</option>
+                    <option value="inappropriate">Contenu inapproprié</option>
+                    <option value="copyright">Violation de droit d'auteur</option>
+                    <option value="other">Autre</option>
+                </select>
+            </div>
+
+            <div class="report-form-group">
+                <label for="reportDescription">Détails (Optionnel)</label>
+                <textarea id="reportDescription" name="description" rows="4"
+                    placeholder="Fournissez plus de contexte..."></textarea>
+            </div>
+
+            <div class="report-modal-actions">
+                <button type="button" class="btn-cancel" onclick="closeReportModal()">Annuler</button>
+                <button type="submit" class="btn-submit-report">Envoyer le signalement</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Report Modal Logic
+    const reportModal = document.getElementById('reportModal');
+    const reportForm = document.getElementById('reportForm');
+
+    function openReportModal(targetType, targetId) {
+        document.getElementById('reportTargetType').value = targetType;
+        document.getElementById('reportTargetId').value = targetId;
+        reportModal.style.display = 'flex';
+        if (reportForm) reportForm.reset();
+    }
+
+    function closeReportModal() {
+        reportModal.style.display = 'none';
+    }
+
+    // Close if clicked outside
+    window.onclick = function (event) {
+        if (event.target == reportModal) {
+            closeReportModal();
+        }
+    }
+
+    if (reportForm) {
+        reportForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const submitBtn = reportForm.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Envoi...';
+
+            const payload = {
+                target_type: document.getElementById('reportTargetType').value,
+                target_id: document.getElementById('reportTargetId').value,
+                reason: document.getElementById('reportReason').value,
+                description: document.getElementById('reportDescription').value
+            };
+
+            fetch("{% url 'submit_report' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Using django's CSRF token if not provided by getCookie helper
+                    'X-CSRFToken': document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || ''
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+
+                    if (data.success) {
+                        closeReportModal();
+                        if (typeof showToast === 'function') {
+                            showToast(data.message, 'success');
+                        } else {
+                            alert(data.message);
+                        }
+                    } else {
+                        if (typeof showToast === 'function') {
+                            showToast(data.error || "Erreur inconnue", 'error');
+                        } else {
+                            alert(data.error || "Une erreur s'est produite.");
+                        }
+                    }
+                })
+                .catch(err => {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                    console.error(err);
+                    alert("Erreur de connexion serveur.");
+                });
+        });
+    }
+</script>

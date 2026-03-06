@@ -43,7 +43,7 @@ def populate():
 
     # 3. Create Page
     # Path to the image we copied
-    image_path = os.path.join(settings.MEDIA_ROOT, 'mangas', 'demo_page.png')
+    image_path = os.path.join(settings.MEDIA_ROOT, 'scans_pages', 'demo_page.png')
     
     if os.path.exists(image_path):
         # We check if pages exist to avoid duplicates if run multiple times

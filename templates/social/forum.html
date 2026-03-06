@@ -109,8 +109,7 @@
                 <div class="form-group">
                     <label>Couleur de fond</label>
                     <div class="color-picker-row">
-                        <input type="color" name="story_bg_color" id="story_bg_color" value="#6c5ce7"
-                            class="color-input" onchange="updateTextPreview()">
+                        <input type="color" name="story_bg_color" id="story_bg_color" value="#6c5ce7"class="color-input"onchange="updateTextPreview()">
                         <div class="color-presets">
                             <span class="color-dot color-dot-purple" data-color="#6c5ce7"
                                 onclick="selectColor('#6c5ce7')"></span>
@@ -271,7 +270,7 @@
                                 <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
 
                                 {% if active_group.owner == user and message.sender != user %}
-                                <button class="btn-ban"onclick="banUser({{ active_group.id }}, {{ message.sender.id }}, '{{ message.sender.nickname }}')"title="Bannir ce membre">🚫</button>
+                                <button class="btn-ban"onclick="banUser({{ active_group.id }}, {{ message.sender.id }}, '{{ message.sender.nickname }}')" title="Bannir ce membre">🚫</button>
                                 {% endif %}
                             </div>
 
@@ -286,7 +285,7 @@
 
                             <!-- Interactions -->
                             <div class="message-actions">
-                                <button class="action-btn like-btn {% if user in message.likes.all %}liked{% endif %}data-message-id="{{ message.id }}"onclick="toggleLike(this,{{ message.id }})">
+                                <button class="action-btn like-btn {% if user in message.likes.all %}liked{% endif %}"data-message-id="{{ message.id }}"onclick="toggleLike(this,{{ message.id }})">
                                     <i
                                         class="{% if user in message.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
                                     <span class="like-count">{{ message.like_count }}</span>
@@ -294,6 +293,11 @@
                                 <button type="button" class="action-btn reply-btn" title="Répondre"aria-label="Répondre"onclick="startReply({{ message.id }},'{{ message.sender.nickname }}')">
                                     <i class="fas fa-reply"></i>
                                 </button>
+                                {% if request.user.is_authenticated and message.sender != user %}
+                                <button type="button" class="action-btn report-btn" title="Signaler"aria-label="Signaler"onclick="openReportModal('message', {{ message.id }})">
+                                    <i class="fas fa-flag"></i>
+                                </button>
+                                {% endif %}
                             </div>
 
                         </div>
@@ -338,7 +342,7 @@
                     {% for story in active_group_stories %}
                     <div class="story-card-full">
                         {% if story.node_type == 'text' %}
-                        <div class="story-text-display" style="background-color:{{ story.background_color }};">
+                        <div class="story-text-display"style="background-color:{{ story.background_color }};">
                             <p>{{ story.text_content }}</p>
                         </div>
                         {% else %}
@@ -604,4 +608,6 @@
         bubbles.forEach(b => b.classList.remove('pressing'));
     }
 </script>
+
+{% include 'components/report_modal.html' %}
 {% endblock %}

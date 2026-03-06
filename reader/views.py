@@ -40,6 +40,22 @@ def chap_view(request, chapter_id=None):
         if not progress.completed:
             progress.completed = True
             progress.save()  # Mark as completed to award XP
+    else:
+        # Phase 3.6: Accès Limité (Stratégie de Conversion)
+        # Track read chapters for anonymous users in session
+        free_chapters = request.session.get('free_chapters_read', [])
+        
+        if chapter.id not in free_chapters:
+            if len(free_chapters) >= 3:
+                # Limit reached, redirect to conversion page
+                return render(request, 'reader/limit_reached.html', {
+                    'chapter': chapter,
+                    'STATIC_VERSION': settings.STATIC_VERSION
+                })
+            else:
+                free_chapters.append(chapter.id)
+                request.session['free_chapters_read'] = free_chapters
+                request.session.modified = True
     
     # Context
     context = {

@@ -8,6 +8,7 @@ urlpatterns = [
     path('privacy/', views.privacy_view, name='privacy'),
     path('dmca/', views.dmca_view, name='dmca'),
     path('contact/', views.contact_view, name='contact'),
+    path('report/submit/', views.submit_report, name='submit_report'),
     
     # Password Reset (Phase 3.2)
     path('password-reset/', 

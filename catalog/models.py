@@ -8,11 +8,11 @@ from django.dispatch import receiver
 def page_image_upload_path(instance, filename):
     """
     Génère un chemin logique pour les images de pages :
-    mangas/<series_slug>/chapter_<number>/<filename>
+    scans_pages/<series_slug>/chapter_<number>/<filename>
     """
     series_slug = instance.chapter.series.slug
     chapter_num = instance.chapter.number
-    return f'mangas/{series_slug}/chapter_{chapter_num}/{filename}'
+    return f'scans_pages/{series_slug}/chapter_{chapter_num}/{filename}'
 
 
 
@@ -78,6 +78,16 @@ class Series(models.Model):
     
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
+
+    @property
+    def average_rating(self):
+        from django.db.models import Avg
+        avg = self.reviews.aggregate(Avg('rating'))['rating__avg']
+        return round(avg, 1) if avg else 0.0
+    
+    @property
+    def review_count(self):
+        return self.reviews.count()
 
     
     def save(self, *args, **kwargs):
@@ -194,3 +204,24 @@ def auto_delete_page_image_on_delete(sender, instance, **kwargs):
     """Deletes the page image file from storage when the Page is deleted."""
     if instance.image:
         instance.image.delete(save=False)
+
+
+class Review(models.Model):
+    """
+    Modèle d'Avis et de Note pour une série.
+    """
+    series = models.ForeignKey(Series, on_delete=models.CASCADE, related_name='reviews')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='reviews')
+    rating = models.IntegerField(default=0, verbose_name="Note") # 1 to 5
+    content = models.TextField(blank=True, verbose_name="Avis")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('series', 'user')
+        verbose_name = "Avis"
+        verbose_name_plural = "Avis"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.nickname} - {self.series.title} ({self.rating}/5)"
