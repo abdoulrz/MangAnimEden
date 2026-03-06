@@ -167,51 +167,70 @@
         let completedUploadIds = [];
         let isUploading = false;
 
+        // Shared progress state for granular (per-chunk) tracking
+        let totalChunksAll = 0;
+        let completedChunksAll = 0;
+        let completedFiles = 0;
+
+        function updateProgress() {
+            if (totalChunksAll > 0) {
+                const pct = Math.round((completedChunksAll / totalChunksAll) * 100);
+                progressBar.style.width = `${pct}%`;
+            }
+            statusText.innerText = `[${completedFiles}/${isUploading ? totalFilesCount : completedFiles}] Upload en cours… (${completedChunksAll}/${totalChunksAll} chunks)`;
+        }
+
+        let totalFilesCount = 0;
+
         folderInput.addEventListener('change', async function (e) {
             const files = Array.from(folderInput.files);
             if (files.length === 0) return;
 
-            // Optional: reset if they select a new folder
+            // Reset state
             completedUploadIds = [];
             isUploading = true;
+            totalFilesCount = files.length;
+            completedFiles = 0;
+            totalChunksAll = 0;
+            completedChunksAll = 0;
             submitBtn.disabled = true;
             progressContainer.style.display = 'block';
 
             try {
-                // Background UPLOAD Phase with Bounded Concurrency (Worker Pool)
-                let completedFiles = 0;
-                let activeWorkers = 0;
-                const maxConcurrent = 5; // Upload 5 files at a time
+                const maxConcurrent = 5;
                 const fileQueue = [...files];
+                const chunkSize = 2 * 1024 * 1024;
 
-                statusText.innerText = `[0/${files.length}] Démarrage de l'upload (5 fichiers en parallèle)...`;
+                // Pre-calculate total chunks across ALL files for accurate progress
+                for (const f of files) {
+                    totalChunksAll += Math.ceil(f.size / chunkSize);
+                    // Add 2 extra steps per file: init + complete/assemble
+                    totalChunksAll += 2;
+                }
 
-                // Worker function to process files from the queue
+                statusText.innerText = `[0/${files.length}] Démarrage de l'upload (${maxConcurrent} fichiers en parallèle)…`;
+
+                // Worker: process files sequentially from shared queue
                 async function worker() {
                     while (fileQueue.length > 0) {
-                        const file = fileQueue.shift(); // Get next file
+                        const file = fileQueue.shift();
                         try {
                             const uploadId = await uploadFileInChunks(file);
                             completedUploadIds.push(uploadId);
                         } catch (err) {
                             console.error(`Échec pour ${file.name}:`, err);
-                            throw err; // Stop the whole process if one file completely fails all retries
+                            throw err;
                         } finally {
                             completedFiles++;
-                            const overallPercent = Math.round((completedFiles / files.length) * 100);
-                            progressBar.style.width = `${overallPercent}%`;
-                            statusText.innerText = `[${completedFiles}/${files.length}] Upload en cours...`;
+                            updateProgress();
                         }
                     }
                 }
 
-                // Start the initial workers
                 const workers = [];
                 for (let i = 0; i < Math.min(maxConcurrent, files.length); i++) {
                     workers.push(worker());
                 }
-
-                // Wait for all workers to finish
                 await Promise.all(workers);
 
                 progressBar.style.width = '100%';
@@ -224,7 +243,6 @@
                 statusText.innerText = "Erreur (upload arrêté) : " + error.message;
                 statusText.style.color = "#ff4d4d";
                 isUploading = false;
-                // Allow them to submit standard data without the folder
                 submitBtn.disabled = false;
             }
         });
@@ -237,9 +255,8 @@
             }
 
             const files = Array.from(folderInput.files);
-            if (files.length === 0) return; // Standard submission if no folder selected
+            if (files.length === 0) return;
 
-            // If we have completed uploads from the background sync, hijack to send IDs
             if (completedUploadIds.length > 0) {
                 e.preventDefault();
                 submitBtn.disabled = true;
@@ -267,13 +284,11 @@
                     statusText.innerText = "Lancement de l'extraction en arrière-plan...";
                     progressBar.style.width = '100%';
 
-                    // Submit all upload IDs for background extraction
                     const processData = new FormData();
                     processData.append('series_id', series_id);
                     processData.append('upload_ids', completedUploadIds.join(','));
                     processData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
 
-                    // Save the IDs to localStorage so the next page knows to poll for progress
                     localStorage.setItem('activeUploads', completedUploadIds.join(','));
 
                     await safeFetch('{% url "administration:upload_process" %}', {
@@ -301,7 +316,6 @@
 
             // 1. Init
             const rawFilename = file.webkitRelativePath || file.name;
-            // Truncate to avoid 255 char DB limit
             const safeFilename = rawFilename.length > 250 ? rawFilename.substring(rawFilename.length - 250) : rawFilename;
 
             const initData = new FormData();
@@ -315,8 +329,10 @@
             }, 'Upload Init');
 
             const { upload_id } = await initRes.json();
+            completedChunksAll++; // init step done
+            updateProgress();
 
-            // 2. Chunks
+            // 2. Chunks — progress updates after EACH chunk
             for (let index = 0; index < totalChunks; index++) {
                 const start = index * chunkSize;
                 const end = Math.min(start + chunkSize, file.size);
@@ -332,6 +348,9 @@
                     method: 'POST',
                     body: chunkData
                 }, `Chunk ${index + 1}/${totalChunks}`);
+
+                completedChunksAll++;
+                updateProgress();
             }
 
             // 3. Complete (Assembly)
@@ -343,6 +362,9 @@
                 method: 'POST',
                 body: completeData
             }, 'Upload Complete');
+
+            completedChunksAll++; // complete step done
+            updateProgress();
 
             return upload_id;
         }
