@@ -6,6 +6,7 @@ app_name = 'users'
 urlpatterns = [
     path('profil/', views.profile_view, name='profile'),
     path('profil/modifier/', views.edit_profile_view, name='edit_profile'),
+    path('profil/supprimer/', views.account_delete_view, name='account_delete'),
     # path('admin-panel/', views.admin_dashboard, name='admin_dashboard'), # Moved to administration app
     path('domaine/', views.domaine_view, name='domaine'),
     path('user/<int:user_id>/', views.public_profile_view, name='public_profile'),  # Phase 2.5.2

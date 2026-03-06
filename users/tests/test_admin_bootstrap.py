@@ -34,6 +34,7 @@ class AdminBootstrapTests(TestCase):
             'password1': 'StrongPass2026!',
             'password2': 'StrongPass2026!',
             'admin_passphrase': passphrase,
+            'terms_accepted': True,
         })
 
     # ------------------------------------------------------------------

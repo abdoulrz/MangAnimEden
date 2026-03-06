@@ -185,6 +185,31 @@ def edit_profile_view(request):
     })
 
 @login_required
+def account_delete_view(request):
+    """
+    Vue de suppression de compte (GDPR).
+    Nécessite une confirmation explicite via formulaire.
+    """
+    from django.contrib.auth import logout
+    from django.contrib import messages
+
+    if request.method == 'POST':
+        # Verify confirmation box was checked
+        if request.POST.get('confirm_delete') == 'yes':
+            user = request.user
+            # Log out the user before deleting to clear session
+            logout(request)
+            user.delete()
+            # Redirect to home or login page after successful deletion
+            return redirect('home')
+        else:
+            messages.error(request, "Vous devez cocher la case pour confirmer la suppression.")
+
+    return render(request, 'users/account_delete_confirm.html', {
+        'STATIC_VERSION': settings.STATIC_VERSION
+    })
+
+@login_required
 def domaine_view(request):
     """
     DEPRECATED: Redirect to profile.

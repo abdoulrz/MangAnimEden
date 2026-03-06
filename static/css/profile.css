@@ -2011,3 +2011,14 @@
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
+
+/* ==================== GDPR DANGER ZONE ==================== */
+.profile-danger-section {
+    margin-top: var(--space-2xl);
+    padding-top: var(--space-md);
+    border-top: 1px solid var(--glass-border);
+}
+
+.profile-danger-link {
+    color: #ef4444 !important;
+}

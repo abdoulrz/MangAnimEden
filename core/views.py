@@ -135,5 +135,63 @@ def about_view(request):
         'STATIC_VERSION': settings.STATIC_VERSION
     })
 
+def terms_view(request):
+    return render(request, 'core/legal/terms.html', {'STATIC_VERSION': settings.STATIC_VERSION})
 
+def privacy_view(request):
+    return render(request, 'core/legal/privacy.html', {'STATIC_VERSION': settings.STATIC_VERSION})
+
+def dmca_view(request):
+    return render(request, 'core/legal/dmca.html', {'STATIC_VERSION': settings.STATIC_VERSION})
+
+from django.core.mail import send_mail
+from django.contrib import messages
+from .forms import ContactForm
+from django.contrib.auth import get_user_model
+from django.db import models
+
+def contact_view(request):
+    """
+    Page de contact, envois un email à tous les superusers/admins.
+    """
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
+
+            User = get_user_model()
+            # On récupère tous les superusers ET utilisateurs avec role_admin=True
+            admin_emails = list(User.objects.filter(models.Q(is_superuser=True) | models.Q(role_admin=True)).values_list('email', flat=True))
+            admin_emails = [e for e in admin_emails if e] # filtrer les emails vides
+
+            if admin_emails:
+                try:
+                    send_mail(
+                        subject=f"[Contact Eden] {subject}",
+                        message=f"Nouveau message de: {name} ({email})\n\n{message}",
+                        from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@manganimeden.net',
+                        recipient_list=admin_emails,
+                        fail_silently=False,
+                    )
+                    messages.success(request, "Votre message a bien été envoyé à l'équipe. Nous vous répondrons dans les plus brefs délais.")
+                    return redirect('contact')
+                except Exception as e:
+                    messages.error(request, f"Une erreur s'est produite lors de l'envoi de l'email : {str(e)}")
+            else:
+                 messages.warning(request, "La messagerie est temporairement indisponible (aucun destinataire configuré).")
+    else:
+        # Pre-fill email if user is authenticated
+        initial = {}
+        if request.user.is_authenticated:
+            initial['email'] = request.user.email
+            initial['name'] = request.user.nickname if hasattr(request.user, 'nickname') else ''
+        form = ContactForm(initial=initial)
+
+    return render(request, 'core/contact.html', {
+        'form': form,
+        'STATIC_VERSION': settings.STATIC_VERSION
+    })
 

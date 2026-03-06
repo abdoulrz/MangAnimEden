@@ -225,6 +225,7 @@ ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https' if not DEBUG else 'http'
 
 SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
@@ -232,13 +233,6 @@ SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
 # Provider specific settings
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'APPS': [
-            {
-                'client_id': config('GOOGLE_CLIENT_ID'),
-                'secret': config('GOOGLE_CLIENT_SECRET'),
-                'key': ''
-            },
-        ],
         'SCOPE': [
             'profile',
             'email',
@@ -315,3 +309,19 @@ FIREBASE_CONFIG = {
     "appId": "1:173234261867:web:18e844c8608ef67df2c62e",
     "measurementId": "G-ZJ9WN24N76"
 }
+
+# --- Email & SMTP Configuration ---
+# Uses SMTP if EMAIL_HOST is defined, otherwise drops to console backend for local dev.
+if config('EMAIL_HOST', default=''):
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = config('EMAIL_HOST')
+    EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='MangaAnimEden <noreply@manganimeden.net>')
+# For error reporting to admins
+SERVER_EMAIL = DEFAULT_FROM_EMAIL

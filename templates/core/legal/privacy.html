@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Politique de Confidentialité - MangAnimEDen{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
+
+{% block content %}
+<div class="container about-container">
+    <div class="about-header">
+        <h1 class="about-title">Politique de Confidentialité</h1>
+        <p class="about-subtitle">Dernière mise à jour : Mars 2026</p>
+    </div>
+
+    <section class="about-section highlight-blue glass-card p-6 rounded-2xl">
+        <h2>1. Collecte des données</h2>
+        <p>
+            Nous collectons les données suivantes lors de votre inscription et de votre navigation sur MangAnimEDen :
+        </p>
+        <ul class="conditions-list mt-2">
+            <li>Votre adresse e-mail et un pseudo.</li>
+            <li>Votre historique de lecture (pour le suivi de progression et l'attribution d'XP).</li>
+            <li>Vos interactions sociales (groupes, favoris, commentaires).</li>
+        </ul>
+
+        <h2 class="mt-6">2. Utilisation des cookies</h2>
+        <p>
+            Notre application n'utilise pas de cookies de traçage publicitaire. Les seuls cookies utilisés sont
+            strictement
+            nécessaires au fonctionnement du site, à savoir : la gestion de votre session de connexion (Session Cookies)
+            et la prévention contre les attaques web (CSRF Tokens).
+        </p>
+
+        <h2 class="mt-6">3. Protection de vos données</h2>
+        <p>
+            Toutes vos données (y compris vos mots de passe, qui sont hachés cryptographiquement) sont stockées dans des
+            bases de données sécurisées. Nous ne revendons <strong>jamais</strong> vos données personnelles à des tiers.
+        </p>
+
+        <h2 class="mt-6">4. Vos droits (RGPD)</h2>
+        <p>
+            Conformément au RGPD européen, vous disposez d'un droit d'accès, de rectification et de suppression de vos
+            données.
+            Vous pouvez effacer totalement votre compte et l'anonymiser directement depuis votre page de Profil en un
+            seul clic.
+        </p>
+    </section>
+</div>
+{% endblock %}

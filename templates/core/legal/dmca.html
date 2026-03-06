@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Propriété Intellectuelle (DMCA) - MangAnimEDen{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
+
+{% block content %}
+<div class="container about-container">
+    <div class="about-header">
+        <h1 class="about-title">Propriété Intellectuelle & DMCA</h1>
+        <p class="about-subtitle">Digital Millennium Copyright Act Notice</p>
+    </div>
+
+    <section class="about-section highlight-pink glass-card p-6 rounded-2xl">
+        <h2>Avis aux Ayants Droit</h2>
+        <p>
+            MangAnimEDen est une plateforme d'hébergement opérant comme un fournisseur de services. Nous respectons
+            strictement les droits de propriété intellectuelle. Si vous êtes le propriétaire légal d'un contenu et que
+            vous croyez qu'il a été mis en ligne sur notre plateforme sans votre autorisation, vous pouvez nous adresser
+            une requête de retrait (Takedown Request).
+        </p>
+
+        <h2 class="mt-6">Comment soumettre une réclamation ?</h2>
+        <p>
+            Veuillez nous soumettre votre requête de retrait via notre <a href="{% url 'contact' %}"
+                class="text-primary hover:underline">Page de Contact</a>.
+            Votre requête doit inclure :
+        </p>
+        <ul class="conditions-list mt-2">
+            <li>L'identification de l'œuvre protégée par le droit d'auteur prétendument enfreinte.</li>
+            <li>L'URL exacte (le lien) pointant vers le contenu sur MangAnimEDen afin que nous puissions le localiser.
+            </li>
+            <li>Vos coordonnées (nom de la société, adresse e-mail professionnelle).</li>
+            <li>Une déclaration de bonne foi confirmant que l'utilisation du matériel n'est pas autorisée.</li>
+        </ul>
+
+        <h2 class="mt-6">Délai de traitement</h2>
+        <p>
+            Dès réception d'une réclamation valide, nous nous engagerons à retirer le contenu concerné
+            de façon permanente de nos serveurs dans un délai de 24 à 48 heures.
+        </p>
+    </section>
+</div>
+{% endblock %}

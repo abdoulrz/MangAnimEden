@@ -4,6 +4,10 @@ from . import views
 
 urlpatterns = [
     path('about/', views.about_view, name='about'),
+    path('terms/', views.terms_view, name='terms'),
+    path('privacy/', views.privacy_view, name='privacy'),
+    path('dmca/', views.dmca_view, name='dmca'),
+    path('contact/', views.contact_view, name='contact'),
     
     # Password Reset (Phase 3.2)
     path('password-reset/', 

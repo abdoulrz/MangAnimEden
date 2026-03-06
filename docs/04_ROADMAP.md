@@ -212,10 +212,13 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [x] UI : Dropdown (5 dernières) + Page dédiée "Toutes les notifications".
   - [x] Realtime : Toasts (Non-intrusive bubbles).
 
-### 3.3 Gestion des Uploads (Sécurité)
+### 3.3 Gestion des Uploads (Sécurité) ✅ (PARTIELLEMENT COMPLÉTÉ)
 
 - [ ] **Validateur** : Magic Bytes check pour les images.
 - [x] **Optimisation Upload** : Implémenter l'upload par morceaux (Chunked Uploads) pour supporter les très gros fichiers (>1GB) de manière fiable, comme Google Drive.
+- [x] **Memory Leak Fix** : Optimisation de l'upload pour éliminer les erreurs Out-Of-Memory (OOM) sur Render — compression d'images avant upload R2 + streaming vers disque temporaire.
+- [x] **Background Processing** : Déplacement du traitement `FileProcessor` entièrement en tâche d'arrière-plan pour éviter les timeouts HTTP.
+- [x] **Progression Concurrente** : Correction du suivi de progression lors d'uploads simultanés (conflits de clé de session résolus).
 
 ### 3.4 Recherche Avancée
 
@@ -234,8 +237,8 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [ ] **Legal Consent** :
   - [ ] Checkbox "J'accepte les CGU" à l'inscription.
 - [ ] **Reporting System** :
-  - [x] Backend : Modèle `Report` (Target: User/Comment, Reason, Status).
-  - [x] UI : Bouton "Signaler" (Flag icon).
+  - [ ] Backend : Modèle `Report` (Target: User/Comment, Reason, Status).
+  - [ ] UI : Bouton "Signaler" (Flag icon).
   - [ ] Admin : Vue de modération des signalements.
 - [ ] **Accès Limité (Stratégie de Conversion)** :
   - [ ] Permettre 2-3 chapitres gratuits max aux nouveaux utilisateurs.
@@ -265,6 +268,17 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [ ] **Publicités PC/Mobile** : Bouton de fermeture fonctionnel et affichage cohérent.
 - [ ] **Ads Vidéo** : Intégrer une publicité vidéo obligatoire toutes les 10 minutes pendant la lecture.
 
+### 3.8 Infrastructure & Déploiement ✅ (COMPLÉTÉ)
+
+- [x] **Migration Contabo VPS** : Migration complète de l'application depuis Render vers un VPS Contabo dédié.
+  - [x] Configuration serveur Ubuntu (Python, PostgreSQL, Nginx, Gunicorn).
+  - [x] Service Gunicorn `systemd` (`gunicorn.service`) pour redémarrage automatique.
+  - [x] Nginx comme reverse proxy avec gestion des fichiers statiques/médias.
+  - [x] Guide de migration documenté : `docs/references/CONTABO_MIGRATION_GUIDE.md`.
+- [x] **Migration Base de Données** : Passage de Neon (PostgreSQL cloud) vers PostgreSQL local sur VPS.
+- [x] **Configuration Upload VPS** : `client_max_body_size` et timeouts Nginx optimisés pour uploads > 1GB.
+- [x] **Script de Déploiement** : `build.sh` mis à jour pour automatiser `collectstatic` et les migrations.
+
 ---
 
 ## 🎨 Phase 4 : UX, Polish et Design System
@@ -281,6 +295,10 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 ### 4.2 Mobile Experience (Prioritaire)
 
+- [x] **Home Page Cards** : Parité visuelle exacte entre les cartes de la page d'accueil et le catalogue.
+  - [x] Correction du chevauchement des badges Statut/Note sur mobile.
+  - [x] Correction du retour à la ligne de "Voir tout ->" (`white-space: nowrap`).
+- [x] **Forum Layout** : Correction de l'alignement du bloc central et des problèmes `flexbox` sur mobile.
 - [ ] **Responsive Check** : Vérification des grilles et tailles de police sur < 400px (Phones & Tablettes).
 - [ ] **Touch Targets** : Audit des boutons trop petits.
 - [ ] **Navigation** : Test du menu sur mobile (Burger ou Bottom Nav).
@@ -366,6 +384,13 @@ A special status or digital card for dedicated users.
 
 - **PWA (Progressive Web App)**: Installable on phone home screens.
 - **Offline Mode**: Download chapters for offline reading (via App wrapper).
+
+## 🖥 Infrastructure & DevOps (Contabo)
+
+See `docs/06_INFRASTRUCTURE.md` for full specification.
+
+- **Private Networking**: Bind PostgreSQL (`5432`) to the private interface (`127.0.0.1`) only, isolating the DB from the public internet.
+- **Custom Image Storage**: Take a snapshot (`.iso`/`.qcow2`) of the fully operational VPS on Contabo to ensure disaster recovery and fast horizontal scaling.
 
 ## 📝 Stories Enrichies (Forum / Social)
 

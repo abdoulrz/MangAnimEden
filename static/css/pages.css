@@ -797,10 +797,8 @@
     font-size: 2.5rem;
     font-weight: 800;
     margin-bottom: var(--space-sm);
-    background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.7) 100%);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--color-text-primary);
+
 }
 
 .about-subtitle {
@@ -813,7 +811,7 @@
     border-radius: var(--radius-xl);
     padding: var(--space-2xl);
     margin-bottom: var(--space-xl);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
     position: relative;
     overflow: hidden;
 }
@@ -859,17 +857,17 @@
 }
 
 .team-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--glass-bg);
     border-radius: var(--radius-lg);
     padding: var(--space-lg);
     text-align: center;
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
     transition: transform 0.3s ease, background 0.3s ease;
 }
 
 .team-card:hover {
     transform: translateY(-5px);
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--glass-bg-hover);
     border-color: var(--color-accent-primary);
 }
 
@@ -886,6 +884,13 @@
     color: white;
     background: linear-gradient(135deg, var(--color-accent-primary), var(--color-accent-secondary));
     box-shadow: 0 5px 15px rgba(99, 102, 241, 0.3);
+}
+
+.light-mode .team-avatar {
+    color: var(--color-text-primary);
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .team-card h3 {

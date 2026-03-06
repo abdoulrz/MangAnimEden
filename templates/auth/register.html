@@ -97,19 +97,19 @@
                 </details>
 
                 <!-- Legal Consent -->
-                <div class="auth-form-group" style="margin-top: 1rem; margin-bottom: 2rem;">
-                    <label
-                        style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; color: var(--color-text-secondary); font-size: 0.9rem;">
+                <!-- Legal Consent -->
+                <div class="auth-form-group mb-8 mt-4">
+                    <label class="flex items-start gap-3 cursor-pointer text-sm text-secondary">
                         {{ form.terms_accepted }}
                         <span>
-                            J'accepte les <a href="{% url 'about' %}#conditions"
-                                style="color: var(--color-primary); text-decoration: underline;">Conditions Générales
-                                d'Utilisation</a>
-                            et je confirme avoir pris connaissance de la politique de confidentialité.
+                            J'accepte les <a href="{% url 'terms' %}" target="_blank"
+                                class="text-purple underline">Conditions Générales d'Utilisation</a>
+                            et je confirme avoir pris connaissance de la <a href="{% url 'privacy' %}" target="_blank"
+                                class="text-purple underline">Politique de confidentialité</a>.
                         </span>
                     </label>
                     {% if form.terms_accepted.errors %}
-                    <div class="field-error" style="margin-top: 0.5rem;">{{ form.terms_accepted.errors }}</div>
+                    <div class="field-error mt-2">{{ form.terms_accepted.errors }}</div>
                     {% endif %}
                 </div>
 

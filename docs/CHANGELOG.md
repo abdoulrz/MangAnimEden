@@ -8,8 +8,81 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### To Be Implemented
 
-- Phase 2.5.3: Système de Badges (Achievements)
-- Phase 2.5.4: Système de Création de Groupes
+- Phase 3.5 : Email Verification, Account Deletion (GDPR), Legal Pages
+- Phase 3.7 : Monétisation & Publicité
+- Phase 4 : UX Polish & Design System Unification
+- Phase 5 : SEO, Performance & Lancement
+
+---
+
+## [2.1.0] - 2026-03-05 ([Upload Bugs & Progress Tracking])
+
+### Fixed Upload
+
+- **Sauvegarde en Arrière-Plan** :
+  - Débogage et correction de l'étape "Sauvegarde des informations" lors des uploads de dossiers sur VPS.
+  - Processing déplacé entièrement en tâche de fond pour éviter le blocage de la requête HTTP.
+- **Suivi de Progression Concurrent** :
+  - Correction du monitoring de progression dans l'interface admin pour les uploads simultanés.
+  - Résolution des conflits de clé de session lors de multiples uploads en parallèle.
+- **Robustesse Générale** :
+  - Amélioration de la gestion des erreurs dans le `FileProcessor` pour continuer le traitement malgré les fichiers corrompus.
+  - Meilleure fiabilité du système de cache de progression (`cache`/`session`-based).
+
+---
+
+## [2.0.1] - 2026-03-02 ([Forum Layout Bugs])
+
+### Fixed Forum
+
+- **Layout Central** :
+  - Correction de l'alignement du bloc central du forum sur desktop et mobile.
+  - Résolution des problèmes de `flexbox` dans les media queries causant des débordements latéraux.
+- **Responsive Mobile** :
+  - Ajustement des breakpoints CSS pour garantir un affichage correct sur écrans < 480px.
+  - Correction du z-index de la sidebar forum sur mobile.
+
+---
+
+## [2.0.0] - 2026-02-27 ([Contabo VPS Migration & Infrastructure])
+
+### Added Infrastructure
+
+- **Migration Contabo VPS** :
+  - Migration complète de l'application depuis Render vers un VPS Contabo dédié (Ubuntu).
+  - Configuration du serveur : Installation de Python, PostgreSQL, Nginx et Gunicorn.
+  - Déploiement Django avec Gunicorn en tant que service `systemd` (`gunicorn.service`).
+  - Configuration Nginx comme reverse proxy avec gestion des fichiers statiques et médias.
+  - Guide de migration documenté dans `docs/references/CONTABO_MIGRATION_GUIDE.md`.
+- **Base de Données** :
+  - Migration depuis Neon (PostgreSQL cloud) vers une instance PostgreSQL locale sur le VPS.
+  - Transfert complet des données et validation d'intégrité post-migration.
+- **Upload Management** :
+  - Résolution des problèmes d'upload de gros fichiers (> 1 GB) sur le VPS.
+  - Configuration Nginx optimisée (`client_max_body_size`, timeouts) pour les uploads longs.
+
+### Changed Settings
+
+- **`config/settings.py`** : Adaptation des paramètres pour l'environnement VPS (chemins, ALLOWED_HOSTS, DB config).
+- **`build.sh`** : Script de build/déploiement mis à jour pour automatiser `collectstatic` et les migrations au redémarrage.
+
+---
+
+## [1.9.2] - 2026-02-23 ([Home Page Layout Polish])
+
+### Fixed Home
+
+- **Badges Overlap Mobile** :
+  - Correction du chevauchement des badges Statut et Note sur les cartes manga en vue mobile.
+  - Les badges sont maintenant empilés verticalement sur les petits écrans.
+- **"Voir tout" Text Wrapping** :
+  - Correction du retour à la ligne du lien "Voir tout ->" dans les en-têtes de blocs.
+  - Application de `white-space: nowrap` pour maintenir le texte sur une ligne à tous les breakpoints.
+- **Visual Parity Catalog ↔ Home** :
+  - Les cartes manga de la page d'accueil sont maintenant un miroir exact des cartes du catalogue.
+  - Harmonisation des badges, de la typographie et du positionnement des éléments.
+
+---
 
 ## [1.9.1] - 2026-02-22 ([Phase 3.4 - Infrastructure & Storage])
 

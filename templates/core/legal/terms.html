@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Conditions Générales d'Utilisation - MangAnimEDen{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}?v={{ STATIC_VERSION }}">
+{% endblock %}
+
+{% block content %}
+<div class="container about-container">
+    <div class="about-header">
+        <h1 class="about-title">Conditions Générales d'Utilisation</h1>
+        <p class="about-subtitle">Dernière mise à jour : Mars 2026</p>
+    </div>
+
+    <section class="about-section highlight-purple glass-card p-6 rounded-2xl">
+        <h2>1. Acceptation des conditions</h2>
+        <p>
+            En accédant au site MangAnimEDen, vous acceptez d'être lié par les présentes Conditions Générales
+            d'Utilisation (CGU).
+            Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser notre service.
+        </p>
+
+        <h2 class="mt-6">2. Règles de Communauté</h2>
+        <p>
+            MangAnimEDen est une plateforme communautaire. Nous exigeons de tous nos membres :
+        </p>
+        <ul class="conditions-list mt-2">
+            <li>Le respect absolu des autres membres, créateurs et modérateurs.</li>
+            <li>L'interdiction stricte de publier des propos haineux, racistes, discriminatoires ou harcelants.</li>
+            <li>L'interdiction de publier du contenu illégal ou pornographique.</li>
+        </ul>
+
+        <h2 class="mt-6">3. Groupes et Modération</h2>
+        <p>
+            La création d'un groupe vous confère le rôle de propriétaire. Vous êtes responsable du contenu partagé dans
+            votre espace.
+            L'équipe d'administration de MangAnimEDen se réserve le droit de fermer un groupe ou de bannir des
+            utilisateurs en cas
+            de non-respect des présentes CGU sans préavis.
+        </p>
+
+        <h2 class="mt-6">4. Résiliation du compte</h2>
+        <p>
+            Vous pouvez demander la suppression de votre compte à tout moment depuis les paramètres de votre profil.
+            Le site se réserve également le droit de suspendre ou supprimer les comptes inactifs ou violant les CGU.
+        </p>
+    </section>
+</div>
+{% endblock %}
