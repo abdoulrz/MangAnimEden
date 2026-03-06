@@ -191,19 +191,28 @@ class Favorite(models.Model):
 def auto_delete_series_cover_on_delete(sender, instance, **kwargs):
     """Deletes the cover image from storage when the Series object is deleted."""
     if instance.cover:
-        instance.cover.delete(save=False)
+        try:
+            instance.cover.delete(save=False)
+        except Exception:
+            pass
 
 @receiver(post_delete, sender=Chapter)
 def auto_delete_chapter_source_on_delete(sender, instance, **kwargs):
     """Deletes the source zip/pdf file from storage when the Chapter is deleted."""
     if instance.source_file:
-        instance.source_file.delete(save=False)
+        try:
+            instance.source_file.delete(save=False)
+        except Exception:
+            pass
 
 @receiver(post_delete, sender=Page)
 def auto_delete_page_image_on_delete(sender, instance, **kwargs):
     """Deletes the page image file from storage when the Page is deleted."""
     if instance.image:
-        instance.image.delete(save=False)
+        try:
+            instance.image.delete(save=False)
+        except Exception:
+            pass
 
 
 class Review(models.Model):
