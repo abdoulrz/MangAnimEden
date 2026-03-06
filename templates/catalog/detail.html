@@ -373,7 +373,8 @@
 
     // Review System Logic
     let currentRating = parseInt("{{ user_review.rating|default:0 }}", 10) || 0;
-    const stars = document.querySelectorAll('.star-icon');
+    // Scope to only the interactive rating input stars, not the stats bar star
+    const stars = document.querySelectorAll('.star-rating-input .star-icon');
     const ratingText = document.getElementById('rating-text');
 
     const submitBtn = document.getElementById('submit-review-btn');

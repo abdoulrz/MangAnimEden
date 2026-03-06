@@ -1027,6 +1027,11 @@
     flex-shrink: 0;
 }
 
+/* SVG child elements must not capture pointer events so clicks bubble to the SVG */
+.star-rating-input .star-icon * {
+    pointer-events: none;
+}
+
 .star-icon.active {
     color: #fbbf24 !important;
 }
