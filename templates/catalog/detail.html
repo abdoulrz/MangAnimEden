@@ -258,8 +258,7 @@
                     </div>
                     <textarea id="review-content" class="form-control" rows="3"
                         placeholder="Partagez votre avis sur cette série... (optionnel)">{% if user_review %}{{ user_review.content }}{% endif %}</textarea>
-                    <button id="submit-review-btn" class="btn btn-primary" data-series-id="{{ series.id }}">{% if
-                        user_review %}Mettre à jour l'avis{% else %}Envoyer l'avis{% endif %}</button>
+                    <button id="submit-review-btn" class="btn btn-primary" data-series-id="{{ series.id }}">{% if user_review %}Mettre à jour l'avis{% else %}Envoyer l'avis{% endif %}</button>
                     <div id="review-status-msg"></div>
                 </div>
                 {% else %}
