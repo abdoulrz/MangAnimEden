@@ -437,9 +437,60 @@
                 if (data.success) {
                     showReviewStatus(data.message, 'success');
                     btn.innerText = 'Mettre à jour l\'avis';
+
+                    // Update average rating & review count in the stats bar and feed heading
                     document.getElementById('average-rating-display').innerText = data.average_rating;
-                    document.querySelector('.reviews-feed h3').innerText = `Avis de la communauté (${data.review_count})`;
-                    setTimeout(() => location.reload(), 1500); // Reload to show new review in feed
+                    const feedHeading = document.querySelector('.reviews-feed h3');
+                    if (feedHeading) {
+                        feedHeading.innerText = `Avis de la communauté (${data.review_count})`;
+                    }
+
+                    // Build today's date string
+                    const today = new Date();
+                    const dateStr = today.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+
+                    // Build the review card HTML for the current user
+                    const nickname = "{{ request.user.nickname|escapejs }}";
+                    const avatarUrl = "{{ request.user.avatar.url|default:'' }}";
+                    const reviewHtml = `
+                        <div class="review-card" id="own-review-card">
+                            <div class="review-card-header">
+                                <div class="review-user-info">
+                                    ${avatarUrl
+                            ? `<img src="${avatarUrl}" alt="avatar" class="review-avatar-img">`
+                            : `<div class="review-avatar-fallback">${nickname.charAt(0).toUpperCase()}</div>`
+                        }
+                                    <div class="review-user-meta">
+                                        <strong>${nickname}</strong>
+                                        <span>${dateStr}</span>
+                                    </div>
+                                </div>
+                                <div class="review-rating-badge">
+                                    <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                    </svg>
+                                    <strong>${currentRating}</strong>
+                                </div>
+                            </div>
+                            ${content ? `<p class="review-body">${content.replace(/\n/g, '<br>')}</p>` : ''}
+                        </div>`;
+
+                    // Remove empty state if present, then add/replace own review card
+                    const feed = document.querySelector('.reviews-feed');
+                    if (feed) {
+                        const emptyState = feed.querySelector('.empty-state-dark');
+                        if (emptyState) emptyState.remove();
+
+                        const existing = document.getElementById('own-review-card');
+                        if (existing) {
+                            existing.outerHTML = reviewHtml;
+                        } else {
+                            // Insert after the heading
+                            feedHeading
+                                ? feedHeading.insertAdjacentHTML('afterend', reviewHtml)
+                                : feed.insertAdjacentHTML('afterbegin', reviewHtml);
+                        }
+                    }
                 } else {
                     showReviewStatus(data.error || 'Erreur lors de l\'envoi.', 'error');
                     btn.innerText = originalText;
