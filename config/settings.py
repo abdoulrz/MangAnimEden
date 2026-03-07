@@ -180,9 +180,14 @@ AWS_S3_FILE_OVERWRITE = False
 
 # Media files (Cloudflare R2 / AWS S3)
 MEDIA_ROOT = BASE_DIR / 'media'
-MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/' if AWS_S3_ENDPOINT_URL else '/media/'
-if AWS_S3_CUSTOM_DOMAIN:
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+
+if AWS_STORAGE_BUCKET_NAME:
+    MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/' if AWS_S3_ENDPOINT_URL else '/media/'
+    if AWS_S3_CUSTOM_DOMAIN:
+        MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+else:
+    # Always use local URL if bucket isn't configured
+    MEDIA_URL = '/media/'
 
 STORAGES = {
     "default": {
@@ -255,7 +260,7 @@ SESSION_COOKIE_SECURE = not DEBUG  # True in prod (HTTPS), False in dev (HTTP)
 CSRF_COOKIE_SECURE = not DEBUG
 
 # Versioning for cache busting 
-STATIC_VERSION = '2.10.11'
+STATIC_VERSION = '2.10.12'
 
 # Admin bootstrap via secret passphrase on registration
 ADMIN_BOOTSTRAP_PASSPHRASE = config('ADMIN_BOOTSTRAP_PASSPHRASE', default='Nefe')

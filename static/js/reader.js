@@ -20,7 +20,8 @@ const MangaReader = (function () {
         direction: localStorage.getItem('reader_direction') || 'ltr', // 'ltr', 'rtl' (manga)
         gapless: localStorage.getItem('reader_gapless') === 'true',
         zoomLevel: 1.0,
-        isMenuOpen: false
+        isMenuOpen: false,
+        isRestoringScroll: true // Block progress tracking during init
     };
 
     // Éléments du DOM
@@ -242,35 +243,30 @@ const MangaReader = (function () {
     };
 
     const _initLazyLoading = () => {
-        if ('IntersectionObserver' in window) {
-            const imageObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const img = entry.target;
+        if (!('IntersectionObserver' in window)) return;
 
-                        // Save current page based on scroll position if in vertical mode
-                        if (state.readingMode !== 'paged' && state.chapterId) {
-                            const pageIndex = elements.pages.indexOf(img) + 1;
-                            if (pageIndex > 0) {
-                                state.currentPage = pageIndex;
-                                localStorage.setItem('manganimeden_progress_chapter_' + state.chapterId, state.currentPage);
-                            }
-                        }
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
 
-                        if (img.dataset.src) {
-                            img.src = img.dataset.src;
-                            img.classList.remove('lazy');
-                            img.removeAttribute('data-src');
-                            observer.unobserve(img);
-                        }
+                    // Lazy Load
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                        img.removeAttribute('data-src');
                     }
-                });
-            }, { threshold: config.lazyLoadThreshold, rootMargin: "500px" });
 
-            elements.pages.forEach(img => {
-                if (img.dataset.src) imageObserver.observe(img);
+                    // Track Progress (We don't unobserve, so this triggers on scroll)
+                    if (!state.isRestoringScroll && state.readingMode !== 'paged' && state.chapterId) {
+                        state.currentPage = elements.pages.indexOf(img) + 1;
+                        localStorage.setItem('manganimeden_progress_chapter_' + state.chapterId, state.currentPage);
+                    }
+                }
             });
-        }
+        }, { rootMargin: "50% 0px -50% 0px" }); // Track when top of image crosses middle of screen
+
+        elements.pages.forEach(img => observer.observe(img));
     };
 
     const _updateProgress = (page) => {
@@ -298,17 +294,30 @@ const MangaReader = (function () {
         }
 
         _initEventListeners();
-        _applySettings(); // Applies initial mode and styles
+        _applySettings();
         _initLazyLoading();
 
-        // Auto-scroll to saved page if not in paged mode
+        // Restore Scroll Position
         if (state.readingMode !== 'paged' && state.currentPage > 1) {
+            // Force load all preceding images immediately (slice is cleaner than a loop)
+            elements.pages.slice(0, state.currentPage).forEach(img => {
+                if (img.dataset.src) {
+                    img.src = img.dataset.src;
+                    img.classList.remove('lazy');
+                    img.removeAttribute('data-src');
+                }
+            });
+
+            // Need to wait for images to actually decode and push layout down
             setTimeout(() => {
                 const targetPage = elements.pages[state.currentPage - 1];
                 if (targetPage) {
-                    targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    targetPage.scrollIntoView({ behavior: 'auto', block: 'start' });
                 }
-            }, 300); // Give DOM/images time to layout
+                setTimeout(() => { state.isRestoringScroll = false; }, 200); // Re-enable tracking after scroll finishes
+            }, 300);
+        } else {
+            state.isRestoringScroll = false; // Normal reading
         }
 
         console.log(`MangaReader initialized. Mode: ${state.readingMode}, Total Pages: ${state.totalPages}, Current Page: ${state.currentPage}`);

@@ -212,13 +212,15 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [x] UI : Dropdown (5 dernières) + Page dédiée "Toutes les notifications".
   - [x] Realtime : Toasts (Non-intrusive bubbles).
 
-### 3.3 Gestion des Uploads (Sécurité) ✅ (PARTIELLEMENT COMPLÉTÉ)
+### 3.3 Gestion des Uploads (Sécurité & Robustesse) ✅ (COMPLÉTÉ)
 
 - [ ] **Validateur** : Magic Bytes check pour les images.
-- [x] **Optimisation Upload** : Implémenter l'upload par morceaux (Chunked Uploads) pour supporter les très gros fichiers (>1GB) de manière fiable, comme Google Drive.
-- [x] **Memory Leak Fix** : Optimisation de l'upload pour éliminer les erreurs Out-Of-Memory (OOM) sur Render — compression d'images avant upload R2 + streaming vers disque temporaire.
-- [x] **Background Processing** : Déplacement du traitement `FileProcessor` entièrement en tâche d'arrière-plan pour éviter les timeouts HTTP.
-- [x] **Progression Concurrente** : Correction du suivi de progression lors d'uploads simultanés (conflits de clé de session résolus).
+- [x] **Optimisation Upload** : Implémenter l'upload par morceaux (Chunked Uploads) pour supporter les gros fichiers de manière fiable.
+- [x] **Concurrence & Backoff** : Worker pool JS (5 fichiers parallèles) avec retries (Exponential Backoff) pour éviter les Timeouts.
+- [x] **Memory Leak Fix** : Optimisation de l'upload pour éliminer les erreurs OOM sur serveur via FileProcessor et flux sur disque.
+- [x] **Background Processing** : Traitement relégué 100% via Celery Tasks asynchrones.
+- [x] **Progression Concurrente** : Correction du suivi de progression et gestion des collisions de noms (`unique_together`).
+- [x] **Auto-Cleanup** : Signaux `post_delete` Django purgeant automatiquement les médias sources (.cbz, images) des disques pour économiser l'espace.
 
 ### 3.4 Recherche Avancée
 
@@ -226,34 +228,35 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [ ] UI : Présentation des résultats (Live search vs Page de résultats).
   - [ ] Backend : Filtres (Genre, Statut, Auteur) et Tri.
 
-### 3.5 Intégrité des Données
+### 3.5 Intégrité des Données ✅ (COMPLÉTÉ)
 
-- [ ] **Email Verification** :
-  - [ ] Configurer `ACCOUNT_EMAIL_VERIFICATION = 'mandatory'` (allauth).
-  - [ ] Templates pour "Confirm your email".
-- [ ] **Account Deletion (GDPR)** :
-  - [ ] UI : Bouton "Supprimer mon compte" (Zone de danger).
-  - [ ] Backend : Soft Delete ou Anonymisation (ne pas casser les commentaires/posts).
-- [ ] **Legal Consent** :
-  - [ ] Checkbox "J'accepte les CGU" à l'inscription.
-- [ ] **Pages Légales & Support** :
-  - [ ] Templates : `terms.html`, `privacy.html`, `dmca.html`.
+- [x] **Email Verification** :
+  - [x] Configurer `ACCOUNT_EMAIL_VERIFICATION = 'mandatory'` (allauth).
+  - [x] Templates intégrés et variables SMTP dynamiques via environnements.
+- [x] **Account Deletion (GDPR)** :
+  - [x] UI : Modale d'avertissement "Zone de danger" pour la suppression du compte.
+  - [x] Backend : Suppression du compte avec préservation saine (Anonymisation/SET_NULL) des dialogues communautaires.
+- [x] **Legal Consent** :
+  - [x] Checkbox "J'accepte les conditions" validée lors de l'inscription via CustomUserCreationForm.
+- [x] **Pages Légales & Support** :
+  - [x] Templates : `terms.html`, `privacy.html`, `dmca.html` avec design Glassmorphism cohérent.
 
-### 3.6 Modération & Stratégie de Conversion
+### 3.6 Modération & Stratégie de Conversion ✅ (PARTIELLEMENT COMPLÉTÉ)
 
-- [ ] **Reporting System** :
-  - [ ] Backend : Modèle `Report` (Target: User/Comment, Reason, Status).
-  - [ ] UI : Bouton "Signaler" (Flag icon).
-  - [ ] Admin : Vue de modération des signalements.
-- [ ] **Accès Limité (Stratégie de Conversion)** :
-  - [ ] Permettre 2-3 chapitres gratuits max aux nouveaux utilisateurs.
-  - [ ] Bloquer la lecture et forcer l'inscription après la limite.
-- [ ] **Système d'Avis & Notes** :
-  - [ ] Permettre de noter et laisser un avis sur un scan (Page Détail).
-- [ ] **Pages Légales & Support** :
-  - [ ] Templates : `terms.html`, `privacy.html`, `dmca.html`.
+- [x] **Reporting System** :
+  - [x] Backend : Modèle `Report` (GenericForeignKey pour User/Comment/Message).
+  - [x] UI : Bouton "Signaler" (Flag icon) avec modale globale AJAX.
+  - [x] Admin : Vue "Signalements" sur le dashboard pour modérer (Résoudre/Ignorer).
+- [x] **Accès Limité (Stratégie de Conversion)** :
+  - [x] Suivi basé sur la session pour autoriser maximum 3 chapitres gratuits aux invités.
+  - [x] Redirection automatique vers la Landing de conversion "Limit Reached" pour forcer l'inscription.
+- [x] **Système d'Avis & Notes** :
+  - [x] Backend : Modèle Review (1-5 étoiles) avec update dynamique de `average_rating`.
+  - [x] UI : Input 5 étoiles interactif et flux des avis de la communauté sur la page Détail.
+- [ ] **Support Client** :
   - [ ] Formulaire de Contact : `/contact/` (Envoi email aux admins).
-- [ ] **Cascades de Suppression** : Revoir les `on_delete` pour s'assurer que supprimer un User ne casse pas les discussions de groupe (passer en `SET_NULL` ou Soft Delete).
+- [x] **Cascades de Suppression** :
+  - [x] Remplacement des relations `CASCADE` par `SET_NULL` pour les ForeignKey (ex: `Message.sender`) afin de ne pas détruire les interactions de groupe en cas de départ d'un utilisateur.
 
 ### 3.7 Support Multi-Formats (CBR, CBZ, PDF, EPUB) ✅ (COMPLÉTÉ)
 
@@ -308,8 +311,9 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [ ] **Touch Targets** : Audit des boutons trop petits.
 - [ ] **Navigation** : Test du menu sur mobile (Burger ou Bottom Nav).
 - [ ] **Mobile Touch** : Feedback visuel au tap (:active), Swipe gestures.
-- [ ] **Layout Fix** : Éliminer les "voids" (espaces vides) latéraux sur Mobile et Tablette (Global & Reader).
-- [ ] **Scan Reading Fix** : Corriger la lecture des scans (actuellement impossible).
+- [x] **Layout Fix** : Éliminer les "voids" (espaces vides) latéraux (écran noir) sur Mobile dans le lecteur en forçant `touch-action: pan-y`.
+- [x] **Scan Reading Fix** : Reprise de lecture parfaite (Scroll Restoration) en réglant les conflits avec le Lazy Loading.
+- [x] **UX Polish** : Amélioration UI/Responsive de la page "Limit Reached".
 
 ---
 

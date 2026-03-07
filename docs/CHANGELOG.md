@@ -8,10 +8,32 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### To Be Implemented
 
-- Phase 3.5 : Email Verification, Account Deletion (GDPR), Legal Pages
+- Phase 3.6 : Support Client (Formulaire de Contact)
 - Phase 3.7 : Monétisation & Publicité
 - Phase 4 : UX Polish & Design System Unification
 - Phase 5 : SEO, Performance & Lancement
+
+---
+
+## [2.1.1] - 2026-03-07 ([Reader & UX Polish])
+
+### Fixed Reader
+
+- **Scroll Restoration** :
+  - Correction d'une "race condition" (condition de course) où le `IntersectionObserver` du lazy loading écrasait la position de lecture sauvegardée pendant le chargement initial.
+  - La reprise de lecture (auto-scroll) ramène maintenant l'utilisateur exactement à sa page, de manière cohérente.
+- **Mobile Horizontal Overflow** :
+  - Résolution de l'effet "écran noir" lors du balayage (swipe) gauche/droite sur mobile.
+  - Ajout de directives CSS strictes (`touch-action: pan-y`, `max-width: 100vw!important`) pour bloquer le rebond horizontal natif d'iOS/Android (rubber-banding).
+
+### Fixed UX
+
+- **Page "Limit Reached"** :
+  - Transformation des textes d'action en véritables boutons clairs (`btn-primary`, `btn-secondary`).
+  - Correction du texte (liste d'avantages) qui se superposait mal sur mobile en utilisant un `span` dans la grille flex.
+  - Nettoyage du code (suppression des styles en ligne au profit du block `<style>`).
+- **Local Media Fallback** :
+  - Ajustement de `settings.py` (`MEDIA_URL`) pour prioriser le filesystem local même si des variables cloud (ex: R2) tronquées restent dans le fichier `.env` local.
 
 ---
 
