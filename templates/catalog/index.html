@@ -40,7 +40,7 @@
                                 <span class="badge-status">{{ series.get_status_display }}</span>
                                 <span class="badge-type">{{ series.get_type_display }}</span>
                             </div>
-                            <div class="badge-rating"><span>★</span> {% if series.average_rating %}{{ series.average_rating }}{% else %}—{% endif %}</div>
+                            <div class="badge-rating"><span>★</span> {{ series.average_rating }}</div>
                         </div>
                         <div class="manga-info">
                             <h3 class="manga-title">{{ series.title }}</h3>

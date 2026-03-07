@@ -15,6 +15,36 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.2.0] - 2026-03-07 ([Data Integrity, Conversion & Infrastructure])
+
+*(Note: Ce patch regroupe des fonctionnalités majeures implémentées récemment mais non documentées dans le journal précédent).*
+
+### Added Compliance (Phase 3.5)
+
+- **Mandatory Email Verification** : Intégration de `django-allauth` avec obligation de vérifier l'email avant accès.
+- **Legal Registration Consent** : Checkbox obligatoire (`terms_accepted`) ajoutée au processus d'inscription.
+- **Dedicated Legal Pages** : Création des pages `/terms/`, `/privacy/` et `/dmca/` accessibles depuis le footer.
+- **GDPR Account Deletion** : Route sécurisée de suppression de compte depuis le profil. Les messages sociaux (`social.Message.sender`) passent en `SET_NULL` pour préserver l'historique de la communauté tout en effaçant l'utilisateur.
+
+### Added Moderation & Conversion (Phase 3.6)
+
+- **Reporting System** :
+  - Nouveau modèle générique `Report` pour signaler les utilisateurs, commentaires et messages.
+  - Modale globale de signalement et tableau de bord de modération intégré à l'admin.
+- **Accès Invité Limité** : Restriction à 3 chapitres gratuits par session pour les non-inscrits, suivie d'une redirection automatique vers la page de conversion (`limit_reached.html`).
+- **Système d'Avis & Notes** :
+  - Nouveau modèle `Review` (1-5 étoiles) avec calcul dynamique de `average_rating`.
+  - Interface interactive sur la page de détail (rating input + flux des avis communautaires).
+
+### Fixed Infrastructure & Uploads
+
+- **Résilience des Uploads** : L'extraction de dossiers gère désormais les erreurs réseau avec un *Exponential Backoff* (retries auto) et décompresse un maximum de 5 fichiers en parallèle (Worker Pool) pour saturer la bande passante sans Timeout.
+- **Auto-Cleanup Médias** : Ajout de signaux Django `post_delete` purgeant automatiquement les fichiers physiques (images, ZIP) sur le disque dès qu'un Chapitre ou une Page est supprimé via l'admin.
+- **Migration R2 vers Local SSD** : Retour stratégique sur un stockage local (Nginx) pour éliminer la latence Cloudflare R2 ; les fichiers temporaires (`.cbz`/`.pdf`) sont désormais auto-purgés immédiatement après extraction pour économiser de l'espace.
+- **CSRF Uploads** : Ajout des domaines de production dans `CSRF_TRUSTED_ORIGINS` pour autoriser les requêtes AJAX JS.
+
+---
+
 ## [2.1.1] - 2026-03-07 ([Reader & UX Polish])
 
 ### Fixed Reader
