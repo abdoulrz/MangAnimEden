@@ -149,7 +149,8 @@
     </svg>
 </div>
 
-<div id="reader-data" class="hidden" data-total="{{ chapter.pages.count|default:'1' }}" data-mode="vertical"></div>
+<div id="reader-data" class="hidden" data-total="{{ chapter.pages.count|default:'1' }}" data-mode="vertical"
+    data-chapter-id="{{ chapter.id }}"></div>
 {% endblock %}
 {% block extra_js %}
 <script src="{% static 'js/reader.js' %}?v={{ STATIC_VERSION }}"></script>
@@ -157,7 +158,8 @@
     document.addEventListener('DOMContentLoaded', function () {
         const readerData = document.getElementById('reader-data');
         const totalPages = readerData ? readerData.dataset.total : 1;
-        MangaReader.init(totalPages);
+        const chapterId = readerData ? readerData.dataset.chapterId : null;
+        MangaReader.init(totalPages, chapterId);
     });
 </script>
 {% endblock %}

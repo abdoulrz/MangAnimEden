@@ -15,6 +15,7 @@ const MangaReader = (function () {
     let state = {
         currentPage: 1, // 1-based index
         totalPages: 0,
+        chapterId: null,
         readingMode: localStorage.getItem('reader_mode') || 'vertical', // 'vertical', 'webtoon', 'paged'
         direction: localStorage.getItem('reader_direction') || 'ltr', // 'ltr', 'rtl' (manga)
         gapless: localStorage.getItem('reader_gapless') === 'true',
@@ -137,6 +138,9 @@ const MangaReader = (function () {
 
         if (newPage >= 1 && newPage <= state.totalPages) {
             state.currentPage = newPage;
+            if (state.chapterId) {
+                localStorage.setItem('manganimeden_progress_chapter_' + state.chapterId, state.currentPage);
+            }
             _updatePagedView();
             _updateProgress(state.currentPage);
         } else {
@@ -243,6 +247,16 @@ const MangaReader = (function () {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const img = entry.target;
+
+                        // Save current page based on scroll position if in vertical mode
+                        if (state.readingMode !== 'paged' && state.chapterId) {
+                            const pageIndex = elements.pages.indexOf(img) + 1;
+                            if (pageIndex > 0) {
+                                state.currentPage = pageIndex;
+                                localStorage.setItem('manganimeden_progress_chapter_' + state.chapterId, state.currentPage);
+                            }
+                        }
+
                         if (img.dataset.src) {
                             img.src = img.dataset.src;
                             img.classList.remove('lazy');
@@ -268,12 +282,36 @@ const MangaReader = (function () {
 
     // --- Méthodes Publiques ---
 
-    const init = (total) => {
+    const init = (total, chapterId) => {
         state.totalPages = parseInt(total) || 1;
+        state.chapterId = chapterId;
+
+        // Restore saved page progress logic
+        if (state.chapterId) {
+            const savedPage = localStorage.getItem('manganimeden_progress_chapter_' + state.chapterId);
+            if (savedPage) {
+                const parsedPage = parseInt(savedPage);
+                if (!isNaN(parsedPage) && parsedPage >= 1 && parsedPage <= state.totalPages) {
+                    state.currentPage = parsedPage;
+                }
+            }
+        }
+
         _initEventListeners();
         _applySettings(); // Applies initial mode and styles
         _initLazyLoading();
-        console.log(`MangaReader initialized. Mode: ${state.readingMode}, Total Pages: ${state.totalPages}`);
+
+        // Auto-scroll to saved page if not in paged mode
+        if (state.readingMode !== 'paged' && state.currentPage > 1) {
+            setTimeout(() => {
+                const targetPage = elements.pages[state.currentPage - 1];
+                if (targetPage) {
+                    targetPage.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }, 300); // Give DOM/images time to layout
+        }
+
+        console.log(`MangaReader initialized. Mode: ${state.readingMode}, Total Pages: ${state.totalPages}, Current Page: ${state.currentPage}`);
     };
 
     return {

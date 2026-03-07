@@ -114,16 +114,47 @@
         color: var(--color-primary);
     }
 
-    .return-link {
-        display: inline-block;
+    .limit-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
         margin-top: 20px;
-        color: var(--color-text-muted);
-        text-decoration: none;
-        font-size: 0.9rem;
     }
 
-    .return-link:hover {
-        text-decoration: underline;
+    .limit-actions .btn {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        padding: 15px;
+    }
+
+    .limit-return {
+        margin-top: 20px;
+        display: inline-flex;
+        justify-content: center;
+    }
+
+    .limit-return-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+    .limit-return {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        color: var(--color-text-muted);
+        text-decoration: none;
+        border-radius: var(--radius-md);
+        transition: all 0.2s;
+    }
+
+    .limit-return:hover {
+        color: var(--color-primary);
+        background-color: var(--color-bg-secondary);
+        text-decoration: none;
     }
 </style>
 {% endblock %}
@@ -142,23 +173,28 @@
         <div class="benefits-list">
             <h4>Pourquoi créer un compte gratuit ?</h4>
             <ul>
-                <li><i class="fas fa-check-circle"></i> <strong>Accès illimité</strong> à tous nos chapitres.</li>
-                <li><i class="fas fa-bookmark"></i> <strong>Suivi de lecture automatique</strong> pour reprendre où vous
-                    en étiez.</li>
-                <li><i class="fas fa-heart"></i> Mettez vos séries en <strong>favoris</strong> pour ne rater aucune
-                    sortie.</li>
-                <li><i class="fas fa-users"></i> Participez au <strong>forum</strong> et interagissez avec les autres
-                    fans.</li>
-                <li><i class="fas fa-star"></i> Gagnez de l'<strong>XP</strong> et débloquez des badges uniques !</li>
+                <li><i class="fas fa-check-circle"></i> <span><strong>Accès illimité</strong> à tous nos
+                        chapitres.</span></li>
+                <li><i class="fas fa-bookmark"></i> <span><strong>Suivi de lecture automatique</strong> pour reprendre
+                        où vous en étiez.</span></li>
+                <li><i class="fas fa-heart"></i> <span>Mettez vos séries en <strong>favoris</strong> pour ne rater
+                        aucune sortie.</span></li>
+                <li><i class="fas fa-users"></i> <span>Participez au <strong>forum</strong> et interagissez avec les
+                        autres fans.</span></li>
+                <li><i class="fas fa-star"></i> <span>Gagnez de l'<strong>XP</strong> et débloquez des badges uniques
+                        !</span></li>
             </ul>
         </div>
 
-        <div class="action-buttons">
-            <a href="{% url 'account_signup' %}" class="btn-register">Créer un Compte Gratuit</a>
-            <a href="{% url 'account_login' %}" class="btn-login">J'ai déjà un compte</a>
+        <div class="limit-actions">
+            <a href="{% url 'account_signup' %}" class="btn btn-primary">Créer un Compte Gratuit</a>
+            <a href="{% url 'account_login' %}" class="btn btn-secondary">J'ai déjà un compte</a>
         </div>
 
-        <a href="{% url 'catalog:home' %}" class="return-link">← Retour à l'accueil</a>
+        <div class="limit-return-container">
+            <a href="{% url 'home' %}" class="btn btn-ghost limit-return">← Retour à
+                l'accueil</a>
+        </div>
     </div>
 </div>
 {% endblock %}

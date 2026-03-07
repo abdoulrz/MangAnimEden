@@ -11,8 +11,10 @@
 
 
             <!-- Navigation Links (Grouped with Brand) -->
-            {% if request.resolver_match.view_name != 'login' and request.resolver_match.view_name != 'register' %}
             <div class="navbar-menu">
+                {% if request.resolver_match.view_name == 'login' or request.resolver_match.view_name == 'register' %}
+                <a href="{% url 'catalog:index' %}" class="nav-link">Catalogue</a>
+                {% else %}
                 {% with url_name=request.resolver_match.view_name %}
                 <a href="{% url 'home' %}"
                     class="nav-link {% if url_name == 'home' or url_name == 'catalog:detail' %}active{% endif %}">Accueil</a>
@@ -21,8 +23,8 @@
                 <a href="{% url 'social:forum_home' %}"
                     class="nav-link {% if 'social:' in url_name %}active{% endif %}">Forum</a>
                 {% endwith %}
+                {% endif %}
             </div>
-            {% endif %}
         </div>
 
         <!-- 3. Right: Search + Icons + Profile -->
@@ -44,7 +46,33 @@
             <!-- Dark Mode Toggle -->
             <button id="theme-toggle" class="btn-ghost navbar-icon-btn">🌙</button>
 
+            <!-- Theme Logic (Global) -->
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const themeBtn = document.getElementById('theme-toggle');
+                    const body = document.body;
 
+                    // Check saved theme
+                    const savedTheme = localStorage.getItem('theme');
+                    if (savedTheme === 'light') {
+                        body.classList.add('light-mode');
+                        if (themeBtn) themeBtn.textContent = '☀️';
+                    } else {
+                        // Default is dark mode, ensure no light-mode class
+                        body.classList.remove('light-mode');
+                        if (themeBtn) themeBtn.textContent = '🌙';
+                    }
+
+                    if (themeBtn) {
+                        themeBtn.addEventListener('click', () => {
+                            body.classList.toggle('light-mode');
+                            const isLight = body.classList.contains('light-mode');
+                            themeBtn.textContent = isLight ? '☀️' : '🌙';
+                            localStorage.setItem('theme', isLight ? 'light' : 'dark');
+                        });
+                    }
+                });
+            </script>
 
             <!-- User Profile Avatar or Login -->
             {% if user.is_authenticated %}
@@ -92,7 +120,7 @@
                 </div>
             </div>
 
-            <!-- Simple Script for Dropdown Toggle & Theme -->
+            <!-- Profile and Notif Dropdown Scripts -->
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     // Profile Dropdown
@@ -104,7 +132,6 @@
                             e.stopPropagation();
                             dropdown.classList.toggle('active');
 
-                            // Close notification dropdown if open
                             const notifDropdown = document.getElementById('notificationDropdown');
                             if (notifDropdown && notifDropdown.classList.contains('active')) {
                                 notifDropdown.classList.remove('active');
@@ -127,7 +154,6 @@
                             e.stopPropagation();
                             notifDropdown.classList.toggle('active');
 
-                            // Close profile dropdown if open
                             const profileDropdown = document.getElementById('profileDropdown');
                             if (profileDropdown && profileDropdown.classList.contains('active')) {
                                 profileDropdown.classList.remove('active');
@@ -138,26 +164,6 @@
                             if (!notifDropdown.contains(e.target) && !notifTrigger.contains(e.target)) {
                                 notifDropdown.classList.remove('active');
                             }
-                        });
-                    }
-
-                    // Theme Toggle
-                    const themeBtn = document.getElementById('theme-toggle');
-                    const body = document.body;
-
-                    // Check saved theme
-                    const savedTheme = localStorage.getItem('theme');
-                    if (savedTheme === 'light') {
-                        body.classList.add('light-mode');
-                        themeBtn.textContent = '☀️';
-                    }
-
-                    if (themeBtn) {
-                        themeBtn.addEventListener('click', () => {
-                            body.classList.toggle('light-mode');
-                            const isLight = body.classList.contains('light-mode');
-                            themeBtn.textContent = isLight ? '☀️' : '🌙';
-                            localStorage.setItem('theme', isLight ? 'light' : 'dark');
                         });
                     }
                 });
