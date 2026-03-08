@@ -36,10 +36,16 @@ def task_process_chapter(self, series_id, upload_id, temp_file_path):
             logger.error(f"Upload {upload_id} failed: {reason}")
 
     def _cleanup_file():
-        """Safely remove the temp file."""
+        """Safely remove the temp file and its parent folder if empty."""
         try:
             if os.path.exists(temp_file_path):
                 os.unlink(temp_file_path)
+                
+            # Attempt to delete the parent upload_id directory if empty
+            if upload_id:
+                parent_dir = os.path.dirname(temp_file_path)
+                if os.path.basename(parent_dir) == str(upload_id):
+                    os.rmdir(parent_dir)
         except OSError:
             pass
 
@@ -51,11 +57,16 @@ def task_process_chapter(self, series_id, upload_id, temp_file_path):
     # --- Check file exists ---
     if not os.path.exists(temp_file_path):
         # Try safe filename fallback
+        from django.conf import settings
         import tempfile as tmpmod
-        base_temp_dir = os.path.join(tmpmod.gettempdir(), 'manga_temp_uploads')
+        base_dir = getattr(settings, 'MEDIA_ROOT', tmpmod.gettempdir())
+        base_temp_dir = os.path.join(base_dir, 'manga_temp_uploads')
         if upload:
             safe_filename = os.path.basename(upload.filename)
-            alt_path = os.path.join(base_temp_dir, safe_filename)
+            alt_path = os.path.join(base_temp_dir, str(upload_id), safe_filename)
+            if not os.path.exists(alt_path):
+                # Fallback purely in case it was stored without the upload_id directory
+                alt_path = os.path.join(base_temp_dir, safe_filename)
             if os.path.exists(alt_path):
                 temp_file_path = alt_path
 

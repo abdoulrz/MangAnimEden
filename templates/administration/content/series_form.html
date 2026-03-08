@@ -166,11 +166,14 @@
 
         let completedUploadIds = [];
         let isUploading = false;
+        let isFormSubmitted = false;
+        let seriesId = null;
 
         // Shared progress state for granular (per-chunk) tracking
         let totalChunksAll = 0;
         let completedChunksAll = 0;
         let completedFiles = 0;
+        let totalFilesCount = 0;
 
         function updateProgress() {
             if (totalChunksAll > 0) {
@@ -180,7 +183,34 @@
             statusText.innerText = `[${completedFiles}/${isUploading ? totalFilesCount : completedFiles}] Upload en cours… (${completedChunksAll}/${totalChunksAll} chunks)`;
         }
 
-        let totalFilesCount = 0;
+        async function finalizeProcess() {
+            statusText.innerText = "Extraction en arrière-plan en cours...";
+            try {
+                const processData = new FormData();
+                processData.append('series_id', seriesId);
+                processData.append('upload_ids', completedUploadIds.join(','));
+                processData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+                localStorage.setItem('activeUploads', completedUploadIds.join(','));
+
+                await safeFetch('{% url "administration:upload_process" %}', {
+                    method: 'POST',
+                    body: processData
+                }, 'Bulk Process Chapters');
+
+                statusText.innerText = "Terminé ! Redirection...";
+                progressBar.style.width = '100%';
+                setTimeout(() => {
+                    window.location.href = "{% url 'administration:series_list' %}";
+                }, 1000);
+            } catch (err) {
+                console.error('Finalize Error:', err);
+                statusText.innerText = "Erreur lors de la finalisation : " + err.message;
+                statusText.style.color = "#ff4d4d";
+                submitBtn.disabled = false;
+                isFormSubmitted = false;
+            }
+        }
 
         folderInput.addEventListener('change', async function (e) {
             const files = Array.from(folderInput.files);
@@ -193,24 +223,21 @@
             completedFiles = 0;
             totalChunksAll = 0;
             completedChunksAll = 0;
-            submitBtn.disabled = true;
+
             progressContainer.style.display = 'block';
+            statusText.innerText = "Calcul des fichiers...";
+            submitBtn.innerText = "Enregistrer";
 
             try {
                 const maxConcurrent = 5;
                 const fileQueue = [...files];
                 const chunkSize = 2 * 1024 * 1024;
 
-                // Pre-calculate total chunks across ALL files for accurate progress
                 for (const f of files) {
                     totalChunksAll += Math.ceil(f.size / chunkSize);
-                    // Add 2 extra steps per file: init + complete/assemble
                     totalChunksAll += 2;
                 }
 
-                statusText.innerText = `[0/${files.length}] Démarrage de l'upload (${maxConcurrent} fichiers en parallèle)…`;
-
-                // Worker: process files sequentially from shared queue
                 async function worker() {
                     while (fileQueue.length > 0) {
                         const file = fileQueue.shift();
@@ -233,80 +260,81 @@
                 }
                 await Promise.all(workers);
 
-                progressBar.style.width = '100%';
-                statusText.innerText = "Fichiers transférés ! Cliquez sur Enregistrer pour lancer l'extraction en arrière-plan.";
-                submitBtn.disabled = false;
                 isUploading = false;
+
+                // If all files uploaded successfully
+                if (completedUploadIds.length === files.length) {
+                    if (isFormSubmitted && seriesId) {
+                        await finalizeProcess();
+                    } else {
+                        statusText.innerText = "Fichiers prêts. Cliquez sur Enregistrer (NE FERMEZ PAS LA PAGE).";
+                        progressBar.style.width = '100%';
+                    }
+                }
 
             } catch (error) {
                 console.error('Upload Error:', error);
                 statusText.innerText = "Erreur (upload arrêté) : " + error.message;
                 statusText.style.color = "#ff4d4d";
                 isUploading = false;
-                submitBtn.disabled = false;
+                if (isFormSubmitted) {
+                    submitBtn.disabled = false;
+                    isFormSubmitted = false;
+                }
             }
         });
 
         form.addEventListener('submit', async function (e) {
-            if (isUploading) {
-                e.preventDefault();
-                alert("Veuillez patienter la fin de l'upload des fichiers.");
-                return;
-            }
+            e.preventDefault();
+
+            if (isFormSubmitted) return;
+            isFormSubmitted = true;
+            submitBtn.disabled = true;
 
             const files = Array.from(folderInput.files);
-            if (files.length === 0) return;
 
-            if (completedUploadIds.length > 0) {
-                e.preventDefault();
-                submitBtn.disabled = true;
-                statusText.innerText = "Sauvegarde des informations de la série...";
-                progressBar.style.width = '50%';
-                progressContainer.style.display = 'block';
+            statusText.innerText = "Sauvegarde des informations de la série...";
+            progressContainer.style.display = 'block';
 
-                try {
-                    const formData = new FormData(form);
-                    formData.delete('folder_upload');
+            try {
+                const formData = new FormData(form);
+                formData.delete('folder_upload');
 
-                    const seriesRes = await safeFetch('', {
-                        method: 'POST',
-                        body: formData,
-                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                    }, 'Series Save');
+                const seriesRes = await safeFetch('', {
+                    method: 'POST',
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                }, 'Series Save');
 
-                    const seriesData = await seriesRes.json();
-                    const series_id = seriesData.series_id;
+                const seriesData = await seriesRes.json();
+                seriesId = seriesData.series_id;
 
-                    if (!series_id) {
-                        throw new Error("Réponse inattendue du serveur.");
-                    }
+                if (!seriesId) throw new Error("Réponse inattendue du serveur.");
 
-                    statusText.innerText = "Lancement de l'extraction en arrière-plan...";
+                if (files.length === 0) {
+                    statusText.innerText = "Série sauvegardée. Redirection...";
                     progressBar.style.width = '100%';
-
-                    const processData = new FormData();
-                    processData.append('series_id', series_id);
-                    processData.append('upload_ids', completedUploadIds.join(','));
-                    processData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
-
-                    localStorage.setItem('activeUploads', completedUploadIds.join(','));
-
-                    await safeFetch('{% url "administration:upload_process" %}', {
-                        method: 'POST',
-                        body: processData
-                    }, 'Bulk Process Chapters');
-
-                    statusText.innerText = "Terminé ! L'extraction continue en arrière-plan. Redirection...";
                     setTimeout(() => {
                         window.location.href = "{% url 'administration:series_list' %}";
-                    }, 1000);
-
-                } catch (error) {
-                    console.error('Save Error:', error);
-                    statusText.innerText = "Erreur : " + error.message;
-                    statusText.style.color = "#ff4d4d";
-                    submitBtn.disabled = false;
+                    }, 500);
+                    return;
                 }
+
+                if (isUploading) {
+                    statusText.innerText = "Série sauvegardée. En attente de la fin du transfert (NE FERMEZ PAS LA PAGE)...";
+                } else if (completedUploadIds.length === files.length) {
+                    // Upload already finished
+                    await finalizeProcess();
+                } else {
+                    throw new Error("L'upload des fichiers a échoué précédemment.");
+                }
+
+            } catch (error) {
+                console.error('Save Error:', error);
+                statusText.innerText = "Erreur : " + error.message;
+                statusText.style.color = "#ff4d4d";
+                isFormSubmitted = false;
+                submitBtn.disabled = false;
             }
         });
 

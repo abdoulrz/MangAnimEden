@@ -147,10 +147,8 @@ class AdminSeriesCreateView(CreateView):
                 'message': 'Série créée avec succès.'
             })
 
-        # Standard flow (backward compatibility)
-        files = self.request.FILES.getlist('folder_upload')
-        if files:
-            bulk_create_chapters_from_folder(self.object, files)
+        # Standard flow (backward compatibility) block removed to prevent OOMs
+        # Only chunked uploads via JS are allowed for massive folders now.
             
         messages.success(self.request, "Série créée avec succès.")
         return super().form_valid(form)
@@ -184,9 +182,8 @@ class AdminSeriesUpdateView(UpdateView):
                 'message': 'Série mise à jour.'
             })
 
-        files = self.request.FILES.getlist('folder_upload')
-        if files:
-            bulk_create_chapters_from_folder(self.object, files)
+        # Standard flow (backward compatibility) block removed to prevent OOMs
+        # Only chunked uploads via JS are allowed for massive folders now.
 
         messages.success(self.request, "Série mise à jour avec succès.")
         return super().form_valid(form)
@@ -574,17 +571,20 @@ import tempfile
 def background_process_chapters(series_id, upload_ids):
     """Dispatch each chapter to a Celery task for processing."""
     from catalog.tasks import task_process_chapter
+    from django.conf import settings
     import tempfile as tmpmod
 
     for upload_id in upload_ids:
         try:
             upload = ChunkedUpload.objects.get(upload_id=upload_id)
-            base_temp_dir = os.path.join(tmpmod.gettempdir(), 'manga_temp_uploads')
-            temp_path = os.path.join(base_temp_dir, upload.filename)
+            base_dir = getattr(settings, 'MEDIA_ROOT', tmpmod.gettempdir())
+            base_temp_dir = os.path.join(base_dir, 'manga_temp_uploads', str(upload_id))
+            temp_path = os.path.join(base_temp_dir, os.path.basename(upload.filename))
 
             if not os.path.exists(temp_path):
-                safe_filename = os.path.basename(upload.filename)
-                temp_path = os.path.join(base_temp_dir, safe_filename)
+                # Fallback purely in case it was stored without the upload_id directory
+                fallback_dir = os.path.join(base_dir, 'manga_temp_uploads')
+                temp_path = os.path.join(fallback_dir, os.path.basename(upload.filename))
 
             if os.path.exists(temp_path):
                 task_process_chapter.delay(series_id, str(upload_id), temp_path)

@@ -78,14 +78,9 @@ def process_single_chapter_from_temp(series_id, temp_file_path, upload_id=None):
             else:
                 raise
 
-    # Save file to chapter FileField
-    from django.core.files import File
-    with open(temp_file_path, 'rb') as f:
-        chapter.source_file.save(filename, File(f), save=True)
-    
-    # Process file to extract pages
+    # Optimized Pipeline: Process DIRECTLY from the temp path to avoid double/triple I/O writes
     processor = FileProcessor(upload_id=upload_id)
-    processor.process_chapter(chapter)
+    processor._process_from_path(chapter, temp_file_path)
     
     return chapter
 
@@ -156,7 +151,11 @@ class FileProcessor:
 
         # Create a temporary file to work with, verifying safe for cloud storage
         try:
-            with tempfile.NamedTemporaryFile(suffix=ext, delete=False) as tmp_file:
+            base_dir = getattr(settings, 'MEDIA_ROOT', tempfile.gettempdir())
+            base_temp_dir = os.path.join(base_dir, 'manga_temp_uploads')
+            os.makedirs(base_temp_dir, exist_ok=True)
+            
+            with tempfile.NamedTemporaryFile(dir=base_temp_dir, suffix=ext, delete=False) as tmp_file:
                 # Write file content to temp file
                 # Use chunks to handle large files efficiently
                 if hasattr(chapter.source_file, 'open'):

@@ -8,7 +8,8 @@ class ChunkedUploadService:
     @staticmethod
     def get_upload_dir(upload_id):
         """Returns the directory where chunks for a specific upload are stored."""
-        path = os.path.join(tempfile.gettempdir(), 'manga_temp_uploads', str(upload_id))
+        base_dir = getattr(settings, 'MEDIA_ROOT', tempfile.gettempdir())
+        path = os.path.join(base_dir, 'manga_temp_uploads', str(upload_id))
         if not os.path.exists(path):
             os.makedirs(path, exist_ok=True)
         return path
@@ -38,7 +39,8 @@ class ChunkedUploadService:
         upload = ChunkedUpload.objects.get(upload_id=upload_id)
         upload_dir = ChunkedUploadService.get_upload_dir(upload_id)
         
-        base_temp_dir = os.path.join(tempfile.gettempdir(), 'manga_temp_uploads')
+        base_dir = getattr(settings, 'MEDIA_ROOT', tempfile.gettempdir())
+        base_temp_dir = os.path.join(base_dir, 'manga_temp_uploads', str(upload_id))
         os.makedirs(base_temp_dir, exist_ok=True)
         
         # Ensure the filename is safe

@@ -4,6 +4,8 @@ from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+import os
+import shutil
 
 def page_image_upload_path(instance, filename):
     """
@@ -188,26 +190,46 @@ class Favorite(models.Model):
 # --- SIGNALS FOR AUTO-DELETING FILES ---
 
 @receiver(post_delete, sender=Series)
-def auto_delete_series_cover_on_delete(sender, instance, **kwargs):
-    """Deletes the cover image from storage when the Series object is deleted."""
+def auto_delete_series_assets_on_delete(sender, instance, **kwargs):
+    """Deletes all associated assets (cover and scans folder) when the Series is deleted."""
+    # 1. Delete Cover Image
     if instance.cover:
         try:
             instance.cover.delete(save=False)
         except Exception:
             pass
+            
+    # 2. Delete the entire series folder in scans_pages
+    if instance.slug:
+        series_path = os.path.join(settings.MEDIA_ROOT, 'scans_pages', instance.slug)
+        if os.path.exists(series_path):
+            try:
+                shutil.rmtree(series_path)
+            except Exception:
+                pass
 
 @receiver(post_delete, sender=Chapter)
-def auto_delete_chapter_source_on_delete(sender, instance, **kwargs):
-    """Deletes the source zip/pdf file from storage when the Chapter is deleted."""
+def auto_delete_chapter_assets_on_delete(sender, instance, **kwargs):
+    """Deletes source file and the entire chapter folder when a Chapter is deleted."""
+    # 1. Delete source archive/pdf
     if instance.source_file:
         try:
             instance.source_file.delete(save=False)
         except Exception:
             pass
+            
+    # 2. Delete the chapter folder containing extracted pages
+    try:
+        series_slug = instance.series.slug
+        chapter_dir = os.path.join(settings.MEDIA_ROOT, 'scans_pages', series_slug, f'chapter_{instance.number}')
+        if os.path.exists(chapter_dir):
+            shutil.rmtree(chapter_dir)
+    except Exception:
+        pass
 
 @receiver(post_delete, sender=Page)
 def auto_delete_page_image_on_delete(sender, instance, **kwargs):
-    """Deletes the page image file from storage when the Page is deleted."""
+    """Deletes the specific page image file, directory cleanup handled by Chapter/Series delete."""
     if instance.image:
         try:
             instance.image.delete(save=False)
