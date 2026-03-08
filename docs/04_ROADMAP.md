@@ -200,6 +200,12 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [x] **Audit Logs** : Modèle `SystemLog`.
 - [x] **Dashboard** : Page `/admin-panel/` avec Design System.
   - [x] **Gestion Complète** : Permettre aux admins/staff de gérer entièrement le contenu (séries/chapitres) et les utilisateurs (clés/rôles/bans) sans passer par l'interface Django Admin standard.
+- [ ] **Admin Dash Enhancements** :
+  - [ ] **Gestion des Signalements** : Interface frontend pour `Report` (GenericForeignKey).
+  - [ ] **Modération des Avis** : Interface pour lister et supprimer les `Review`.
+  - [ ] **Audit Logs UI** : Vue filtrable pour les `SystemLog`.
+  - [ ] **Metadata de Série** : Afficher la note moyenne et le nombre d'avis dans la liste des séries.
+  - [ ] **Détails Utilisateurs** : Afficher Avatar, Niveau et Bio dans la gestion des lecteurs.
 - [ ] **Admin Fixes** : Réparer la checkbox et le bouton "Effacer" dans l'administration.
 
 ### 3.2 Notifications & Social ✅ (COMPLÉTÉ)
