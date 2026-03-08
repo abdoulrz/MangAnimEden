@@ -132,7 +132,7 @@
         let lastPercentage = -1;
         let stallCount = 0; // How many polls with no progress change
         let errorCount = 0; // Consecutive error counter
-        const MAX_ERRORS = 5; // After this many consecutive errors, give up
+        const MAX_ERRORS = 10; // Reduced to 10 as requested for faster feedback during failures
 
         const pollProgress = async () => {
             try {
@@ -179,7 +179,7 @@
 
                 pollCount++;
 
-                // Track stalled progress (percentage hasn't changed)
+                // Track stalled progress
                 if (data.percentage === lastPercentage) {
                     stallCount++;
                 } else {
@@ -187,33 +187,31 @@
                     lastPercentage = data.percentage;
                 }
 
-                // If stalled for ~2 minutes (80 polls × 1.5s), mark as stuck
-                if (stallCount > 80) {
-                    text.innerText = "Le traitement semble bloqué. Vous pouvez fermer ce panneau.";
+                // Stall limit: ~3 minutes for 60 polls at 3s intervals
+                if (stallCount > 60) {
+                    text.innerText = "Le traitement semble long. Vous pouvez fermer ce panneau, il continuera en arrière-plan.";
                     text.style.color = '#f59e0b';
                     localStorage.removeItem('activeUploads');
-                    return; // Stop polling
+                    return;
                 }
 
-                // Poll every 1.5 seconds
-                setTimeout(pollProgress, 1500);
+                // Poll every 3 seconds instead of 1.5s to reduce server load
+                setTimeout(pollProgress, 3000);
 
             } catch (err) {
                 errorCount++;
                 console.warn(`Erreur de suivi (#${errorCount}/${MAX_ERRORS}):`, err.message);
 
                 if (errorCount >= MAX_ERRORS) {
-                    // Too many errors - give up but show a helpful message
-                    text.innerText = "Suivi interrompu (serveur injoignable). Le traitement peut continuer en arrière-plan.";
+                    text.innerText = "Connexion instable, mais le serveur travaille toujours. Vous pouvez rafraîchir la page plus tard.";
                     text.style.color = '#f59e0b';
                     dismissBtn.style.display = 'inline-block';
-                    return; // Stop polling
+                    return;
                 }
 
-                // Retry with exponential backoff: 3s, 6s, 12s, 24s...
-                const retryDelay = 3000 * Math.pow(2, errorCount - 1);
-                text.innerText = `Tentative de reconnexion... (${errorCount}/${MAX_ERRORS})`;
-                setTimeout(pollProgress, retryDelay);
+                const retryDelay = 2000 * Math.pow(2, errorCount - 1);
+                text.innerText = `Reconnexion au suivi... (${errorCount}/${MAX_ERRORS})`;
+                setTimeout(pollProgress, Math.min(retryDelay, 30000)); // Cap at 30s
             }
         };
 

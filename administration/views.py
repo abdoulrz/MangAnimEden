@@ -565,42 +565,6 @@ class CompleteChunkedUploadView(View):
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 
-from catalog.services import process_single_chapter_from_temp
-import tempfile
-
-def background_process_chapters(series_id, upload_ids):
-    """Dispatch each chapter to a Celery task for processing."""
-    from catalog.tasks import task_process_chapter
-    from django.conf import settings
-    import tempfile as tmpmod
-
-    for upload_id in upload_ids:
-        try:
-            upload = ChunkedUpload.objects.get(upload_id=upload_id)
-            base_dir = getattr(settings, 'MEDIA_ROOT', tmpmod.gettempdir())
-            base_temp_dir = os.path.join(base_dir, 'manga_temp_uploads', str(upload_id))
-            temp_path = os.path.join(base_temp_dir, os.path.basename(upload.filename))
-
-            if not os.path.exists(temp_path):
-                # Fallback purely in case it was stored without the upload_id directory
-                fallback_dir = os.path.join(base_dir, 'manga_temp_uploads')
-                temp_path = os.path.join(fallback_dir, os.path.basename(upload.filename))
-
-            if os.path.exists(temp_path):
-                task_process_chapter.delay(series_id, str(upload_id), temp_path)
-            else:
-                logger.error(f"Assembled file not found for upload {upload_id}")
-                upload.status = 'failed'
-                upload.save(update_fields=['status'])
-
-        except Exception as e:
-            logger.error(f"Error dispatching upload {upload_id}: {e}")
-            try:
-                upload = ChunkedUpload.objects.get(upload_id=upload_id)
-                upload.status = 'failed'
-                upload.save(update_fields=['status'])
-            except ChunkedUpload.DoesNotExist:
-                pass
 
 @method_decorator(requires_admin, name='dispatch')
 class ProcessChapterFromUploadView(View):
@@ -615,14 +579,8 @@ class ProcessChapterFromUploadView(View):
             upload_ids = [uid.strip() for uid in upload_ids_str.split(',') if uid.strip()]
             
             if upload_ids:
-                # Dispatch in a background thread so the HTTP response returns immediately
-                # (CELERY_TASK_ALWAYS_EAGER makes .delay() synchronous, which would block)
-                thread = threading.Thread(
-                    target=background_process_chapters,
-                    args=(series_id, upload_ids),
-                    daemon=True
-                )
-                thread.start()
+                from catalog.tasks import task_bulk_process_chapters
+                task_bulk_process_chapters.delay(series_id, upload_ids)
                 
             return JsonResponse({
                 'status': 'processing_started',
@@ -645,48 +603,50 @@ class UploadProgressStatusView(View):
         upload_ids = [uid.strip() for uid in upload_ids_str.split(',') if uid.strip()]
         
         try:
+            from django.db.models import Sum
+            
             uploads = ChunkedUpload.objects.filter(upload_id__in=upload_ids)
-            stale_threshold = timezone.now() - timedelta(minutes=30)  # Match Celery hard limit
+            count = uploads.count()
             
-            stats = {
-                'total_files': 0,
-                'processed_files': 0,
-                'terminal_uploads': 0,  # completed + failed + stale
-                'total_uploads': len(upload_ids),
-                'status': 'processing'
-            }
+            if count == 0:
+                 return JsonResponse({'status': 'finished', 'percentage': 100})
+
+            # Calculate aggregates in ONE GO
+            agg = uploads.aggregate(
+                total=Sum('total_files_to_process'),
+                processed=Sum('processed_files')
+            )
             
-            for upload in uploads:
-                stats['total_files'] += upload.total_files_to_process
-                stats['processed_files'] += upload.processed_files
-                
-                # Count terminal states: completed, failed, or stale
-                if upload.status in ('completed', 'failed'):
-                    stats['terminal_uploads'] += 1
-                elif upload.status == 'uploading' and upload.created_at < stale_threshold:
-                    # Only mark 'uploading' as stale (never 'processing' — task may still be working)
-                    upload.status = 'failed'
-                    upload.save(update_fields=['status'])
-                    stats['terminal_uploads'] += 1
-                elif upload.status == 'completed' and upload.processed_files >= upload.total_files_to_process and upload.total_files_to_process > 0:
-                    stats['terminal_uploads'] += 1
-                     
-            if stats['total_files'] > 0:
-                stats['percentage'] = round((stats['processed_files'] / stats['total_files']) * 100)
-            else:
-                stats['percentage'] = 0
-                
-            # Finished if: all uploads reached a terminal state, OR no records exist at all (deleted)
-            if stats['terminal_uploads'] >= len(upload_ids) or uploads.count() == 0:
-                stats['status'] = 'finished'
-                
-                # Check if any failed
+            total_files = agg['total'] or 0
+            processed_files = agg['processed'] or 0
+            
+            percentage = 0
+            if total_files > 0:
+                percentage = round((processed_files / total_files) * 100)
+            
+            # Check terminal status across all ids
+            # If any are still in 'assembled' or 'processing', we are 'processing'
+            # If all are 'completed' or 'failed', we are 'finished'
+            status = 'processing'
+            terminal_count = uploads.filter(status__in=['completed', 'failed']).count()
+            
+            if terminal_count >= count:
+                status = 'finished'
                 failed_count = uploads.filter(status='failed').count()
                 if failed_count > 0:
-                    stats['status'] = 'failed'
-                    stats['message'] = f"{failed_count} upload(s) ont échoué."
-                 
-            return JsonResponse(stats)
+                    status = 'failed'
+                    return JsonResponse({
+                        'status': 'failed',
+                        'percentage': percentage,
+                        'message': f"{failed_count} upload(s) ont échoué."
+                    })
+            
+            return JsonResponse({
+                'status': status,
+                'percentage': percentage,
+                'total_files': total_files,
+                'processed_files': processed_files
+            })
         except Exception as e:
             return JsonResponse({'error': str(e)}, status=500)
 

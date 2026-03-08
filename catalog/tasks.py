@@ -111,3 +111,42 @@ def task_process_chapter(self, series_id, upload_id, temp_file_path):
             return  # Give up
         # Don't delete the file — retry needs it
         raise self.retry(exc=exc)
+
+@shared_task
+def task_bulk_process_chapters(series_id, upload_ids):
+    """
+    Celery task that loops through multiple upload_ids and dispatches individual processing tasks.
+    Offloading the loop from the web server thread to the worker prevents DB locking issues.
+    """
+    import os
+    from administration.models import ChunkedUpload
+    from django.conf import settings
+    import tempfile as tmpmod
+
+    base_dir = getattr(settings, 'MEDIA_ROOT', tmpmod.gettempdir())
+    base_temp_dir = os.path.join(base_dir, 'manga_temp_uploads')
+
+    for upload_id in upload_ids:
+        try:
+            upload = ChunkedUpload.objects.get(upload_id=upload_id)
+            
+            # Construct the path to the assembled file
+            safe_filename = os.path.basename(upload.filename)
+            temp_path = os.path.join(base_temp_dir, str(upload_id), safe_filename)
+
+            if not os.path.exists(temp_path):
+                # Fallback for older flat structure
+                temp_path = os.path.join(base_temp_dir, safe_filename)
+
+            if os.path.exists(temp_path):
+                # Dispatch individual chapter task
+                task_process_chapter.delay(series_id, str(upload_id), temp_path)
+            else:
+                logger.error(f"Bulk process: temp file not found for upload {upload_id}")
+                upload.status = 'failed'
+                upload.save(update_fields=['status'])
+                
+        except Exception as e:
+            logger.error(f"Error dispatching bulk item {upload_id}: {e}")
+            continue
+

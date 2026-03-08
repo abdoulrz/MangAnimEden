@@ -291,16 +291,17 @@ class FileProcessor:
                 # Free memory immediately
                 del image_data
 
-                # Update progress tracking
-                if self.upload_id:
-                    ChunkedUpload.objects.filter(upload_id=self.upload_id).update(processed_files=F('processed_files') + 1)
-
             except Exception as e:
                 failed_count += 1
                 page_idx = args[0] if args else '?'
                 logger.error(f"Failed to process page {page_idx} of {chapter}: {e}")
                 # Continue to next image — don't let one failure kill the whole chapter
                 continue
+
+        # Final progress update for this chapter (ONE write instead of 50+)
+        if self.upload_id:
+            ChunkedUpload.objects.filter(upload_id=self.upload_id).update(processed_files=saved_count)
+
 
         logger.info(f"Finished processing {chapter}: {saved_count} saved, {failed_count} failed out of {len(tasks)}")
 
