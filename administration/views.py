@@ -593,10 +593,14 @@ class ProcessChapterFromUploadView(View):
 @method_decorator(requires_admin, name='dispatch')
 class UploadProgressStatusView(View):
     def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
         from django.utils import timezone
         from datetime import timedelta
         
-        upload_ids_str = request.GET.get('upload_ids', '')
+        # Accept from GET or POST to avoid breaking existing clients during migration
+        upload_ids_str = request.POST.get('upload_ids') or request.GET.get('upload_ids', '')
         if not upload_ids_str:
             return JsonResponse({'error': 'Paramètres manquants'}, status=400)
             

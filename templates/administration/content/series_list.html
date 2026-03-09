@@ -136,8 +136,25 @@
 
         const pollProgress = async () => {
             try {
-                const response = await fetch(`{% url "administration:upload_process_status" %}?upload_ids=${uploadIdsStr}`);
-                if (!response.ok) throw new Error('Network response was not ok');
+                // Use POST to avoid URI Too Long errors with many IDs
+                const response = await fetch('{% url "administration:upload_process_status" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: `upload_ids=${encodeURIComponent(uploadIdsStr)}`
+                });
+
+                if (!response.ok) {
+                    if (response.status === 400) {
+                        // Stale or invalid IDs - clean up and stop
+                        localStorage.removeItem('activeUploads');
+                        container.style.display = 'none';
+                        return;
+                    }
+                    throw new Error(`Server returned ${response.status}`);
+                }
                 const data = await response.json();
 
                 // Reset error count on successful response
