@@ -590,7 +590,9 @@ class ProcessChapterFromUploadView(View):
             logger.error(f"Error starting background processing: {e}")
             return JsonResponse({'error': str(e)}, status=500)
 
-@method_decorator(requires_admin, name='dispatch')
+from django.views.decorators.csrf import csrf_exempt
+
+@method_decorator(csrf_exempt, name='dispatch')
 class UploadProgressStatusView(View):
     def get(self, request, *args, **kwargs):
         return self.post(request, *args, **kwargs)
@@ -603,6 +605,10 @@ class UploadProgressStatusView(View):
         upload_ids_str = request.POST.get('upload_ids') or request.GET.get('upload_ids', '')
         if not upload_ids_str:
             return JsonResponse({'error': 'Paramètres manquants'}, status=400)
+            
+        # Manually check admin status to avoid 404/403 page redirects during AJAX
+        if not (request.user.is_authenticated and (request.user.is_superuser or getattr(request.user, 'role_admin', False))):
+            return JsonResponse({'status': 'session_expired', 'message': 'Session expirée. Veuillez vous reconnecter.'}, status=401)
             
         upload_ids = [uid.strip() for uid in upload_ids_str.split(',') if uid.strip()]
         

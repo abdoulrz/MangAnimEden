@@ -15,6 +15,22 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.3.0] - 2026-03-12 ([Bulk Upload Stability & Security])
+
+### Fixed Bulk Upload Tracking
+
+- **POST-based Polling** : Le suivi de progression utilise désormais des requêtes `POST`. Cela résout les erreurs "URI Too Long" (414) qui survenaient lors de l'upload de dossiers contenant plus de 100 chapitres.
+- **CSRF Resilience** : L'endpoint de progression est désormais `csrf_exempt` (lecture seule), évitant les erreurs 403 lors des changements d'IP (mobiles) ou des sessions expirées.
+- **Session Graceful Termination** : Ajout d'une gestion propre des sessions expirées (401 JSON). L'interface utilisateur arrête maintenant le suivi proprement avec un message explicatif au lieu de tenter des reconnexions infinies.
+
+### Optimized I/O & Isolation
+
+- **Isolation par `upload_id`** : Chaque dossier importé est traité dans un répertoire temporaire unique, garantissant qu'aucune collision de nom de fichier ne se produise entre différents chapitres ou uploads simultanés.
+- **Direct Extraction Pipeline** : Suppression des copies de fichiers redondantes. Le système extrait les pages directement depuis l'archive assemblée sur SSD vers le stockage final, réduisant l'utilisation du cache disque.
+- **Celery Task Migration** : La boucle de gestion des extractions a été déplacée vers Celery (`task_bulk_process_chapters`), libérant totalement les threads du serveur web et évitant les "freezes" d'interface pour l'administrateur.
+
+---
+
 ## [2.2.0] - 2026-03-07 ([Data Integrity, Conversion & Infrastructure])
 
 *(Note: Ce patch regroupe des fonctionnalités majeures implémentées récemment mais non documentées dans le journal précédent).*

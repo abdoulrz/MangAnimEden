@@ -222,10 +222,10 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 - [ ] **Validateur** : Magic Bytes check pour les images.
 - [x] **Optimisation Upload** : Implémenter l'upload par morceaux (Chunked Uploads) pour supporter les gros fichiers de manière fiable.
-- [x] **Concurrence & Backoff** : Worker pool JS (5 fichiers parallèles) avec retries (Exponential Backoff) pour éviter les Timeouts.
-- [x] **Memory Leak Fix** : Optimisation de l'upload pour éliminer les erreurs OOM sur serveur via FileProcessor et flux sur disque.
+- [x] **Concurrence & Backoff** : Worker pool JS (10 fichiers parallèles) avec retries (Exponential Backoff) pour éviter les Timeouts.
+- [x] **Memory Leak Fix** : Optimisation de l'upload pour éliminer les erreurs OOM sur serveur via FileProcessor et flux sur disque (SSD au lieu de RAM).
 - [x] **Background Processing** : Traitement relégué 100% via Celery Tasks asynchrones.
-- [x] **Progression Concurrente** : Correction du suivi de progression et gestion des collisions de noms (`unique_together`).
+- [x] **Progression Concurrente & Robuste** : Correction du suivi de progression (support POST pour les listes d'IDs massives), gestion des collisions de noms (`upload_id` isolation) et résilience CSRF/Session.
 - [x] **Auto-Cleanup** : Signaux `post_delete` Django purgeant automatiquement les médias sources (.cbz, images) des disques pour économiser l'espace.
 
 ### 3.4 Recherche Avancée
@@ -424,3 +424,24 @@ See `docs/06_INFRASTRUCTURE.md` for full specification.
   - **Traductions Natives** : Les citations (Quotes), le contenu éditorial et l'interface doivent être traduits nativement (pas de traduction automatique à la volée).
   - **Contenu Adapté** : Proposer les scans dans la langue de l'utilisateur si disponible.
   - **Sélecteur de Langue** : Switcher facilement dans le footer ou la navbar.
+
+## 🛡️ Phase 6 : Qualité, Sécurité & Scalabilité
+
+*Consolidation technique basée sur l'ancien `COMPLEX_IMPLEMENTATION_MEMO.md`.*
+
+### 6.1 Sécurité & Abus
+
+- [ ] **Validation de fichiers** : Vérifier les MIME types/Magic Bytes (pas seulement l'extension) pour tous les uploads.
+- [ ] **Quotas de stockage** : Limiter l'espace disque par utilisateur pour éviter les saturations.
+- [ ] **Rate Limiting** : Brider le chat et les commentaires (ex: X messages / minute) contre le spam.
+
+### 6.2 Notifications & Engagement
+
+- [ ] **Dispatcher centralisé** : Service unique pour router les notifications (Email vs In-App).
+- [ ] **Préférences utilisateur** : Permettre d'activer/désactiver certains types de notifications.
+- [ ] **Mode "Ne pas déranger"** : Option pour muter les notifications selon des plages horaires.
+
+### 6.3 Performance & Data
+
+- [ ] **Intégrité (Concurrency)** : Utiliser `transaction.atomic` et `select_for_update` sur les opérations critiques (XP, Commandes).
+- [ ] **Full-Text Search** : Remplacer `icontains` par PostgreSQL SearchVectors pour des recherches plus rapides et pertinentes.

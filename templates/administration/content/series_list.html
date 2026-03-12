@@ -147,6 +147,14 @@
                 });
 
                 if (!response.ok) {
+                    if (response.status === 401) {
+                        // Session expired - stop polling and explain
+                        text.innerText = "Session expirée. Reconnectez-vous pour voir l'avancement.";
+                        text.style.color = '#f59e0b';
+                        dismissBtn.style.display = 'inline-block';
+                        localStorage.removeItem('activeUploads');
+                        return;
+                    }
                     if (response.status === 400) {
                         // Stale or invalid IDs - clean up and stop
                         localStorage.removeItem('activeUploads');

@@ -43,7 +43,7 @@ PROJET_MANGA/
 │   ├── group_icons/             # Icônes des groupes communautaires
 │   ├── scans/                   # Pages de mangas extraites (.jpg, .webp)
 │   ├── stories/                 # Contenu éphémère (24h)
-│   └── temp_uploads/            # Fichiers archives en cours de traitement
+│   └── manga_temp_uploads/      # Fichiers archives isolés par upload_id
 │  
 ├── static/                      # ASSETS STATIQUES (Design System)  
 │   ├── css/  
@@ -111,6 +111,9 @@ Interface métier dédiée pour la gestion fluide du contenu (Séries, Uploads d
 
 * **Uploads de Dossiers** :
   * **Contournement Formulaire** : Utilisation d'un `<input type="file" webkitdirectory>` manuel dans le template pour supporter l'envoi de dossiers entiers.
+  * **Asynchronisme (Celery)** : Utilisation de workers Celery (`task_bulk_process_chapters`) pour gérer l'extraction lourde en arrière-plan, évitant tout blocage du serveur web.
+  * **Isolation & Sécurité** : Chaque upload est isolé dans un sous-répertoire `<upload_id>/` pour éviter les collisions de noms de fichiers.
+  * **Suivi de Progression Robuste** : Polling via `POST` (supporte des centaines d'IDs) et `csrf_exempt` pour une résilience maximale aux déconnexions/timeouts.
   * **Traitement en Masse** : Service `FileProcessor` qui itère sur les fichiers, gère l'extraction des archives (`.cbz`, `.zip`), convertit les PDFs et extrait le numéro de chapitre.
 * **Feature:** Interface utilisateur repensée en Neumorphism/Glassmorphism.
 
@@ -140,3 +143,27 @@ Pour respecter le design (moderne, sombre, épuré premium), nous utilisons une 
     --font-ui: 'Inter', sans-serif;       /* Pour l'interface */  
 }  
 ```
+
+---
+
+## **Mémos de Mise en Œuvre (Complexité)**
+
+*Consolidation technique pour garantir l'intégrité et la sécurité.*
+
+### 1. Administration & Rôles
+
+* **Hiérarchie** :
+  * **Superuser** : Accès complet Django Admin. Gère les clés et promeut les admins.
+  * **Site Administrator** : Accès Dashboard métier (`/admin-panel/`). Gère les membres et le contenu.
+  * **Moderator** : Accès outils frontend (modération chat/forum).
+* **Audit Logs** : Chaque action sensible (ban, suppression, promotion) doit être loggée via le décorateur `log_admin_action` dans `SystemLog`.
+
+### 2. Intégrité des Données
+
+* **Cascades de suppression** : Prioriser `SET_NULL` pour les messages et interactions sociales afin de préserver l'historique communautaire lors de la suppression d'un compte (RGPD).
+* **Concurrency** : Utiliser `transaction.atomic` pour les calculs d'XP et les transactions de badges afin d'éviter les "Race Conditions".
+
+### 3. Sécurité & Abus
+
+* **Background Processes** : Utiliser impérativement des requêtes `POST` et le décorateur `@csrf_exempt` pour le polling de progression (cf. `UploadProgressStatusView`).
+* **Signalements (Report)** : Système générique via `GenericForeignKey` permettant de signaler n'importe quel objet (User, Comment, Message).
