@@ -46,4 +46,7 @@ urlpatterns = [
     path('gamification/badges/create/', views.AdminBadgeCreateView.as_view(), name='badge_create'),
     path('gamification/badges/<int:pk>/edit/', views.AdminBadgeUpdateView.as_view(), name='badge_edit'),
     path('gamification/badges/<int:pk>/delete/', views.AdminBadgeDeleteView.as_view(), name='badge_delete'),
+    
+    # Tools & Maintenance
+    path('tools/resync-metadata/', views.AdminResyncMetadataView.as_view(), name='resync_metadata'),
 ]

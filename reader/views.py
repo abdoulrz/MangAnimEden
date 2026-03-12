@@ -30,16 +30,16 @@ def chap_view(request, chapter_id=None):
     prev_chapter = Chapter.objects.filter(series=chapter.series, number__lt=chapter.number).order_by('-number').first()
     next_chapter = Chapter.objects.filter(series=chapter.series, number__gt=chapter.number).order_by('number').first()
     
-    # Save Reading Progress & Mark as Completed (awards XP via signal)
+    # Save Reading Progress (without marking completed)
+    current_page = 1
     if request.user.is_authenticated:
         from reader.models import ReadingProgress
         progress, created = ReadingProgress.objects.get_or_create(
             user=request.user,
             chapter=chapter,
         )
-        if not progress.completed:
-            progress.completed = True
-            progress.save()  # Mark as completed to award XP
+        progress.save() # Update last_read
+        current_page = progress.current_page
     else:
         # Phase 3.6: Accès Limité (Stratégie de Conversion)
         # Track read chapters for anonymous users in session
@@ -62,6 +62,7 @@ def chap_view(request, chapter_id=None):
         'page': first_page, # For backward compatibility with existing template logic that expects 'page'
         'chapter': chapter,
         'pages': pages,
+        'current_page': current_page,
         'prev_chapter': prev_chapter,
         'next_chapter': next_chapter,
         'STATIC_VERSION': settings.STATIC_VERSION

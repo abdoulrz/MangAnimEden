@@ -12,9 +12,11 @@ def home_view(request):
     Page d'accueil avec sections principales.
     Accessible seulement aux utilisateurs connectés.
     """
-    # Fetch series for the homepage
+    # Optimized fetch for homepage sections
     latest_updates = Series.objects.prefetch_related('genres').all().order_by('-updated_at')[:3]
-    popular_series = Series.objects.prefetch_related('genres').all().order_by('?')[:3] # Random for now as popular
+    
+    # Use stable sorting (views/rating) instead of order_by('?') which is extremely slow on large tables
+    popular_series = Series.objects.prefetch_related('genres').all().order_by('-views_count', '-average_rating')[:3]
     
     # Continue Reading & Stats logic
     continue_reading = None

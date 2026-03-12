@@ -3,9 +3,17 @@
 {% block admin_content %}
 <div class="admin-header">
     <h1 class="admin-page-title">Gestion des Séries</h1>
-    <a href="{% url 'administration:series_create' %}" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Nouvelle Série
-    </a>
+    <div class="admin-header-actions">
+        <form action="{% url 'administration:resync_metadata' %}" method="POST" class="inline-form">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-secondary">
+                <i class="fas fa-sync"></i> Re-synchroniser
+            </button>
+        </form>
+        <a href="{% url 'administration:series_create' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Nouvelle Série
+        </a>
+    </div>
 </div>
 
 <div class="admin-controls">
@@ -34,7 +42,7 @@
         <div class="series-info">
             <h3 class="series-title">{{ series.title }}</h3>
             <div class="series-meta">
-                {{ series.chapter_count }} chapitres • {{ series.views_count }} vues
+                {{ series.chapters_count }} chapitres • {{ series.views_count }} vues
             </div>
 
             <div class="series-actions">

@@ -150,7 +150,8 @@
 </div>
 
 <div id="reader-data" class="hidden" data-total="{{ chapter.pages.count|default:'1' }}" data-mode="vertical"
-    data-chapter-id="{{ chapter.id }}"></div>
+    data-chapter-id="{{ chapter.id }}" data-current-page="{{ current_page|default:'1' }}"
+    data-progress-url="{% url 'reader:update_progress' %}"></div>
 {% endblock %}
 {% block extra_js %}
 <script src="{% static 'js/reader.js' %}?v={{ STATIC_VERSION }}"></script>
@@ -159,7 +160,10 @@
         const readerData = document.getElementById('reader-data');
         const totalPages = readerData ? readerData.dataset.total : 1;
         const chapterId = readerData ? readerData.dataset.chapterId : null;
-        MangaReader.init(totalPages, chapterId);
+        const initialPage = readerData ? readerData.dataset.currentPage : 1;
+        const progressUrl = readerData ? readerData.dataset.progressUrl : '/reader/api/progress/';
+
+        MangaReader.init(totalPages, chapterId, initialPage, progressUrl);
     });
 </script>
 {% endblock %}

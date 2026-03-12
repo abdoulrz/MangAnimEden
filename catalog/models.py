@@ -76,19 +76,26 @@ class Series(models.Model):
     release_date = models.DateField(blank=True, null=True, verbose_name="Date de publication")
     
     # Analytics
-    views_count = models.PositiveIntegerField(default=0, verbose_name="Nombre de vues")
+    views_count = models.PositiveIntegerField(default=0, verbose_name="Nombre de vues", db_index=True)
+    average_rating = models.FloatField(default=0.0, verbose_name="Note moyenne", db_index=True)
+    chapters_count = models.PositiveIntegerField(default=0, verbose_name="Nombre de chapitres", db_index=True)
+    review_count = models.PositiveIntegerField(default=0, verbose_name="Nombre d'avis", db_index=True)
     
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
-    @property
-    def average_rating(self):
+    def update_metadata(self):
+        """
+        Recalculates average_rating, chapters_count, and review_count and saves.
+        """
         from django.db.models import Avg
-        avg = self.reviews.aggregate(Avg('rating'))['rating__avg']
-        return round(avg, 1) if avg else 0.0
+        self.average_rating = round(self.reviews.aggregate(Avg('rating'))['rating__avg'] or 0.0, 1)
+        self.chapters_count = self.chapters.count()
+        self.review_count = self.reviews.count()
+        self.save(update_fields=['average_rating', 'chapters_count', 'review_count'])
     
     @property
-    def review_count(self):
+    def get_review_count(self):
         return self.reviews.count()
 
     
@@ -256,3 +263,23 @@ class Review(models.Model):
 
     def __str__(self):
         return f"{self.user.nickname} - {self.series.title} ({self.rating}/5)"
+
+
+# --- SIGNALS FOR DENORMALIZATION ---
+
+@receiver([models.signals.post_save, models.signals.post_delete], sender=Chapter)
+def update_series_chapters_count(sender, instance, **kwargs):
+    """Updates chapters_count on Series when a Chapter is created or deleted."""
+    if instance.series:
+        instance.series.chapters_count = instance.series.chapters.count()
+        instance.series.save(update_fields=['chapters_count'])
+
+@receiver([models.signals.post_save, models.signals.post_delete], sender=Review)
+def update_series_average_rating(sender, instance, **kwargs):
+    """Updates average_rating and review_count on Series when a Review is created or deleted."""
+    if instance.series:
+        from django.db.models import Avg
+        avg = instance.series.reviews.aggregate(Avg('rating'))['rating__avg']
+        instance.series.average_rating = round(avg or 0.0, 1)
+        instance.series.review_count = instance.series.reviews.count()
+        instance.series.save(update_fields=['average_rating', 'review_count'])

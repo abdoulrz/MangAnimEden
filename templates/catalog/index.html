@@ -28,7 +28,7 @@
                 </div>
 
                 <div class="catalog-grid">
-                    {% for series in series_list %}
+                    {% for series in page_obj %}
                     <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
                         <div class="manga-cover">
                             {% if series.cover %}
@@ -57,6 +57,24 @@
                     <p>Aucun manga trouvé.</p>
                     {% endfor %}
                 </div>
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <div class="pagination">
+                    {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_genre %}&genre={{ current_genre }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_order %}&order={{ current_order }}{% endif %}"
+                        class="pagination-btn">« Précédent</a>
+                    {% endif %}
+
+                    <span class="pagination-current">Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages
+                        }}</span>
+
+                    {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_genre %}&genre={{ current_genre }}{% endif %}{% if current_type %}&type={{ current_type }}{% endif %}{% if current_order %}&order={{ current_order }}{% endif %}"
+                        class="pagination-btn">Suivant »</a>
+                    {% endif %}
+                </div>
+                {% endif %}
             </section>
         </main>
 

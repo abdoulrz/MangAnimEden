@@ -114,7 +114,7 @@ class AdminSeriesListView(ListView):
     ordering = ['-updated_at']
 
     def get_queryset(self):
-        queryset = super().get_queryset().annotate(chapter_count=Count('chapters'))
+        queryset = super().get_queryset()
         query = self.request.GET.get('q')
         if query:
             queryset = queryset.filter(title__icontains=query)
@@ -720,3 +720,15 @@ class AdminBadgeDeleteView(DeleteView):
         create_system_log(request, 'BADGE_DELETE', details=f"Badge supprimé : {obj.name}")
         messages.success(request, f"Badge '{obj.name}' supprimé.")
         return super().delete(request, *args, **kwargs)
+@method_decorator(requires_admin, name='dispatch')
+class AdminResyncMetadataView(View):
+    """Recalculates average_rating and chapters_count for all series."""
+    def post(self, request, *args, **kwargs):
+        series_list = Series.objects.all()
+        count = series_list.count()
+        for series in series_list:
+            series.update_metadata()
+        
+        create_system_log(request, 'METADATA_RESYNC', details=f"Synchronisation de la métadonnées pour {count} séries.")
+        messages.success(request, f"Métadonnées synchronisées pour {count} séries.")
+        return redirect('administration:series_list')

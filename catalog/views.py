@@ -6,6 +6,8 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 
+from django.core.paginator import Paginator
+
 def catalog_index(request):
     """
     Page principale du catalogue de mangas avec recherche et filtrage.
@@ -13,9 +15,12 @@ def catalog_index(request):
     query = request.GET.get('q', '')
     genre = request.GET.get('genre', '')
     type_filter = request.GET.get('type', '')
+    order = request.GET.get('order', 'title') # Default sort by title
 
-    series_list = Series.objects.prefetch_related('genres').all().order_by('title')
+    # Base queryset with prefetch to avoid N+1 on genres
+    series_list = Series.objects.prefetch_related('genres').all()
 
+    # Filtering
     if query:
         series_list = series_list.filter(title__icontains=query)
     
@@ -25,13 +30,31 @@ def catalog_index(request):
     if type_filter:
         series_list = series_list.filter(type__iexact=type_filter)
 
-    trending_series = Series.objects.prefetch_related('genres').all().order_by('-views_count')[:5]
+    # Sorting
+    if order == 'views':
+        series_list = series_list.order_by('-views_count')
+    elif order == 'rating':
+        series_list = series_list.order_by('-average_rating')
+    elif order == 'newest':
+        series_list = series_list.order_by('-created_at')
+    else:
+        series_list = series_list.order_by('title')
+
+    # Pagination
+    paginator = Paginator(series_list, 20)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    trending_series = Series.objects.only('id', 'title', 'cover', 'views_count').all().order_by('-views_count')[:5]
     
     return render(request, 'catalog/index.html', {
-        'series_list': series_list,
+        'page_obj': page_obj,
         'trending_series': trending_series,
         'STATIC_VERSION': settings.STATIC_VERSION,
-        'search_query': query, # Preserve search term
+        'search_query': query,
+        'current_genre': genre,
+        'current_type': type_filter,
+        'current_order': order,
     })
 
 def manga_detail(request, series_id):

@@ -21,7 +21,9 @@ const MangaReader = (function () {
         gapless: localStorage.getItem('reader_gapless') === 'true',
         zoomLevel: 1.0,
         isMenuOpen: false,
-        isRestoringScroll: true // Block progress tracking during init
+        isRestoringScroll: true, // Block progress tracking during init
+        progressUrl: '/reader/api/progress/',
+        _lastSyncedPage: 0
     };
 
     // Éléments du DOM
@@ -140,7 +142,7 @@ const MangaReader = (function () {
         if (newPage >= 1 && newPage <= state.totalPages) {
             state.currentPage = newPage;
             if (state.chapterId) {
-                localStorage.setItem('manganimeden_progress_chapter_' + state.chapterId, state.currentPage);
+                _updateProgress(state.currentPage);
             }
             _updatePagedView();
             _updateProgress(state.currentPage);
@@ -260,7 +262,7 @@ const MangaReader = (function () {
                     // Track Progress (We don't unobserve, so this triggers on scroll)
                     if (!state.isRestoringScroll && state.readingMode !== 'paged' && state.chapterId) {
                         state.currentPage = elements.pages.indexOf(img) + 1;
-                        localStorage.setItem('manganimeden_progress_chapter_' + state.chapterId, state.currentPage);
+                        _updateProgress(state.currentPage);
                     }
                 }
             });
@@ -270,20 +272,50 @@ const MangaReader = (function () {
     };
 
     const _updateProgress = (page) => {
-        // Send progress to server (Debounced or simple fire-and-forget)
-        // const url = `/api/reader/progress/${page}/`;
-        // fetch(url, { method: 'POST' });
-        console.log(`Progress: Page ${page}`);
+        if (!state.chapterId) return;
+
+        // Local Storage fallback
+        localStorage.setItem('manganimeden_progress_chapter_' + state.chapterId, page);
+
+        // Server Sync (Debounced by page change)
+        if (page === state._lastSyncedPage) return;
+        state._lastSyncedPage = page;
+
+        console.log(`Reader: Syncing page ${page}...`);
+
+        fetch(state.progressUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.cookie.match(/csrftoken=([^;]+)/)?.[1]
+            },
+            body: JSON.stringify({
+                chapter_id: state.chapterId,
+                page: page
+            })
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(`Synced progress: Page ${data.current_page}/${data.total_pages} (Completed: ${data.completed})`);
+                }
+            })
+            .catch(err => console.warn('Reader Progress sync error:', err));
     };
 
     // --- Méthodes Publiques ---
 
-    const init = (total, chapterId) => {
+    const init = (total, chapterId, initialPage, progressUrl) => {
         state.totalPages = parseInt(total) || 1;
         state.chapterId = chapterId;
+        state.progressUrl = progressUrl || state.progressUrl;
 
-        // Restore saved page progress logic
-        if (state.chapterId) {
+        // Priority 1: Server-side restoration
+        if (initialPage && parseInt(initialPage) > 1) {
+            state.currentPage = parseInt(initialPage);
+        }
+        // Priority 2: LocalStorage fallback (if server didn't have one)
+        else if (state.chapterId) {
             const savedPage = localStorage.getItem('manganimeden_progress_chapter_' + state.chapterId);
             if (savedPage) {
                 const parsedPage = parseInt(savedPage);
@@ -292,6 +324,8 @@ const MangaReader = (function () {
                 }
             }
         }
+
+        state._lastSyncedPage = state.currentPage;
 
         _initEventListeners();
         _applySettings();
