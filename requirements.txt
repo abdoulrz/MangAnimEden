@@ -15,4 +15,4 @@ django-storages[s3]==1.14.2
 urllib3==1.26.18
 celery==5.4.0
 redis==5.2.1
-python-magic-bin==0.4.14
+python-magic==0.4.27
