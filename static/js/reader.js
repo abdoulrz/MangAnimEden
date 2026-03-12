@@ -141,11 +141,10 @@ const MangaReader = (function () {
 
         if (newPage >= 1 && newPage <= state.totalPages) {
             state.currentPage = newPage;
-            if (state.chapterId) {
-                _updateProgress(state.currentPage);
-            }
             _updatePagedView();
-            _updateProgress(state.currentPage);
+            if (state.chapterId) {
+                _debouncedSync(state.currentPage);
+            }
         } else {
             // End of chapter logic (could prompt "Next Chapter")
             console.log("End of chapter/start reached");
@@ -252,23 +251,44 @@ const MangaReader = (function () {
                 if (entry.isIntersecting) {
                     const img = entry.target;
 
-                    // Lazy Load
+                    // Lazy Load: swap data-src → src
                     if (img.dataset.src) {
                         img.src = img.dataset.src;
                         img.classList.remove('lazy');
                         img.removeAttribute('data-src');
                     }
 
-                    // Track Progress (We don't unobserve, so this triggers on scroll)
-                    if (!state.isRestoringScroll && state.readingMode !== 'paged' && state.chapterId) {
-                        state.currentPage = elements.pages.indexOf(img) + 1;
-                        _updateProgress(state.currentPage);
+                    // Track Progress — ONLY if the image is actually loaded (has src).
+                    // This prevents zero-height collapsed lazy images from falsely
+                    // triggering progress updates (especially for the last page).
+                    if (!state.isRestoringScroll && state.readingMode !== 'paged' && state.chapterId && img.src) {
+                        const pageNum = elements.pages.indexOf(img) + 1;
+                        // Extra guard: only update if this page is near our current reading position
+                        // (prevents wild jumps from layout shifts during initial load)
+                        if (pageNum <= state.currentPage + 3) {
+                            state.currentPage = pageNum;
+                            _debouncedSync(pageNum);
+                        }
                     }
                 }
             });
         }, { rootMargin: "50% 0px -50% 0px" }); // Track when top of image crosses middle of screen
 
         elements.pages.forEach(img => observer.observe(img));
+    };
+
+    // Debounced server sync (1 second) to avoid spamming API on fast scroll
+    let _syncTimer = null;
+    const _debouncedSync = (page) => {
+        // Always update localStorage immediately for instant local resume
+        if (state.chapterId) {
+            localStorage.setItem('manganimeden_progress_chapter_' + state.chapterId, page);
+        }
+
+        clearTimeout(_syncTimer);
+        _syncTimer = setTimeout(() => {
+            _updateProgress(page);
+        }, 1000);
     };
 
     const _updateProgress = (page) => {
