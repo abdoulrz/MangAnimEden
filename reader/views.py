@@ -38,7 +38,19 @@ def chap_view(request, chapter_id=None):
             user=request.user,
             chapter=chapter,
         )
-        progress.save() # Update last_read
+        
+        # If this chapter was marked completed by the old auto-complete system
+        # but the user is opening it again, reset the stale completion.
+        # The chapter will only be re-completed when the API confirms the user
+        # has truly reached the last page. XP is protected by the pre_save signal.
+        if progress.completed:
+            total_pages = chapter.pages.count()
+            # Only reset if current_page hasn't actually reached the end
+            # (this is the telltale sign of stale old data)
+            if progress.current_page < total_pages:
+                progress.completed = False
+        
+        progress.save()  # Update last_read
         current_page = progress.current_page
     else:
         # Phase 3.6: Accès Limité (Stratégie de Conversion)

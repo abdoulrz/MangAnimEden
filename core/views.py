@@ -26,18 +26,33 @@ def home_view(request):
         from reader.models import ReadingProgress
         
         # --- Continue Reading ---
+        # Find the chapter the user most recently interacted with
         last_progress = ReadingProgress.objects.filter(
             user=request.user
         ).select_related('chapter__series').order_by('-last_read').first()
         
         if last_progress:
-            if last_progress.completed:
+            # A chapter is only "truly finished" if:
+            # 1. It's marked as completed, AND
+            # 2. The user's current_page actually reached the last page.
+            # This guards against stale 'completed=True' records from the old code
+            # that auto-completed chapters on open.
+            total_pages = last_progress.chapter.pages.count()
+            truly_finished = (
+                last_progress.completed 
+                and total_pages > 0 
+                and last_progress.current_page >= total_pages
+            )
+            
+            if truly_finished:
+                # User genuinely finished this chapter — suggest the next one
                 next_chapter = Chapter.objects.filter(
                     series=last_progress.chapter.series,
                     number__gt=last_progress.chapter.number
                 ).order_by('number').first()
                 continue_reading = next_chapter or last_progress.chapter
             else:
+                # User is mid-chapter or has stale data — resume this chapter
                 continue_reading = last_progress.chapter
                 
         # --- User Stats (Option 2) ---
