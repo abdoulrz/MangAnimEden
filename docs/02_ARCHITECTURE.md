@@ -88,6 +88,26 @@ Le cœur de l'expérience utilisateur de lecture.
 * **Models:** ReadingProgress (Lien User <-> Chapter + page number).  
 * **Logique:** Préchargement des pages suivantes (Pre-fetching via JS, `reader.js`).
 
+#### Continue Reading — Mécanisme et Fallback
+
+**Logique actuelle** (`core/views.py` — `home_view`):  
+Le système vérifie si un chapitre est « véritablement terminé » (`truly_finished`) en combinant `completed=True` ET `current_page >= total_pages`. Si oui, il suggère le chapitre suivant. Sinon, il affiche le chapitre en cours.
+
+> [!IMPORTANT]
+> **Fallback prêt à l'emploi** — Si la logique actuelle cause encore des incohérences, remplacez tout le bloc `# --- Continue Reading ---` dans `core/views.py` par ce code simplifié qui reflète exactement la logique de la **page détail** (qui fonctionne toujours) :
+
+```python
+# --- Continue Reading (FALLBACK SIMPLE) ---
+last_progress = ReadingProgress.objects.filter(
+    user=request.user
+).select_related('chapter__series').order_by('-last_read').first()
+
+if last_progress:
+    continue_reading = last_progress.chapter
+```
+
+Ce fallback affiche **toujours** le dernier chapitre ouvert, sans essayer de deviner le prochain. Quand l'utilisateur clique « Suivant → » dans le lecteur, le chapitre suivant devient automatiquement le dernier ouvert.
+
 ### **3. social (ex-community)**
 
 La couche communautaire et d'interactions ("Forum").
