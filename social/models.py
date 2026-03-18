@@ -80,6 +80,10 @@ class DirectMessage(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
 
+    # DM Interactions (Reply + Like)
+    likes = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='liked_dms', blank=True)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='dm_replies', on_delete=models.SET_NULL)
+
     class Meta:
         ordering = ['timestamp']
         indexes = [
@@ -88,6 +92,10 @@ class DirectMessage(models.Model):
 
     def __str__(self):
         return f"DM from {self.sender} to {self.recipient}"
+
+    @property
+    def like_count(self):
+        return self.likes.count()
 
 
 # ========== NOTIFICATIONS (Phase 3.2) ==========
@@ -106,6 +114,7 @@ class Notification(models.Model):
         ('reply', 'Réponse'),
         ('friend_request', 'Demande d\'ami'),
         ('friend_accept', 'Ami accepté'),
+        ('message', 'Message Privé'),
     ]
     
     recipient = models.ForeignKey(
@@ -140,6 +149,29 @@ class Notification(models.Model):
     def __str__(self):
         actor_name = self.actor.nickname if self.actor else "System"
         return f"Notif for {self.recipient}: {actor_name} {self.verb}"
+
+    def get_target_url(self):
+        """
+        Returns a deep-link URL so the user can jump directly to the source
+        of this notification (DM conversation, group chat, or profile).
+        """
+        try:
+            if self.notification_type == 'message' and self.actor:
+                # DM notification → open the DM conversation with the sender
+                return f'/forum/?dm_id={self.actor.id}'
+            elif self.notification_type in ('like', 'reply') and self.target:
+                # Group message interaction → open the group chat
+                # target is a Message object; navigate to the group
+                group_id = getattr(self.target, 'group_id', None)
+                if group_id:
+                    return f'/forum/?group_id={group_id}'
+            elif self.notification_type in ('friend_request', 'friend_accept') and self.actor:
+                # Open the actor's public profile
+                return f'/users/user/{self.actor.id}/'
+        except Exception:
+            pass
+        # Fallback: notifications list
+        return '/social/notifications/'
 
 
 from django.utils import timezone

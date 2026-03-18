@@ -288,10 +288,19 @@ def forum_home(request):
                     messages.error(request, "Vous devez être amis pour envoyer des messages privés.")
                     return redirect('social:forum_home')
                 
+                dm_parent_id = request.POST.get('dm_parent_id')
+                dm_parent = None
+                if dm_parent_id:
+                    try:
+                        dm_parent = DirectMessage.objects.filter(id=dm_parent_id).first()
+                    except (ValueError, TypeError):
+                        pass
+
                 dm = DirectMessage.objects.create(
                     sender=request.user,
                     recipient=recipient,
-                    content=content
+                    content=content,
+                    parent=dm_parent
                 )
                 
                 # Notification for DM
@@ -735,6 +744,7 @@ def notifications_list(request):
     
     context = {
         'notifications': notifications,
+        'STATIC_VERSION': settings.STATIC_VERSION,
     }
     return render(request, 'social/notifications.html', context)
 
@@ -788,6 +798,37 @@ def like_message(request, message_id):
         'success': True, 
         'liked': liked, 
         'count': message.like_count
+    })
+
+
+@login_required
+def like_dm(request, dm_id):
+    """
+    Toggle Like on a DirectMessage.
+    """
+    from .models import DirectMessage
+    from django.http import JsonResponse
+
+    if request.method != 'POST':
+        return JsonResponse({'success': False, 'error': 'Invalid method'}, status=405)
+
+    dm = get_object_or_404(DirectMessage, id=dm_id)
+
+    # Verify the user is part of this DM conversation
+    if dm.sender != request.user and dm.recipient != request.user:
+        return JsonResponse({'success': False, 'error': 'Not authorized'}, status=403)
+
+    if request.user in dm.likes.all():
+        dm.likes.remove(request.user)
+        liked = False
+    else:
+        dm.likes.add(request.user)
+        liked = True
+
+    return JsonResponse({
+        'success': True,
+        'liked': liked,
+        'count': dm.like_count
     })
 
 @login_required

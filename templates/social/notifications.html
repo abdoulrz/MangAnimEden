@@ -28,7 +28,7 @@
         <!-- Notifications List Container -->
         <div class="notifications-list-container glass-card">
             {% for notif in notifications %}
-            <div class="notification-item {% if not notif.is_read %}unread{% endif %}">
+            <a href="{{ notif.get_target_url }}" class="notification-item {% if not notif.is_read %}unread{% endif %}">
                 <!-- Actor Avatar -->
                 <div class="item-avatar-section">
                     <div class="avatar-wrapper">
@@ -45,6 +45,7 @@
                         <span class="type-badge type-{{ notif.notification_type }}">
                             {% if notif.notification_type == 'like' %}<i class="fas fa-heart"></i>
                             {% elif notif.notification_type == 'reply' %}<i class="fas fa-reply"></i>
+                            {% elif notif.notification_type == 'message' %}<i class="fas fa-comment"></i>
                             {% elif notif.notification_type == 'friend_request' %}<i class="fas fa-user-plus"></i>
                             {% elif notif.notification_type == 'friend_accept' %}<i class="fas fa-user-check"></i>
                             {% else %}<i class="fas fa-info-circle"></i>{% endif %}
@@ -61,7 +62,7 @@
 
                     <div class="content-body">
                         {% if notif.actor %}
-                        <a href="{% url 'users:public_profile' notif.actor.id %}" class="actor-link">{{ notif.actor.nickname }}</a>
+                        <span class="actor-link">{{ notif.actor.nickname }}</span>
                         {% else %}
                         <span class="system-label">Système</span>
                         {% endif %}
@@ -75,14 +76,14 @@
                     {% endif %}
                 </div>
 
-                <!-- Action (Mark as Read circle) -->
+                <!-- Action -->
                 <div class="item-action-section">
-                    <a href="{% url 'social:notifications_list' %}?read={{ notif.id }}" class="mark-read-circle"
-                        title="Marquer comme lu">
+                    <span class="read-status-icon" title="{% if notif.is_read %}Lu{% else %}Non lu{% endif %}">
                         <i class="fas fa-circle {% if notif.is_read %}read-icon{% else %}unread-icon{% endif %}"></i>
-                    </a>
+                    </span>
+                    <i class="fas fa-chevron-right chevron-icon"></i>
                 </div>
-            </div>
+            </a>
             {% empty %}
             <div class="empty-state">
                 <div class="empty-icon">
@@ -185,7 +186,7 @@
         overflow: hidden;
     }
 
-    /* Individual Notification Item */
+    /* Individual Notification Item (now a clickable <a> link) */
     .notification-item {
         display: flex;
         padding: 1.5rem;
@@ -193,6 +194,8 @@
         border-bottom: 1px solid var(--border-color);
         transition: background-color 0.2s ease;
         position: relative;
+        text-decoration: none;
+        color: inherit;
     }
 
     .notification-item:last-child {
@@ -345,13 +348,27 @@
         align-items: flex-start;
     }
 
-    .mark-read-circle {
+    .mark-read-circle,
+    .read-status-icon {
         padding: 0.5rem;
         transition: transform 0.2s;
     }
 
     .mark-read-circle:hover {
         transform: scale(1.2);
+    }
+
+    .chevron-icon {
+        color: var(--color-text-muted);
+        opacity: 0.4;
+        font-size: 0.75rem;
+        align-self: center;
+        margin-left: 0.25rem;
+    }
+
+    .notification-item:hover .chevron-icon {
+        opacity: 0.9;
+        color: var(--color-purple-primary);
     }
 
     .read-icon {

@@ -5,6 +5,81 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/chat.css' %}?v={{ STATIC_VERSION }}">
+<style>
+/* ===== Emoji Picker ===== */
+.emoji-trigger-btn {
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted, #9ca3af);
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 0 0.4rem;
+    transition: color 0.2s, transform 0.2s;
+    flex-shrink: 0;
+}
+.emoji-trigger-btn:hover {
+    color: #f59e0b;
+    transform: scale(1.15);
+}
+#emojiPicker {
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    z-index: 9999;
+    width: 300px;
+    max-height: 300px;
+    overflow-y: auto;
+    background: rgba(15, 15, 20, 0.95);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 1rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.04);
+    padding: 0.75rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(139,92,246,0.4) transparent;
+}
+#emojiPicker.emoji-picker-open {
+    display: flex;
+}
+.dropdown-header-search-icon {
+    font-size: 0.75rem;
+    opacity: 0.5;
+}
+.friend-dropdown-avatar.avatar-placeholder-modal {
+    width: 32px;
+    height: 32px;
+    font-size: 0.8rem;
+}
+.emoji-category-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #8b5cf6;
+    letter-spacing: 0.5px;
+    padding: 0.4rem 0 0.25rem;
+    text-transform: uppercase;
+}
+.emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    margin-bottom: 0.5rem;
+}
+.emoji-item {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 6px;
+    transition: background 0.15s, transform 0.15s;
+    line-height: 1;
+}
+.emoji-item:hover {
+    background: rgba(139, 92, 246, 0.25);
+    transform: scale(1.2);
+}
+</style>
 {% endblock %}
 
 {% block content %}
@@ -95,9 +170,10 @@
                         required placeholder="Écrivez votre message..." oninput="updateTextPreview()"></textarea>
                 </div>
                 <div class="form-group">
-                    <label>Couleur de fond</label>
+                    <label for="story_bg_color">Couleur de fond</label>
                     <div class="color-picker-row">
-                        <input type="color" name="story_bg_color" id="story_bg_color" value="#6c5ce7" class="color-input" onchange="updateTextPreview()">
+                        <input type="color" name="story_bg_color" id="story_bg_color" value="#6c5ce7" class="color-input" 
+                               title="Sélecteur de couleur" onchange="updateTextPreview()">
                         <div class="color-presets">
                             <span class="color-dot color-dot-purple" data-color="#6c5ce7"
                                 onclick="selectColor('#6c5ce7')"></span>
@@ -141,7 +217,7 @@
                         <div class="friends-dropdown-menu" id="friendsDropdownMenu">
                             <div class="dropdown-header-premium">
                                 <span>Mes Amis</span>
-                                <i class="fas fa-search" style="font-size: 0.75rem; opacity: 0.5;"></i>
+                                <i class="fas fa-search dropdown-header-search-icon"></i>
                             </div>
                             <div class="friends-dropdown-list">
                                 {% for friend in friends %}
@@ -150,7 +226,7 @@
                                         {% if friend.avatar %}
                                         <img src="{{ friend.avatar.url }}" class="friend-dropdown-avatar" alt="">
                                         {% else %}
-                                        <div class="friend-dropdown-avatar avatar-placeholder-modal" style="width:32px; height:32px; font-size: 0.8rem;">
+                                        <div class="friend-dropdown-avatar avatar-placeholder-modal">
                                             {{ friend.nickname|slice:":1"|upper }}
                                         </div>
                                         {% endif %}
@@ -293,13 +369,33 @@
 
                 <div class="chat-messages" id="chatMessages">
                     {% for message in messages_list %}
-                    <div class="message {% if message.sender == user %}my-message{% else %}other-message{% endif %}" id="dm-{{ message.id }}">
+                    <div class="message {% if message.sender == user %}my-message{% else %}other-message{% endif %}" id="dm-{{ message.id }}"
+                         data-message-id="{{ message.id }}"
+                         data-sender="{{ message.sender.nickname|default:message.sender.username }}">
                         <div class="message-bubble">
                             <div class="message-info">
                                 <span class="sender-name">{{ message.sender.nickname|default:message.sender.username }}</span>
                                 <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
                             </div>
+
+                            {% if message.parent %}
+                            <div class="reply-context">
+                                <small>Réponse à <strong>{{ message.parent.sender.nickname }}</strong> : {{ message.parent.content|truncatechars:30 }}</small>
+                            </div>
+                            {% endif %}
+
                             <p class="message-text">{{ message.content }}</p>
+
+                            <!-- DM Interactions -->
+                            <div class="message-actions">
+                                <button type="button" class="action-btn like-btn {% if user in message.likes.all %}liked{% endif %}" onclick="toggleDMLike(this, '{{ message.id }}')">
+                                    <i class="{% if user in message.likes.all %}fas{% else %}far{% endif %} fa-heart"></i>
+                                    <span class="like-count">{{ message.like_count }}</span>
+                                </button>
+                                <button type="button" class="action-btn reply-btn" title="Répondre" onclick="startDMReply('{{ message.id }}', '{{ message.sender.nickname|default:message.sender.username|escapejs }}')">
+                                    <i class="fas fa-reply"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                     {% empty %}
@@ -312,9 +408,20 @@
                 </div>
 
                 <div class="chat-input-area">
-                    <form method="post" action="?dm_id={{ active_dm_user.id }}" class="chat-form">
+                    <!-- DM Reply Banner -->
+                    <div id="dmReplyBanner" class="reply-banner reply-banner-hidden">
+                        <span>Réponse à <strong id="dmReplyTargetName">User</strong></span>
+                        <button class="btn-close-small" onclick="cancelDMReply()">x</button>
+                    </div>
+
+                    <form method="post" action="?dm_id={{ active_dm_user.id }}" class="chat-form" id="dmChatForm">
                         {% csrf_token %}
                         <input type="hidden" name="dm_id" value="{{ active_dm_user.id }}">
+                        <input type="hidden" name="dm_parent_id" id="dmParentInput">
+                        <!-- Emoji Button -->
+                        <button type="button" class="emoji-trigger-btn" id="dmEmojiBtn" onclick="toggleEmojiPicker('dm')" title="Emojis">
+                            <i class="far fa-smile"></i>
+                        </button>
                         <input type="text" name="content" id="dmInput" class="chat-input"
                             placeholder="Message privé..." autocomplete="off" required>
                         <button type="submit" class="send-btn">🚀</button>
@@ -432,9 +539,13 @@
                         <button class="btn-close-small" onclick="cancelReply()">×</button>
                     </div>
 
-                    <form method="post" action="?group_id={{ active_group.id }}" class="chat-form">
+                    <form method="post" action="?group_id={{ active_group.id }}" class="chat-form" id="groupChatForm">
                         {% csrf_token %}
                         <input type="hidden" name="parent_id" id="parentInput">
+                        <!-- Emoji Button -->
+                        <button type="button" class="emoji-trigger-btn" id="groupEmojiBtn" onclick="toggleEmojiPicker('group')" title="Emojis">
+                            <i class="far fa-smile"></i>
+                        </button>
                         <input type="text" name="content" id="chatInput" class="chat-input"
                             placeholder="Écrivez votre message..." autocomplete="off" required>
                         <button type="submit" class="send-btn">🚀</button>
@@ -454,7 +565,7 @@
                     {% for story in active_group_stories %}
                     <div class="story-card-full">
                         {% if story.node_type == 'text' %}
-                        <div class="story-text-display"style="background-color:{{ story.background_color }};">
+                        <div class="story-text-display" style="background-color: {{ story.background_color }};">
                             <p>{{ story.text_content }}</p>
                         </div>
                         {% else %}
@@ -790,7 +901,187 @@
         const bubbles = document.querySelectorAll('.message-bubble.pressing');
         bubbles.forEach(b => b.classList.remove('pressing'));
     }
+
+    // ===================== DM INTERACTIONS =====================
+
+    function toggleDMLike(btn, dmId) {
+        fetch(`/forum/dms/${dmId}/like/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' }
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.success) {
+                const icon = btn.querySelector('i');
+                const count = btn.querySelector('.like-count');
+                count.textContent = data.count;
+                if (data.liked) {
+                    btn.classList.add('liked');
+                    icon.classList.replace('far', 'fas');
+                } else {
+                    btn.classList.remove('liked');
+                    icon.classList.replace('fas', 'far');
+                }
+            }
+        });
+    }
+
+    function startDMReply(dmId, nickname) {
+        document.getElementById('dmParentInput').value = dmId;
+        document.getElementById('dmReplyTargetName').textContent = nickname;
+        const banner = document.getElementById('dmReplyBanner');
+        banner.classList.remove('reply-banner-hidden');
+        banner.style.display = 'flex';
+        document.getElementById('dmInput').focus();
+    }
+
+    function cancelDMReply() {
+        document.getElementById('dmParentInput').value = '';
+        const banner = document.getElementById('dmReplyBanner');
+        banner.classList.add('reply-banner-hidden');
+        banner.style.display = 'none';
+    }
+
+    // Swipe-left-to-reply for DM (touch devices)
+    const dmChatContainer = document.getElementById('chatMessages');
+    if (dmChatContainer) {
+        let touchStartX = 0;
+        let touchStartY = 0;
+        let swipeTarget = null;
+
+        dmChatContainer.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+            swipeTarget = e.target.closest('.message');
+        }, { passive: true });
+
+        dmChatContainer.addEventListener('touchend', (e) => {
+            if (!swipeTarget) return;
+            const dx = e.changedTouches[0].clientX - touchStartX;
+            const dy = e.changedTouches[0].clientY - touchStartY;
+
+            // Horizontal swipe left (at least 60px) and mostly horizontal
+            if (dx < -60 && Math.abs(dy) < 40) {
+                const msgId = swipeTarget.dataset.messageId || swipeTarget.id.replace('dm-','');
+                const senderName = swipeTarget.dataset.sender ||
+                    (swipeTarget.querySelector('.sender-name') ? swipeTarget.querySelector('.sender-name').textContent.trim() : '');
+                if (msgId) {
+                    if (navigator.vibrate) navigator.vibrate(30);
+                    // Try DM reply first, then group reply
+                    if (document.getElementById('dmParentInput')) {
+                        startDMReply(msgId, senderName);
+                    } else if (document.getElementById('parentInput')) {
+                        startReply(msgId, senderName);
+                    }
+                }
+            }
+            swipeTarget = null;
+        });
+    }
+
+    // ===================== EMOJI PICKER =====================
+
+    const EMOJI_CATEGORIES = {
+        '😊 Réaction': ['😀','😃','😄','😁','😆','😅','🤣','😂','🙂','😊','😇','🥰','😍','😘','😗','😙','😚','😋','😛','😝','😜','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😱','🥵','🥶','😶','😐','😑','🤔','🤥','😬','🙄','😴','🤮','🤒','🤕','🤑'],
+        '👋 Gestes': ['👋','🤚','✋','🖖','👌','🤌','🤏','✌️','🤞','🤟','🤘','🤙','👈','👉','👆','👇','☝️','👍','👎','✊','👊','🤛','🤜','👏','🙌','🫶','👐','🤲','🙏','✍️','💪','🦾'],
+        '❤️ Coeurs': ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❤️‍🔥','❤️‍🩹','💖','💗','💓','💞','💕','💟','☮️','✨','💫','⭐','🌟'],
+        '🎉 Fête': ['🎉','🎊','🎈','🎁','🎀','🪅','🥳','🎂','🍰','🧁','🎆','🎇','🪄','🎸','🎵','🎶','🎤','🎧','🏆','🥇','🎮'],
+        '🚀 Objets': ['💬','💭','📱','💻','⌨️','🖥️','📷','📸','🔥','💯','✅','❌','⚡','🌈','☀️','🌙','⭐','💎','👑','🪐','🌺','🌸','🌹']
+    };
+
+    let activeEmojiContext = null; // 'dm' or 'group'
+
+    function toggleEmojiPicker(context) {
+        const picker = document.getElementById('emojiPicker');
+        const btn = document.getElementById(context === 'dm' ? 'dmEmojiBtn' : 'groupEmojiBtn');
+
+        if (activeEmojiContext === context && picker.classList.contains('emoji-picker-open')) {
+            closeEmojiPicker();
+            return;
+        }
+
+        activeEmojiContext = context;
+        
+        // Dynamic positioning
+        if (btn && picker) {
+            const rect = btn.getBoundingClientRect();
+            const pickerWidth = 300;
+            const pickerHeight = 310;
+            
+            // Align left with button, but prevent right-side overflow
+            let left = rect.left;
+            if (left + pickerWidth > window.innerWidth) {
+                left = window.innerWidth - pickerWidth - 10;
+            }
+            // Prevent left-side overflow
+            if (left < 10) left = 10;
+
+            // Position above the button, but if no space, show below
+            let top = rect.top - pickerHeight;
+            if (top < 10) {
+                top = rect.bottom + 10;
+            }
+
+            picker.style.left = `${left}px`; 
+            picker.style.top = `${top}px`; 
+        }
+
+        picker.classList.add('emoji-picker-open');
+    }
+
+    function closeEmojiPicker() {
+        document.getElementById('emojiPicker').classList.remove('emoji-picker-open');
+        activeEmojiContext = null;
+    }
+
+    function insertEmoji(emoji) {
+        const inputId = activeEmojiContext === 'dm' ? 'dmInput' : 'chatInput';
+        const input = document.getElementById(inputId);
+        if (!input) return;
+
+        const start = input.selectionStart;
+        const end = input.selectionEnd;
+        const val = input.value;
+        input.value = val.substring(0, start) + emoji + val.substring(end);
+        input.selectionStart = input.selectionEnd = start + emoji.length;
+        input.focus();
+    }
+
+    // Build emoji picker DOM after full page is parsed
+    document.addEventListener('DOMContentLoaded', function buildEmojiPicker() {
+        const picker = document.getElementById('emojiPicker');
+        if (!picker) return;
+
+        let html = '';
+        for (const [cat, emojis] of Object.entries(EMOJI_CATEGORIES)) {
+            html += `<div class="emoji-category-label">${cat}</div><div class="emoji-grid">`;
+            emojis.forEach(em => {
+                html += `<button type="button" class="emoji-item" onclick="insertEmoji('${em}')">${em}</button>`;
+            });
+            html += '</div>';
+        }
+        picker.innerHTML = html;
+    });
+
+    // Close picker when clicking outside
+    document.addEventListener('click', (e) => {
+        const picker = document.getElementById('emojiPicker');
+        if (!picker) return;
+        const isDmBtn = document.getElementById('dmEmojiBtn');
+        const isGroupBtn = document.getElementById('groupEmojiBtn');
+        if (
+            !picker.contains(e.target) &&
+            !(isDmBtn && isDmBtn.contains(e.target)) &&
+            !(isGroupBtn && isGroupBtn.contains(e.target))
+        ) {
+            closeEmojiPicker();
+        }
+    });
+
 </script>
+
+<!-- Global Emoji Picker Panel (populated by JS) -->
+<div id="emojiPicker" role="dialog" aria-label="Sélecteur d'émojis"></div>
 
 {% include 'components/report_modal.html' %}
 {% endblock %}

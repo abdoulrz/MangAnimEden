@@ -32,13 +32,14 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 *Objectif : Transformer le lecteur passif en membre actif de la communauté.*
 
-- [x] **Direct Messages (DMs)** : Conversations privées basées sur le statut d'ami.
+- [x] **Direct Messages (DMs)** : Conversations privées basées sur le statut d'ami (Includes Likes & Replies).
 - [x] **Indicateur d'État** : Petit point vert sur l'avatar pour les utilisateurs en ligne.
-- [x] **Système de Réponse** : UI "Long Press" (appui long 2s) pour répondre à un message. (Implemented as reply button/context)
-- [x] **Gestion d'Événements UX** : Affichage des événements en blocs **curateurs** dans le sidebar unifié (cliquer pour voir détails).
+- [x] **Système de Réponse** : UI "Swipe" et "Long Press" pour répondre à un message avec contexte.
+- [x] **Gestion d'Événements UX** : Affichage des événements en blocs **curateurs** dans le sidebar unifié.
+- [x] **Emoji Picker** : Intégration d'un sélecteur d'émojis dans les DMs et les Groupes.
 - [x] **Stories UX** : Design premium normal/hover pour le bouton de création.
 - [x] **Sécurité & Accès** : Gestion des accès NSFW et pack d'abonnement (Champs `User` & backend).
-- [x] **Forum Navigation Excellence** : Dropdown d'amis et iconographie premium unifiée pour une navigation fluide.
+- [x] **Forum Navigation Excellence** : Dropdown d'amis et iconographie premium unifiée.
 
 ### Étape 2 : Recherche Avancée & Sagesse (Wisdom)
 
@@ -55,9 +56,9 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 - [ ] **Admin Dash Enhancements** :
   - [x] **Gestion Unifiée de la Communauté** : Interface pour modérer Groupes et Événements avec tags curateurs.
-  - [ ] Interface de gestion des **Signalements**.
+  - [ ] Interface de gestion des **Signalements** (Modèle `Report` prêt).
   - [ ] Modération des **Avis** (Reviews).
-  - [ ] Audit Logs filtrables (SystemLog UI).
+  - [ ] Audit Logs filtrables (Modèle `SystemLog` prêt).
   - [ ] Métadonnées étendues dans la gestion des séries.
 - [ ] **Intégrité des Données** : Utilisation de `select_for_update` sur les opérations critiques (XP, Vues) pour éviter les pertes de données lors de clics simultanés.
 - [ ] **Quotas & Limites** : Limitation de l'espace de stockage par utilisateur/groupe.
