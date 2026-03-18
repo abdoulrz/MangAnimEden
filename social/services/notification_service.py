@@ -11,6 +11,16 @@ class NotificationService:
         if recipient == actor:
             return None  # Don't notify users of their own actions
             
+        # Check recipient notification preferences (Phase 1 Expansion - SPEC-014)
+        if type == 'like' and not recipient.pref_notif_likes:
+            return None
+        if type == 'reply' and not recipient.pref_notif_replies:
+            return None
+        if (type == 'friend_request' or type == 'friend_accept') and not recipient.pref_notif_friends:
+            return None
+        if type == 'message' and not recipient.pref_notif_messages:
+            return None
+
         try:
             notification = Notification(
                 recipient=recipient,

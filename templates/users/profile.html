@@ -5,8 +5,9 @@
 
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/profile.css' %}?v={{ STATIC_VERSION }}">
-<link rel="stylesheet" href="{% static 'css/components/otaku_card.css' %}?v={{ STATIC_VERSION }}">
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}?v={{ STATIC_VERSION }}">
+    <link rel="stylesheet" href="{% static 'css/components/otaku_card.css' %}?v={{ STATIC_VERSION }}">
+    <link rel="stylesheet" href="{% static 'css/domaine.css' %}?v={{ STATIC_VERSION }}">
 {% endblock %}
 
 {% block content %}
@@ -54,10 +55,24 @@
 
                 <!-- User Info -->
                 <div class="profile-identity">
-                    <h1 class="profile-username">{{ user.nickname|default:user.username }}</h1>
-                    <p class="profile-role">
-                        {% if user.is_staff %}Administrateur{% else %}Membre Explorateur{% endif %}
-                    </p>
+                    <h1 class="profile-username">
+                        {{ user.nickname|default:user.username }}
+                    </h1>
+                    <div class="profile-rank-badge-row">
+                        {% with rank=user.get_rank_info %}
+                        <span class="rank-badge-detailed rank-{{ rank.title|slugify }}" title="{{ rank.title }}">
+                            {{ rank.emoji }} {{ rank.title }}
+                        </span>
+                        {% endwith %}
+                        
+                        {% if user.is_staff %}
+                        <span class="staff-tag">STAFF</span>
+                        {% endif %}
+                        
+                        {% if user.is_dnd_mode %}
+                        <span class="dnd-badge" title="Mode Ne Pas Déranger">🔇 DND</span>
+                        {% endif %}
+                    </div>
                     <p class="member-since">Membre depuis {{ user.date_joined|date:"F Y" }}</p>
                 </div>
 
@@ -244,7 +259,6 @@
             </a>
         </div>
 
-        <!-- Carte Otaku Banner -->
         <div class="otaku-card-banner" id="open-otaku-card">
             <div class="otaku-icon-wrapper">
                 <span class="otaku-icon">💳</span>
@@ -252,57 +266,6 @@
             <div class="otaku-text">
                 <h3>Carte Otaku</h3>
                 <p>Votre identité de membre officiel</p>
-            </div>
-            <div class="otaku-arrow">›</div>
-        </div>
-
-        <!-- OTAKU CARD OVERLAY -->
-        <div class="otaku-card-overlay" id="otaku-card-overlay">
-            <div class="otaku-card-container">
-                <div class="otaku-id-card">
-                    <button class="close-card-btn" id="close-otaku-card">&times;</button>
-
-                    <div class="card-header">
-                        <div class="card-logo">
-                            <span>⛩️</span> MangAnimEDen
-                        </div>
-                        <div class="card-rank">
-                            {% if user.is_superuser %}Admin{% elif user.is_staff %}Staff{% else %}Membre{% endif %}
-                        </div>
-                    </div>
-
-                    <div class="card-body">
-                        <div class="card-avatar">
-                            {% if user.avatar %}
-                            <img src="{{ user.avatar.url }}" alt="{{ user.nickname }}">
-                            {% else %}
-                            <div class="card-placeholder">{{ user.nickname|first|upper }}</div>
-                            {% endif %}
-                        </div>
-
-                        <div class="card-info">
-                            <div class="card-row">
-                                <span class="card-label">PSEUDONYME</span>
-                                <span class="card-value highlight">{{ user.nickname }}</span>
-                            </div>
-
-                            <div class="card-row">
-                                <span class="card-label">NIVEAU</span>
-                                <span class="card-value">LVL {{ user.level }}</span>
-                            </div>
-
-                            <div class="card-row">
-                                <span class="card-label">MEMBRE DEPUIS</span>
-                                <span class="card-value">{{ user.date_joined|date:"d/m/Y" }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card-footer">
-                        <div class="card-id">ID: {{ user.id|stringformat:"08d" }}</div>
-                        <div class="card-chip"></div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -561,17 +524,31 @@
                             if (data.success && data.friends.length > 0) {
                                 let html = '';
                                 data.friends.forEach(friend => {
+                                    // 10 characters limit for nickname
+                                    const displayNickname = friend.nickname.length > 10 
+                                        ? friend.nickname.substring(0, 10) + '...' 
+                                        : friend.nickname;
+
                                     const avatarHtml = friend.avatar
-                                        ? `<img src="${friend.avatar}" alt="${friend.nickname}">`
+                                        ? `<img src="${friend.avatar}" alt="${friend.nickname}" class="rounded-avatar">`
                                         : `<div class="avatar-placeholder-small">${friend.nickname.charAt(0).toUpperCase()}</div>`;
+                                    
                                     html += `
-                                        <a href="/users/user/${friend.id}/" class="friend-item" data-user-id="${friend.id}" style="text-decoration: none; color: inherit;">
-                                            <div class="friend-avatar-small">${avatarHtml}</div>
-                                            <div class="friend-info">
-                                                <span class="friend-nickname">${friend.nickname}</span>
-                                                <span class="friend-level">Niveau ${friend.level}</span>
-                                            </div>
-                                        </a>
+                                        <div class="friend-item-horizontal">
+                                            <a href="/users/user/${friend.id}/" class="friend-main-link" title="${friend.nickname}">
+                                                <div class="friend-avatar-wrapper">
+                                                    ${avatarHtml}
+                                                    <span class="status-dot ${friend.is_online ? 'online' : 'offline'}"></span>
+                                                </div>
+                                                <div class="friend-meta">
+                                                    <span class="friend-nickname">${displayNickname}</span>
+                                                    <span class="friend-level">Niv. ${friend.level}</span>
+                                                </div>
+                                            </a>
+                                            <a href="/forum/?dm_id=${friend.id}" class="friend-quick-dm" title="Message privé">
+                                                <i class="fas fa-comment-dots"></i>
+                                            </a>
+                                        </div>
                                     `;
                                 });
                                 friendsListContainer.innerHTML = html;
@@ -756,6 +733,76 @@
         </div>
     </div>
 
+</div>
+
+
+<!-- OTAKU CARD OVERLAY (Phase 5 Refined) -->
+<div class="otaku-card-overlay" id="otaku-card-overlay">
+    <div class="otaku-card-container">
+        {% with rank=user.get_rank_info %}
+        <div class="otaku-id-card glass-premium rank-theme-{{ rank.slug }}">
+            <button class="close-card-btn" id="close-otaku-card">&times;</button>
+            
+            <!-- Rank Seal (Anchored to top-right of the whole card) -->
+            <div class="card-rank-seal seal-header">
+                <span class="seal-emoji">{{ rank.emoji }}</span>
+                <span class="seal-text">{{ rank.title }}</span>
+            </div>
+
+            <div class="card-header">
+                <div class="card-logo">
+                    <span>⛩️</span> MangAnimEDen
+                </div>
+            </div>
+
+            <div class="card-body">
+                <div class="card-left">
+                    <div class="card-avatar">
+                        {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.nickname }}">
+                        {% else %}
+                        <div class="card-placeholder">{{ user.nickname|first|upper }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card-info">
+                    <div class="card-row">
+                        <span class="card-label">PSEUDONYME</span>
+                        <span class="card-value highlight">{{ user.nickname }}</span>
+                    </div>
+
+                    <div class="card-row">
+                        <span class="card-label">ACCÈS CONTENU</span>
+                        <div class="access-grid">
+                            {% for pack in user.get_access_packs %}
+                            <div class="access-item" title="{{ pack.name }}">
+                                <span class="access-icon">{{ pack.icon }}</span>
+                                <span class="access-text">{{ pack.name }}</span>
+                            </div>
+                            {% empty %}
+                            <div class="access-item">
+                                <span class="access-icon">📜</span>
+                                <span class="access-text">Accès Standard</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="card-row">
+                        <span class="card-label">MEMBRE DEPUIS</span>
+                        <span class="card-value">{{ user.date_joined|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="card-id">UID: {{ user.id|stringformat:"08d" }}</div>
+                <div class="card-hologram"></div>
+            </div>
+        </div>
+        {% endwith %}
+    </div>
 </div>
 
 <!-- Suppression de compte (GDPR) — Always at the bottom of the page, all screen sizes -->

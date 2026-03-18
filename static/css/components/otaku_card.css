@@ -7,7 +7,7 @@
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
     backdrop-filter: blur(5px);
-    z-index: 1000;
+    z-index: 9999;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -25,7 +25,8 @@
     perspective: 1000px;
     width: 450px;
     max-width: 90vw;
-    height: 280px;
+    height: auto; /* Allow growth on desktop */
+    min-height: 280px;
     transform: scale(0.9);
     opacity: 0;
     transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -44,7 +45,7 @@
     background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' opacity='0.5'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.4'/%3E%3C/svg%3E");
     border-radius: 8px;
     position: relative;
-    overflow: hidden;
+    overflow: visible; /* Allow wax seal to overlap corners */
     box-shadow:
         0 10px 30px rgba(0, 0, 0, 0.5),
         inset 0 0 60px rgba(139, 69, 19, 0.3),
@@ -209,28 +210,112 @@
     letter-spacing: 1px;
 }
 
-/* Stamp Effect */
-.card-chip {
-    width: 40px;
-    height: 40px;
-    background: none;
-    border: 2px solid #b71c1c;
-    border-radius: 50%;
-    position: relative;
-    opacity: 0.6;
-    transform: rotate(-15deg);
+/* Authentic Wax Seal Style (Stamped Letter Look) */
+.card-rank-seal {
+    width: 75px;
+    height: 75px;
+    background: currentColor;
+    /* Organic, slightly irregular shape */
+    border-radius: 46% 54% 50% 50% / 54% 46% 54% 46%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(5deg);
+    position: absolute;
+    z-index: 5;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    
+    /* Wax texture and depth */
+    box-shadow: 
+        inset 0 0 15px rgba(0, 0, 0, 0.4),
+        2px 4px 8px rgba(0, 0, 0, 0.3),
+        0 0 0 2px rgba(255, 255, 255, 0.05);
+    border: none;
 }
 
-.card-chip::before {
-    content: 'Guild';
+/* Pressed center effect */
+.card-rank-seal::before {
+    content: '';
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 0.6em;
-    color: #b71c1c;
-    font-weight: bold;
+    top: 10%;
+    left: 10%;
+    right: 10%;
+    bottom: 10%;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.1);
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.5);
+    z-index: -1;
+}
+
+.card-rank-seal .seal-emoji {
+    font-size: 1.6rem;
+    margin-bottom: -4px;
+    filter: drop-shadow(0 -1px 1px rgba(0,0,0,0.5)) drop-shadow(0 1px 1px rgba(255,255,255,0.2));
+}
+
+.card-rank-seal .seal-text {
+    font-size: 0.6rem; /* Slightly larger for legibility */
+    font-weight: 900;
     text-transform: uppercase;
+    text-align: center;
+    line-height: 1;
+    max-width: 60px;
+    color: rgba(255, 255, 255, 0.95); /* Brighter for contrast */
+    text-shadow: 
+        1px 1px 1px rgba(0,0,0,0.5),
+        -1px -1px 0px rgba(0,0,0,0.2);
+    letter-spacing: 0.5px;
+}
+
+/* Placement (Top-Right of card) */
+.seal-header {
+    top: -15px;
+    right: -15px;
+    transform: rotate(12deg);
+    /* Ensure it overlaps the corner neatly */
+}
+
+/* Rank Themes for Seal (Wax Colors) */
+.rank-theme-civilian .card-rank-seal { color: #8e735b; } /* Dull brown wax */
+.rank-theme-rookie-pirate .card-rank-seal { color: #5d4037; } /* Dark chocolate wax */
+.rank-theme-grade-4-sorcerer .card-rank-seal { color: #2c3e50; } /* Dark blue wax */
+.rank-theme-e-rank-hunter .card-rank-seal { color: #34495e; } 
+.rank-theme-supernova .card-rank-seal { color: #b8860b; } /* Golden wax */
+.rank-theme-grade-3-sorcerer .card-rank-seal { color: #1b5e20; } /* Forest green wax */
+.rank-theme-c-rank-hunter .card-rank-seal { color: #006064; }
+.rank-theme-warlord .card-rank-seal { color: #bf360c; } /* Burnt orange wax */
+.rank-theme-grade-1-sorcerer .card-rank-seal { color: #e65100; }
+.rank-theme-s-rank-hunter .card-rank-seal { color: #8b0000; } /* Deep blood red wax */
+.rank-theme-yonko-commander .card-rank-seal { color: #b71c1c; }
+.rank-theme-special-grade .card-rank-seal { color: #4a148c; } /* Royal purple wax */
+.rank-theme-shadow-monarch .card-rank-seal { color: #1a1a1a; box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 2px 4px 12px rgba(0, 0, 0, 0.5); } /* Obsidian wax */
+
+/* Access Grid */
+.access-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 5px;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px dashed rgba(139, 110, 80, 0.3);
+    border-radius: 4px;
+}
+
+.access-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.75rem;
+    color: #4e342e;
+    font-weight: 600;
+}
+
+.access-icon {
+    font-size: 0.9rem;
+    filter: drop-shadow(1px 1px 0px rgba(255,255,255,0.5));
 }
 
 .close-card-btn {
@@ -284,4 +369,19 @@
         width: 70px;
         height: 90px;
     }
+}
+
+/* Card Rank Seal & Membership Badge (Retired for unified Seal) */
+.card-membership-badge {
+    display: none;
+}
+
+/* Card Avatar Fix */
+.card-body {
+    align-items: flex-start;
+}
+
+.card-left {
+    position: relative;
+    z-index: 3;
 }

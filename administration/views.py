@@ -13,7 +13,7 @@ from django.utils import timezone
 from .decorators import requires_admin, requires_moderator, log_admin_action, create_system_log
 from .models import SystemLog
 from catalog.models import Series, Chapter, Genre
-from social.models import Group  # Import Group model
+from social.models import Group, Event  # Import Group and Event models
 from users.models import Badge
 
 User = get_user_model()
@@ -32,6 +32,7 @@ class AdminDashboardView(TemplateView):
         context['total_series'] = Series.objects.count()
         context['total_chapters'] = Chapter.objects.count()
         context['total_groups'] = Group.objects.count()
+        context['total_events'] = Event.objects.count()
         
         # Recent Activity (Logs)
         context['recent_logs'] = SystemLog.objects.select_related('actor', 'target_user').order_by('-created_at')[:10]
@@ -506,6 +507,63 @@ class AdminGroupDeleteView(DeleteView):
         obj = self.get_object()
         create_system_log(request, 'GROUP_DELETE', details=f"Groupe supprimé : {obj.name}")
         messages.success(request, f"Groupe '{obj.name}' supprimé.")
+        return super().delete(request, *args, **kwargs)
+
+# --- Community Management (Events) ---
+@method_decorator(requires_moderator, name='dispatch')
+class AdminEventListView(ListView):
+    model = Event
+    template_name = 'administration/community/event_list.html'
+    context_object_name = 'events'
+    paginate_by = 20
+    ordering = ['-date']
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        query = self.request.GET.get('q')
+        if query:
+            queryset = queryset.filter(
+                Q(title__icontains=query) | 
+                Q(description__icontains=query) |
+                Q(location__icontains=query)
+            )
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'groups'  # We'll group it under the Community section
+        context['active_sub_tab'] = 'events'
+        return context
+
+@method_decorator(requires_moderator, name='dispatch')
+class AdminEventUpdateView(UpdateView):
+    model = Event
+    template_name = 'administration/community/event_form.html'
+    fields = ['title', 'description', 'date', 'location', 'image']
+    success_url = reverse_lazy('administration:event_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'groups'
+        context['active_sub_tab'] = 'events'
+        return context
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        create_system_log(self.request, 'EVENT_UPDATE', details=f"Événement modifié : {self.object.title}")
+        messages.success(self.request, "Événement mis à jour avec succès.")
+        return response
+
+@method_decorator(requires_moderator, name='dispatch')
+class AdminEventDeleteView(DeleteView):
+    model = Event
+    template_name = 'administration/community/event_confirm_delete.html'
+    success_url = reverse_lazy('administration:event_list')
+    
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        create_system_log(request, 'EVENT_DELETE', details=f"Événement supprimé : {obj.title}")
+        messages.success(request, f"Événement '{obj.title}' supprimé.")
         return super().delete(request, *args, **kwargs)
 
 from django.http import JsonResponse

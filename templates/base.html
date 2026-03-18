@@ -50,7 +50,7 @@
         /**
          * Toast Notification System
          */
-        function showToast(message, type = 'info', duration = 5000) {
+        function showToast(message, type = 'info', duration = 3000) {
             const container = document.getElementById('toast-container');
             if (!container) return;
 
@@ -67,6 +67,15 @@
                 <div class="toast-content">${message}</div>
                 <button class="toast-close">&times;</button>
             `;
+
+            // Limit to 3 toasts max
+            const existingToasts = container.querySelectorAll('.toast:not(.toast-exit)');
+            if (existingToasts.length >= 3) {
+                // Remove the oldest one (first in the list)
+                const oldestToast = existingToasts[0];
+                oldestToast.classList.add('toast-exit');
+                setTimeout(() => oldestToast.remove(), 300);
+            }
 
             container.appendChild(toast);
 

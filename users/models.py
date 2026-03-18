@@ -42,9 +42,70 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     bio = models.TextField(max_length=500, blank=True)
     
-    # Gamification (Optionnel mais suggéré pour l'engagement communautaire)
+    # Gamification
     level = models.PositiveIntegerField(default=1)
     xp = models.PositiveIntegerField(default=100)
+
+    # Online Status & Preferences (Phase 1 Expansion)
+    last_seen = models.DateTimeField(null=True, blank=True)
+    is_dnd_mode = models.BooleanField(default=False, verbose_name="Mode Ne Pas Déranger")
+    
+    # Notification Preferences
+    pref_notif_likes = models.BooleanField(default=True, verbose_name="Notifs J'aime")
+    pref_notif_replies = models.BooleanField(default=True, verbose_name="Notifs Réponses")
+    pref_notif_friends = models.BooleanField(default=True, verbose_name="Notifs Amis")
+    pref_notif_messages = models.BooleanField(default=True, verbose_name="Notifs Messages")
+
+    # Subscription & Access (New)
+    has_nsfw_access = models.BooleanField(default=False, verbose_name="Accès 18+")
+    SUBSCRIPTION_CHOICES = [
+        ('free', 'Membre Gratuit'),
+        ('premium', 'Abonné Premium'),
+        ('legend', 'Membre Légende'),
+    ]
+    subscription_type = models.CharField(max_length=20, choices=SUBSCRIPTION_CHOICES, default='free')
+    subscription_expires = models.DateTimeField(null=True, blank=True)
+
+    # Rank System Metadata (Phase 4 Roadmap)
+    RANK_DATA = {
+        1:  {'title': 'Citoyen', 'slug': 'civilian', 'emoji': '🏘️', 'min_level': 1, 'color': '#95a5a6'},
+        2:  {'title': 'Pirate Novice', 'slug': 'rookie-pirate', 'emoji': '🏴‍☠️', 'min_level': 5, 'color': '#7f8c8d'},
+        3:  {'title': 'Exorciste Grade 4', 'slug': 'grade-4-sorcerer', 'emoji': '🧿', 'min_level': 10, 'color': '#3498db'},
+        4:  {'title': 'Chasseur Rang-E', 'slug': 'e-rank-hunter', 'emoji': '🏹', 'min_level': 15, 'color': '#2980b9'},
+        5:  {'title': 'Supernova', 'slug': 'supernova', 'emoji': '🌟', 'min_level': 20, 'color': '#f1c40f'},
+        6:  {'title': 'Exorciste Grade 3', 'slug': 'grade-3-sorcerer', 'emoji': '🧿', 'min_level': 25, 'color': '#2ecc71'},
+        7:  {'title': 'Chasseur Rang-C', 'slug': 'c-rank-hunter', 'emoji': '⚔️', 'min_level': 30, 'color': '#27ae60'},
+        8:  {'title': 'Grand Corsaire', 'slug': 'warlord', 'emoji': '🔱', 'min_level': 40, 'color': '#e67e22'},
+        9:  {'title': 'Exorciste Grade 1', 'slug': 'grade-1-sorcerer', 'emoji': '🧿', 'min_level': 45, 'color': '#d35400'},
+        10: {'title': 'Chasseur Rang-S', 'slug': 's-rank-hunter', 'emoji': '🗡️', 'min_level': 50, 'color': '#e74c3c'},
+        11: {'title': 'Commandant d\'Empereur', 'slug': 'yonko-commander', 'emoji': '🎖️', 'min_level': 65, 'color': '#c0392b'},
+        12: {'title': 'Classe Spéciale', 'slug': 'special-grade', 'emoji': '🧿', 'min_level': 80, 'color': '#8e44ad'},
+        13: {'title': 'Monarque des Ombres', 'slug': 'shadow-monarch', 'emoji': '👑', 'min_level': 100, 'color': '#2c3e50'},
+    }
+
+    def get_rank_info(self):
+        """
+        Retourne les informations du rang actuel basées sur le niveau.
+        """
+        current_rank = self.RANK_DATA[1]
+        for rank_id, data in sorted(self.RANK_DATA.items()):
+            if self.level >= data['min_level']:
+                current_rank = data
+            else:
+                break
+        return current_rank
+
+    @property
+    def is_online(self):
+        """
+        Vérifie si l'utilisateur est en ligne (vu il y a moins de 5 minutes).
+        Masqué si le mode DND est activé.
+        """
+        if self.is_dnd_mode or not self.last_seen:
+            return False
+        from django.utils import timezone
+        from datetime import timedelta
+        return self.last_seen > timezone.now() - timedelta(minutes=5)
 
     def calculate_level(self):
         """
@@ -103,6 +164,14 @@ class User(AbstractUser):
             role_updated = True
         
         return role_updated
+
+    def get_rank_display_name(self):
+        """
+        Returns the unified rank display name with its emoji.
+        Replaces old Admin/Mod/Member labels site-wide.
+        """
+        rank = self.get_rank_info()
+        return f"{rank['emoji']} {rank['title']}"
 
     @property
     def is_profile_complete(self):
@@ -198,6 +267,40 @@ class User(AbstractUser):
             status='pending'
         ).exists()
     
+    def get_access_packs(self):
+        """
+        Retourne une liste des 'packs' ou contenus auxquels l'utilisateur a accès.
+        Basé sur l'abonnement, le rang, et les flags d'accès.
+        Max 5 items.
+        """
+        packs = []
+        
+        # 1. Type d'Abonnement (Inclus par défaut)
+        packs.append({'name': self.get_subscription_type_display(), 'icon': '📜', 'type': 'membership'})
+        
+        # 2. Accès Adultes (Contenu 18+)
+        if self.has_nsfw_access:
+            packs.append({'name': 'Accès 18+', 'icon': '🔞', 'type': 'access'})
+        
+        # 3. Early Access (Basé sur le rang/niveau - voir ROADMAP Phase 4)
+        rank = self.get_rank_info()
+        if rank['min_level'] >= 20: # Supernova +
+            days = 1
+            if rank['min_level'] >= 40: days = 2
+            if rank['min_level'] >= 65: days = 3
+            packs.append({'name': f'Early Access (+{days}j)', 'icon': '⚡', 'type': 'perk'})
+            
+        # 4. Pack AnimWorld (Sera lié au système d'achat futur)
+        # Pour l'instant, on simule l'accès pour les membres Légende ou haut niveau
+        if self.subscription_type == 'legend' or self.level >= 30:
+            packs.append({'name': 'AnimWorld VOD', 'icon': '🎬', 'type': 'content'})
+            
+        # 5. Pack Soutien (Placeholder pour "Contenu acheté")
+        if self.subscription_type != 'free':
+            packs.append({'name': 'Pack Pionnier', 'icon': '💎', 'type': 'bought'})
+            
+        return packs[:5]
+
     def has_sent_request_to(self, other_user):
         """
         Vérifie si cet utilisateur a envoyé une demande à other_user.

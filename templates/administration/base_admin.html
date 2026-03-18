@@ -36,8 +36,12 @@
 
             <div class="admin-nav-header">Communauté</div>
             <a href="{% url 'administration:group_list' %}"
-                class="admin-nav-item {% if active_tab == 'groups' %}active{% endif %}">
+                class="admin-nav-item {% if active_tab == 'groups' and active_sub_tab != 'events' %}active{% endif %}">
                 <i class="fas fa-users-cog"></i> Groupes
+            </a>
+            <a href="{% url 'administration:event_list' %}"
+                class="admin-nav-item {% if active_sub_tab == 'events' %}active{% endif %}">
+                <i class="fas fa-calendar-alt"></i> Événements
             </a>
 
             <div class="admin-nav-header">Gamification</div>

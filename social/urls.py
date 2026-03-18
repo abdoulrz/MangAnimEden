@@ -31,5 +31,6 @@ urlpatterns = [
     # Interactions (Phase 3.2)
     path('messages/<int:message_id>/like/', views.like_message, name='like_message'),
     path('messages/<int:message_id>/reply/', views.reply_message, name='reply_message'),
+    path('events/delete/<int:event_id>/', views.delete_event, name='delete_event'),
 ]
 

@@ -4,6 +4,39 @@
  */
 
 /* ==================== LAYOUT ==================== */
+.user-rank-emoji {
+    font-size: 1.2rem;
+    vertical-align: middle;
+    margin-left: 8px;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.2));
+}
+
+.rank-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-right: 8px;
+    display: inline-flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--glass-text-secondary);
+    border: 1px solid var(--glass-border);
+}
+
+/* Specific Tier Styles (Simple) */
+.rank-civilian { color: #95a5a6; border-color: #95a5a640; background: #95a5a615; }
+.rank-rookie-pirate { color: #7f8c8d; border-color: #7f8c8d40; background: #7f8c8d15; }
+.rank-grade-4-sorcerer, .rank-grade-3-sorcerer, .rank-grade-1-sorcerer, .rank-special-grade { color: #3498db; border-color: #3498db40; background: #3498db15; }
+.rank-e-rank-hunter, .rank-c-rank-hunter, .rank-s-rank-hunter { color: #27ae60; border-color: #27ae6040; background: #27ae6015; }
+.rank-supernova { color: #f1c40f; border-color: #f1c40f40; background: #f1c40f15; }
+.rank-warlord { color: #e67e22; border-color: #e67e2240; background: #e67e2215; }
+.rank-yonko-commander { color: #e74c3c; border-color: #e74c3c40; background: #e74c3c15; }
+.rank-shadow-monarch { color: #2c3e50; border-color: #2c3e5040; background: #2c3e5015; }
+
+/* .staff-tag is defined below under the OTAKU CARD HEADER section */
 .profile-layout-container {
     display: flex;
     gap: 1.5rem;
@@ -44,6 +77,60 @@
     }
 }
 
+/* ==================== GLASS PANEL (from chat.css) ==================== */
+.glass-panel, .glass-premium {
+    background: rgba(30, 30, 30, 0.65);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    border-radius: 20px;
+}
+
+/* Neumorphic touch for elements */
+.neumorphic-inset {
+    background: rgba(20, 20, 20, 0.4);
+    box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.5), 
+                inset -2px -2px 4px rgba(255, 255, 255, 0.05);
+}
+
+/* Separated Rank Badge in Header */
+.profile-rank-badge-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.rank-badge-detailed {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Custom Staff Tag Header */
+.staff-tag {
+    background: linear-gradient(135deg, #ff4d4d, #c0392b);
+    color: white;
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    margin-left: 4px;
+    box-shadow: 0 0 10px rgba(192, 57, 43, 0.3);
+}
+
 .profile-main-content {
     flex: 1;
     min-width: 0;
@@ -56,16 +143,6 @@
     top: 50vh;
     transform: translateY(-50%);
     height: min-content;
-}
-
-/* ==================== GLASS PANEL (from chat.css) ==================== */
-.glass-panel {
-    background: rgba(30, 30, 30, 0.6);
-    -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-    border-radius: 20px;
 }
 
 /* ==================== PROFILE CARD ==================== */
@@ -196,6 +273,299 @@
     font-size: 1rem;
     color: var(--glass-text-secondary);
     margin: 0 0 0.25rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.dnd-badge {
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: 8px;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+/* ==================== OTAKU ID CARD (Phase 5 - Glassmorphism & Neumorphism) ==================== */
+.otaku-card-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    background-image: radial-gradient(circle at center, rgba(139, 92, 246, 0.15), transparent 70%);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.otaku-card-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.otaku-card-container {
+    perspective: 1200px;
+    width: 90%;
+    max-width: 500px;
+    transform: translateY(30px) scale(0.95);
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.otaku-card-overlay.active .otaku-card-container {
+    transform: translateY(0) scale(1);
+}
+
+.otaku-id-card {
+    position: relative;
+    padding: 2.5rem;
+    color: white;
+    border-radius: 24px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    /* Neumorphic shadow for the card itself */
+    box-shadow: 20px 20px 60px rgba(0, 0, 0, 0.5), 
+                -10px -10px 30px rgba(255, 255, 255, 0.05);
+}
+
+.otaku-id-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Rank-Specific Thematic Backgrounds */
+.rank-theme-rookie-pirate { background: linear-gradient(145deg, #2c3e50, #000000); border: 1px solid rgba(255,255,255,0.1); }
+.rank-theme-supernova { background: linear-gradient(145deg, #d48e02, #000000); border: 1px solid rgba(241, 196, 15, 0.3); }
+.rank-theme-s-rank-hunter { background: linear-gradient(145deg, #c0392b, #000000); border: 1px solid rgba(231, 76, 60, 0.3); }
+.rank-theme-yonko-commander { background: linear-gradient(145deg, #8e44ad, #000000); border: 1px solid rgba(142, 68, 173, 0.3); }
+.rank-theme-shadow-monarch { background: linear-gradient(145deg, #1a1a1a, #000000); border: 1px solid rgba(255, 255, 255, 0.2); }
+
+.close-card-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s;
+}
+
+.close-card-btn:hover {
+    color: white;
+    transform: rotate(90deg);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 1rem;
+    z-index: 2;
+}
+
+.card-logo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 800;
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.card-membership-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    background: rgba(139, 92, 246, 0.3);
+    border: 1px solid rgba(139, 92, 246, 0.5);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #e9d5ff;
+}
+
+.card-body {
+    display: flex;
+    gap: 2rem;
+    z-index: 2;
+    align-items: center;
+}
+
+.card-left {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.card-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 16px;
+    overflow: hidden;
+    padding: 3px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.05));
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.3), 
+                -4px -4px 8px rgba(255, 255, 255, 0.05);
+}
+
+.card-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: 13px;
+    object-fit: cover;
+}
+
+.card-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #1e1e1e;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 700;
+}
+
+.card-rank-seal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.seal-emoji { font-size: 1.5rem; margin-bottom: 2px; }
+.seal-text { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; color: rgba(255, 255, 255, 0.6); }
+
+.card-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.card-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.card-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 1px;
+}
+
+.card-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.card-value.highlight {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: white;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.badge-nsfw {
+    display: inline-block;
+    padding: 0.1rem 0.6rem;
+    border-radius: 6px;
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1rem;
+    z-index: 2;
+}
+
+.card-id {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.card-hologram {
+    width: 60px;
+    height: 40px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+    background-size: 200% 200%;
+    animation: holo-shine 3s linear infinite;
+    opacity: 0.6;
+}
+
+.card-chip {
+    width: 45px;
+    height: 35px;
+    background: linear-gradient(135deg, #f1c40f, #f39c12);
+    border-radius: 6px;
+    position: relative;
+    box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.4);
+}
+
+.card-chip::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+@keyframes holo-shine {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Mobile responsive for overlay card */
+@media (max-width: 480px) {
+    .otaku-id-card { padding: 1.5rem; gap: 1rem; }
+    .card-body { flex-direction: column; gap: 1rem; text-align: center; }
+    .card-info { text-align: center; }
+    .card-value.highlight { font-size: 1.2rem; }
+    .card-avatar { width: 100px; height: 100px; }
 }
 
 .member-since {
@@ -2028,4 +2398,122 @@
 
 .profile-danger-link {
     color: #ef4444 !important;
+}
+
+/*/* ==================== OTAKU CARD FRIENDS LIST (Horizontal Polish) ==================== */
+.friends-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 0.5rem;
+}
+
+.friend-item-horizontal {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.friend-item-horizontal:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(5px);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.friend-main-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-decoration: none !important;
+    color: inherit !important;
+    flex: 1;
+}
+
+.friend-avatar-wrapper {
+    position: relative;
+    width: 40px;
+    height: 40px;
+}
+
+.friend-avatar-wrapper .rounded-avatar,
+.friend-avatar-wrapper .avatar-placeholder-small {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.status-dot {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 2px solid #1a1a1a;
+}
+.status-dot.online { background-color: #2ecc71; box-shadow: 0 0 5px #2ecc71; }
+.status-dot.offline { background-color: #95a5a6; }
+
+.friend-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.friend-nickname {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: white;
+}
+
+.friend-level {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    font-weight: 600;
+}
+
+.friend-quick-dm {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(139, 92, 246, 0.1);
+    color: #a78bfa;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.friend-quick-dm:hover {
+    background: #8b5cf6;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* Light Mode Visibility Fixes */
+@media (prefers-color-scheme: light) {
+    .light-mode .friend-item-horizontal {
+        background: rgba(0, 0, 0, 0.03);
+        border-color: rgba(0, 0, 0, 0.08);
+    }
+    
+    .light-mode .friend-nickname {
+        color: #1a1a1a;
+    }
+    
+    .light-mode .friend-level {
+        color: #666;
+    }
+
+    .light-mode .status-dot {
+        border-color: white;
+    }
 }

@@ -1,0 +1,77 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1 class="admin-page-title">
+        {% if object %}Éditer l'événement : {{ object.title }}{% else %}Créer un événement{% endif %}
+    </h1>
+    <a href="{% url 'administration:event_list' %}" class="btn btn-secondary">Retour à la liste</a>
+</div>
+
+<div class="admin-form-container glass-panel">
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <div class="form-grid">
+            {% for field in form %}
+            <div class="form-group {% if field.errors %}has-error{% endif %}">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                <small class="form-help">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                <span class="error-msg">{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-actions row-flex mt-4">
+            <button type="submit" class="btn btn-primary">
+                {% if object %}Enregistrer les modifications{% else %}Créer l'événement{% endif %}
+            </button>
+            {% if object %}
+            <form action="{% url 'administration:event_delete' object.id %}" method="POST" class="inline-form" onsubmit="return confirm('Supprimer cet événement ?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Supprimer</button>
+            </form>
+            {% endif %}
+        </div>
+    </form>
+</div>
+
+<style>
+    .admin-form-container {
+        padding: 2rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+    }
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
+    .form-group label {
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.7);
+    }
+    .form-group input, .form-group textarea, .form-group select {
+        padding: 0.75rem;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: white;
+    }
+    .mt-4 { margin-top: 2rem; }
+</style>
+{% endblock %}

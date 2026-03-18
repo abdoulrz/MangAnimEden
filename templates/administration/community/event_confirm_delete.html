@@ -1,0 +1,23 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1 class="admin-page-title">Supprimer l'Événement</h1>
+</div>
+
+<div class="glass-panel admin-confirm-panel">
+    <p class="confirm-title">
+        Êtes-vous sûr de vouloir supprimer l'événement <strong>{{ object.title }}</strong> ?
+    </p>
+    <p class="confirm-body-text">
+        Cette action est irréversible.
+    </p>
+    <form method="POST">
+        {% csrf_token %}
+        <div class="confirm-actions">
+            <a href="{% url 'administration:event_list' %}" class="btn btn-secondary">Annuler</a>
+            <button type="submit" class="btn btn-danger">Confirmer la suppression</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

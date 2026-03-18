@@ -807,6 +807,32 @@
     border-color: rgba(16, 185, 129, 0.2);
 }
 
+/* ===== Destructive-Action Confirmation Panel ===== */
+.admin-confirm-panel {
+    padding: 2rem;
+    max-width: 500px;
+    margin: 2rem auto;
+    text-align: center;
+}
+
+.admin-confirm-panel .confirm-title {
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+    color: var(--color-text-primary);
+}
+
+.admin-confirm-panel .confirm-body-text {
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+}
+
+.admin-confirm-panel .confirm-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    align-items: center;
+}
+
 /* Badge Management */
 .badge-grid {
     display: grid;

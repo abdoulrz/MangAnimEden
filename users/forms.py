@@ -48,6 +48,8 @@ class UserUpdateForm(forms.ModelForm):
         model = User
         fields = [
             'nickname', 'avatar', 'bio',
+            'is_dnd_mode',
+            'pref_notif_likes', 'pref_notif_replies', 'pref_notif_friends', 'pref_notif_messages',
             'social_facebook', 'social_twitter', 'social_instagram', 'social_youtube', 'social_linkedin',
             'location_country', 'location_city'
         ]

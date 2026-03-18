@@ -5,17 +5,6 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/chat.css' %}?v={{ STATIC_VERSION }}">
-<style>
-    .forum-sender-link {
-        color: inherit;
-        text-decoration: none;
-        transition: opacity 0.3s;
-    }
-
-    .reply-banner-hidden {
-        display: none;
-    }
-</style>
 {% endblock %}
 
 {% block content %}
@@ -24,10 +13,10 @@
     <div class="stories-section">
         <div class="stories-container">
             {% if can_post_story %}
-            <div class="story-item story-add" onclick="openStoryModal()">
+            <div class="story-item story-add premium-btn" onclick="openStoryModal()">
                 <div class="story-ring">
                     <div class="story-circle">
-                        <span class="story-add-icon">+</span>
+                        <i class="fas fa-plus story-add-icon"></i>
                     </div>
                 </div>
                 <span class="story-name">Ajouter</span>
@@ -82,8 +71,7 @@
                     <label for="story_file" class="file-dummy">
                         <span>📤 Sélectionner une image</span>
                     </label>
-                    <input type="file" name="story_image" id="story_file" accept="image/*" required
-                        onchange="updateFileName(this)">
+                    <input type="file" name="story_image" id="story_file" accept="image/*" required onchange="updateFileName(this)">
                     <span id="file-name" class="file-name-display">Aucun fichier choisi</span>
                 </div>
                 <button type="submit" class="modal-submit-btn">Publier</button>
@@ -109,7 +97,7 @@
                 <div class="form-group">
                     <label>Couleur de fond</label>
                     <div class="color-picker-row">
-                        <input type="color" name="story_bg_color" id="story_bg_color" value="#6c5ce7"class="color-input"onchange="updateTextPreview()">
+                        <input type="color" name="story_bg_color" id="story_bg_color" value="#6c5ce7" class="color-input" onchange="updateTextPreview()">
                         <div class="color-presets">
                             <span class="color-dot color-dot-purple" data-color="#6c5ce7"
                                 onclick="selectColor('#6c5ce7')"></span>
@@ -142,45 +130,121 @@
 
         <!-- Left Column: Groups -->
         <div class="sidebar-container groups-sidebar">
-            <h2 class="section-title">
-                Groupes
-                {% if user.level >= 50 or user.role_moderator or user.is_staff %}
-                <a href="{% url 'social:create_group' %}" class="btn-group-add" title="Créer un groupe">
-                    <span>+</span>
-                </a>
-                {% endif %}
+            <h2 class="section-title unified-sidebar-header">
+                Communauté
+                <div class="header-actions">
+                    <!-- Friends Dropdown Trigger -->
+                    <div class="friends-dropdown-wrapper">
+                        <button type="button" class="header-action-btn" id="friendsDropdownTrigger" title="Mes Amis">
+                            <i class="fas fa-users"></i>
+                        </button>
+                        <div class="friends-dropdown-menu" id="friendsDropdownMenu">
+                            <div class="dropdown-header-premium">
+                                <span>Mes Amis</span>
+                                <i class="fas fa-search" style="font-size: 0.75rem; opacity: 0.5;"></i>
+                            </div>
+                            <div class="friends-dropdown-list">
+                                {% for friend in friends %}
+                                <a href="?dm_id={{ friend.id }}" class="friend-dropdown-item">
+                                    <div class="friend-dropdown-left">
+                                        {% if friend.avatar %}
+                                        <img src="{{ friend.avatar.url }}" class="friend-dropdown-avatar" alt="">
+                                        {% else %}
+                                        <div class="friend-dropdown-avatar avatar-placeholder-modal" style="width:32px; height:32px; font-size: 0.8rem;">
+                                            {{ friend.nickname|slice:":1"|upper }}
+                                        </div>
+                                        {% endif %}
+                                        <span class="friend-dropdown-name">{{ friend.nickname|truncatechars:10 }}</span>
+                                    </div>
+                                    <i class="fas fa-comment-alt friend-dropdown-dm-icon"></i>
+                                </a>
+                                {% empty %}
+                                <div class="empty-friends-dropdown">
+                                    Aucun ami pour le moment
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if user.level >= 50 or user.role_moderator or user.is_staff %}
+                    <a href="{% url 'social:create_group' %}" class="header-action-btn premium-add-btn" title="Créer un groupe">
+                        <i class="fas fa-users-cog"></i>
+                    </a>
+                    {% endif %}
+
+                    {% if can_create_event %}
+                    <button type="button" class="header-action-btn btn-action-curated" onclick="document.getElementById('eventModal').classList.remove('hidden')" title="Créer un événement">
+                        <i class="fas fa-calendar-plus"></i>
+                    </button>
+                    {% endif %}
+                </div>
             </h2>
 
             <!-- Tabs Navigation -->
             <div class="sidebar-tabs">
-                <a href="?tab=my_groups" class="sidebar-tab {% if active_tab == 'my_groups' %}active{% endif %}">Mes
-                    Groupes</a>
+                <a href="?tab=my_groups" class="sidebar-tab {% if active_tab == 'my_groups' %}active{% endif %}">Discussions</a>
                 <a href="?tab=discover"
-                    class="sidebar-tab {% if active_tab == 'discover' %}active{% endif %}">Découvrir</a>
+                    class="sidebar-tab {% if active_tab == 'discover' %}active{% endif %}">Explorer</a>
             </div>
 
             <div class="glass-panel sidebar-content">
                 <div class="groups-list">
                     {% if active_tab == 'my_groups' %}
-                    {% for group in my_groups %}
-                    <a href="?group_id={{ group.id }}&tab=my_groups"
-                        class="group-card {% if active_group.id == group.id %}active{% endif %}">
-                        <div class="group-icon">
-                            {% if group.icon %}
-                            <img src="{{ group.icon.url }}" alt="{{ group.name }}">
-                            {% else %}
-                            <span>{{ group.name|slice:":1"|upper }}</span>
+                    {% for item in sidebar_items %}
+                        {% if item.type == 'group' %}
+                        <a href="?group_id={{ item.id }}&tab=my_groups"
+                            class="group-card {% if active_group.id == item.id %}active{% endif %}">
+                            <div class="group-icon">
+                                {% if item.avatar %}
+                                <img src="{{ item.avatar }}" alt="{{ item.name }}">
+                                {% else %}
+                                <span>{{ item.name|slice:":1"|upper }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="group-info">
+                                <span class="type-tag tag-group">GROUP</span>
+                                <span class="group-name">{{ item.name }}</span>
+                                <span class="group-desc-short">Dernière activité: {{ item.last_activity|date:"d/m H:i" }}</span>
+                            </div>
+                        </a>
+                        {% elif item.type == 'dm' %}
+                        <a href="?dm_id={{ item.id }}&tab=my_groups"
+                            class="group-card {% if active_dm_user.id == item.id %}active{% endif %}">
+                            <div class="group-icon user-avatar-wrapper">
+                                {% if item.avatar %}
+                                <img src="{{ item.avatar }}" alt="{{ item.name }}" class="rounded-avatar">
+                                {% else %}
+                                <div class="avatar-placeholder">{{ item.name|slice:":1"|upper }}</div>
+                                {% endif %}
+                                <span class="status-indicator {% if item.is_online %}online{% endif %}"></span>
+                            </div>
+                            <div class="group-info">
+                                <span class="type-tag tag-dm">DM</span>
+                                <span class="group-name">{{ item.name }}</span>
+                                <span class="group-desc-short">{{ item.last_activity|date:"H:i" }}</span>
+                            </div>
+                            {% if item.unread %}
+                            <span class="unread-dot"></span>
                             {% endif %}
-                        </div>
-                        <div class="group-info">
-                            <span class="group-name">{{ group.name }}</span>
-                            <span class="group-desc-short">{{ group.description|truncatechars:30 }}</span>
-                        </div>
-                    </a>
+                        </a>
+                        {% elif item.type == 'event' %}
+                        <a href="?event_id={{ item.id }}&tab=my_groups"
+                            class="group-card {% if active_event.id == item.id %}active{% endif %}">
+                            <div class="group-icon">
+                                <div class="avatar-placeholder event-placeholder">📅</div>
+                            </div>
+                            <div class="group-info">
+                                <span class="type-tag tag-event">EVENT</span>
+                                <span class="group-name">{{ item.name }}</span>
+                                <span class="group-desc-short">{{ item.last_activity|date:"d M • H:i" }}</span>
+                            </div>
+                        </a>
+                        {% endif %}
                     {% empty %}
                     <div class="empty-state-small">
-                        <p class="no-data">Vous n'avez rejoint aucun groupe.</p>
-                        <a href="?tab=discover" class="btn-small-cta">Découvrir</a>
+                        <p class="no-data">Aucune discussion en cours.</p>
+                        <a href="?tab=discover" class="btn-small-cta">Découvrir des groupes</a>
                     </div>
                     {% endfor %}
                     {% else %}
@@ -210,7 +274,55 @@
         <!-- Center Column: Dynamic Content -->
         <div class="chat-window-container">
 
-            {% if active_mode == 'chat' %}
+            {% if active_mode == 'dm' %}
+            <!-- Private DM View -->
+            <div class="glass-panel chat-window">
+                <div class="chat-header">
+                    <div class="chat-header-info">
+                        <div class="header-avatar-status">
+                            <h3>{{ active_dm_user.nickname|default:active_dm_user.username }}</h3>
+                            <span class="status-badge {% if active_dm_user.is_online %}online{% endif %}">
+                                {% if active_dm_user.is_online %}En ligne{% else %}Hors ligne{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="chat-header-actions">
+                        <a href="{% url 'users:public_profile' active_dm_user.id %}" class="btn-join-group">Voir Profil</a>
+                    </div>
+                </div>
+
+                <div class="chat-messages" id="chatMessages">
+                    {% for message in messages_list %}
+                    <div class="message {% if message.sender == user %}my-message{% else %}other-message{% endif %}" id="dm-{{ message.id }}">
+                        <div class="message-bubble">
+                            <div class="message-info">
+                                <span class="sender-name">{{ message.sender.nickname|default:message.sender.username }}</span>
+                                <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
+                            </div>
+                            <p class="message-text">{{ message.content }}</p>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon">✉️</div>
+                        <h3>Dites bonjour !</h3>
+                        <p>Envoyez un message privé à {{ active_dm_user.nickname|default:active_dm_user.username }}.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="chat-input-area">
+                    <form method="post" action="?dm_id={{ active_dm_user.id }}" class="chat-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="dm_id" value="{{ active_dm_user.id }}">
+                        <input type="text" name="content" id="dmInput" class="chat-input"
+                            placeholder="Message privé..." autocomplete="off" required>
+                        <button type="submit" class="send-btn">🚀</button>
+                    </form>
+                </div>
+            </div>
+
+            {% elif active_mode == 'chat' %}
             <!-- Chat View -->
             <div class="glass-panel chat-window">
                 <div class="chat-header">
@@ -260,7 +372,7 @@
                     </div>
                     {% else %}
                     <!-- Normal Chat Messages -->
-                    {% for message in messages %}
+                    {% for message in messages_list %}
                     <div class="message {% if message.sender == user %}my-message{% else %}other-message{% endif %}"
                         id="msg-{{ message.id }}">
                         <div class="message-bubble">
@@ -356,36 +468,63 @@
                 </div>
             </div>
 
-            {% elif active_mode == 'event' %}
-            <!-- Event View (Centered) -->
-            <div class="glass-panel event-view-container text-center">
-                <div class="event-view-header">
-                    <h3>{{ active_event.title }}</h3>
-                    <a href="{% url 'social:forum_home' %}" class="close-event-btn">×</a>
+            {% elif active_mode == 'event' and active_event %}
+        <div class="event-view-container">
+            <div class="event-view-header">
+                <a href="?{% if active_group %}group_id={{ active_group.id }}{% endif %}" class="close-event-btn">&times;</a>
+            </div>
+            
+            <div class="event-focus-card">
+                <div class="event-focus-header">
+                    <h1 class="event-focus-title">{{ active_event.title }}</h1>
+                    <div class="event-organizer-badge">
+                        Organisé par <strong>{% if active_event.organizer %}{{ active_event.organizer.nickname }}{% else %}L'équipe{% endif %}</strong>
+                    </div>
                 </div>
-                <div class="event-focused-content">
-                    <div class="event-icon-medium">
-                        {% if active_event.image %}
-                        <img src="{{ active_event.image.url }}" alt="{{ active_event.title }}">
-                        {% else %}
-                        <span>📅</span>
-                        {% endif %}
-                    </div>
 
-                    <div class="event-meta-centered">
-                        <p class="event-date-large">
-                            {{ active_event.date|date:"d/m/y" }}
-                            <span class="date-separator">●</span>
-                            {{ active_event.date|date:"H:i" }}
-                        </p>
-                        <p class="event-location-large">📍 {{ active_event.location }}</p>
+                <div class="event-meta-grid">
+                    <div class="event-meta-item">
+                        <span class="event-meta-icon">📅</span>
+                        <strong>Date & Heure</strong>
+                        <p>{{ active_event.date|date:"l d F Y" }}</p>
+                        <p>{{ active_event.date|date:"H:i" }}</p>
                     </div>
+                    <div class="event-meta-item">
+                        <span class="event-meta-icon">📍</span>
+                        <strong>Lieu</strong>
+                        <p>{{ active_event.location|default:"En ligne / À définir" }}</p>
+                    </div>
+                </div>
 
-                    <div class="event-description-centered">
-                        {{ active_event.description|linebreaks }}
+                {% if active_event.image %}
+                <div class="event-focus-image-container">
+                    <img src="{{ active_event.image.url }}" alt="{{ active_event.title }}" class="event-focus-image">
+                </div>
+                {% endif %}
+
+                <div class="event-focus-desc">
+                    {{ active_event.description|linebreaks }}
+                </div>
+                
+                <div class="event-actions-footer">
+                    {% if user.level >= 65 or user.role_moderator or user.role_admin or user.is_staff %}
+                    <a href="{% url 'social:delete_event' active_event.id %}" 
+                       class="btn-delete-event" 
+                       onclick="return confirm('Supprimer cet événement ?')">
+                        🗑️ Supprimer l'événement
+                    </a>
+                    {% endif %}
+                    
+                    {% if active_event.organizer %}
+                    <div class="organizer-info">
+                        <img src="{% if active_event.organizer.avatar %}{{ active_event.organizer.avatar.url }}{% else %}/static/images/default_avatar.png{% endif %}" alt="Avatar" class="story-user-avatar organizer-avatar">
+                        <span>Contacter l'organisateur</span>
+                        <a href="?dm_id={{ active_event.organizer.id }}" class="btn-event-action">💬</a>
                     </div>
+                    {% endif %}
                 </div>
             </div>
+        </div>
 
             {% else %}
             <!-- Default View -->
@@ -394,49 +533,88 @@
                     <div class="logo-animation">
                         <span class="logo-icon">🌸</span>
                     </div>
-                    <h2>MangaAnimEden Forum</h2>
+                    <h2>MangAnimEden Forum</h2>
                     <p>Sélectionnez un groupe, une story, ou un event pour afficher les détails.</p>
                 </div>
             </div>
             {% endif %}
         </div>
 
-        <!-- Right Column: Events -->
-        <div class="sidebar-container events-sidebar">
-            <h2 class="section-title">Events</h2>
-            <div class="glass-panel sidebar-content">
-                <div class="events-list">
-                    {% for event in events %}
-                    <a href="?event_id={{ event.id }}"
-                        class="event-card {% if active_event.id == event.id %}active{% endif %}">
-                        <div class="event-image">
-                            {% if event.image %}
-                            <img src="{{ event.image.url }}" alt="{{ event.title }}">
-                            {% else %}
-                            <div class="event-placeholder">📅</div>
-                            {% endif %}
-                        </div>
-                        <div class="event-details">
-                            <h4>{{ event.title }}</h4>
-                            <p class="event-date">{{ event.date|date:"d M" }}</p>
-                            <p class="event-location">📍 {{ event.location }}</p>
-                        </div>
-                    </a>
-                    {% empty %}
-                    <p class="no-data">Aucun événement.</p>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
+        <!-- Right Column (Empty for now or removed for 2-column layout) -->
+        <!-- We have unified events into the left sidebar with curated tags -->
 
     </div>
 </div>
+
+    <!-- Event Creation Modal -->
+    <div id="eventModal" class="modal-overlay hidden">
+        <div class="modal-content glass-panel">
+            <div class="modal-header">
+                <h3>Annoncer un Événement</h3>
+                <button class="close-modal" onclick="document.getElementById('eventModal').classList.add('hidden')">&times;</button>
+            </div>
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="hidden" name="event_title" value="1"> <!-- Marker for view -->
+                
+                <div class="modal-input-group">
+                    <label class="modal-label">Titre</label>
+                    {{ event_form.title }}
+                </div>
+                
+                <div class="modal-input-group">
+                    <label class="modal-label">Date et Heure</label>
+                    {{ event_form.date }}
+                </div>
+                
+                <div class="modal-input-group">
+                    <label class="modal-label">Lieu</label>
+                    {{ event_form.location }}
+                </div>
+
+                <div class="modal-input-group">
+                    <label class="modal-label">Description</label>
+                    {{ event_form.description }}
+                </div>
+
+                <div class="modal-input-group">
+                    <label class="modal-label">Affiche / Image</label>
+                    <div class="file-input-wrapper">
+                        <label for="event_file" class="file-dummy">
+                            <span>📤 Sélectionner une image</span>
+                        </label>
+                        <input type="file" name="image" id="event_file" accept="image/*" onchange="this.nextElementSibling.innerText = this.files[0].name">
+                        <span class="file-name-display">Aucun fichier choisi</span>
+                    </div>
+                </div>
+
+                <button type="submit" class="modal-submit-btn">Créer l'annonce</button>
+            </form>
+        </div>
+    </div>
 
 <script>
     // Auto scroll to bottom of chat
     const chatMessages = document.getElementById('chatMessages');
     if (chatMessages) {
         chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Friends Dropdown Toggle
+    const friendsTrigger = document.getElementById('friendsDropdownTrigger');
+    const friendsMenu = document.getElementById('friendsDropdownMenu');
+
+    if (friendsTrigger && friendsMenu) {
+        friendsTrigger.addEventListener('click', function(e) {
+            e.stopPropagation();
+            friendsMenu.classList.toggle('active');
+        });
+
+        document.addEventListener('click', function(e) {
+            if (!friendsMenu.contains(e.target) && !friendsTrigger.contains(e.target)) {
+                friendsMenu.classList.remove('active');
+            }
+        });
     }
 
     // Modal Logic
@@ -491,9 +669,14 @@
 
     // Close modal on outside click
     window.onclick = function (event) {
-        const modal = document.getElementById('storyModal');
-        if (event.target == modal) {
-            modal.style.display = "none";
+        const storyModal = document.getElementById('storyModal');
+        const eventModal = document.getElementById('eventModal');
+        
+        if (event.target == storyModal) {
+            closeStoryModal();
+        }
+        if (event.target == eventModal) {
+            eventModal.classList.add('hidden');
         }
     }
 
@@ -590,7 +773,7 @@
         const messageDiv = bubble.closest('.message');
         if (!messageDiv) return;
 
-        const messageId = messageDiv.id.replace('msg-', '');
+        const messageId = messageDiv.id.replace('msg-', '').replace('dm-', '');
         const senderName = messageDiv.querySelector('.sender-name').textContent.trim();
 
         bubble.classList.add('pressing');

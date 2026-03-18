@@ -38,6 +38,7 @@ class Event(models.Model):
     date = models.DateTimeField()
     location = models.CharField(max_length=200, blank=True)
     image = models.ImageField(upload_to='event_images/', blank=True, null=True)
+    organizer = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='organized_events')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -66,6 +67,27 @@ class Message(models.Model):
     @property
     def like_count(self):
         return self.likes.count()
+
+
+class DirectMessage(models.Model):
+    """
+    Modèle pour les messages privés entre amis.
+    Phase 1 Expansion - SPEC-012
+    """
+    sender = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='sent_dms', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='received_dms', on_delete=models.CASCADE)
+    content = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['timestamp']
+        indexes = [
+            models.Index(fields=['sender', 'recipient', 'timestamp']),
+        ]
+
+    def __str__(self):
+        return f"DM from {self.sender} to {self.recipient}"
 
 
 # ========== NOTIFICATIONS (Phase 3.2) ==========

@@ -15,6 +15,66 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.4.0] - 2026-03-18 ([Forum UX Refinement & Icon Excellence])
+
+### Added
+- **Forum UI/UX (Phase 5 Refinement)** :
+  - **Friends Dropdown** : Nouveau menu déroulant glassmorphique dans l'en-tête de la sidebar pour un accès direct aux DM.
+  - **Premium Iconography** : Remplacement des icônes "+" génériques par des icônes intuitives et colorées (`fas fa-users`, `fas fa-users-cog`, `fas fa-calendar-plus`).
+  - **Story Add Button** : Refonte du bouton "Ajouter" avec une icône FontAwesome stylisée.
+- **Design System Update** :
+  - Mise en place d'un système de design unifié pour les actions de l'en-tête avec des "tokens" de couleur (Bleu pour Amis, Violet pour Groupes, Orange pour Événements).
+  - Amélioration du contraste et de la visibilité en mode sombre pour tous les éléments interactifs.
+
+### Fixed
+- **Layout & Responsivité** :
+  - **Responsive Dropdown** : Correction de l'alignement et du clipping en mode "Laptop" en centrant le menu par rapport à l'en-tête de la sidebar.
+  - **Truncation des Pseudos** : Limite de 10 caractères appliquée aux noms d'amis pour préserver l'intégrité du layout.
+  - **DM Link Redirection** : Correction de la logique `dm_id` assurant que l'icône DM d'un ami ouvre la bonne conversation.
+- **Stabilité Backend** :
+  - Résolution de l'erreur `AttributeError` lors de l'accès à `request.user.get_friends()`.
+  - Correction de la boucle de messages de chat pour filtrer les messages système.
+  - Correction de la redirection lors de l'atteinte du quota de création de groupe.
+
+---
+
+## [2.3.2] - 2026-03-16 ([Unified Admin & Social UI Fixes])
+
+### Added
+- **Administration Unifiée (Phase 3)** :
+  - Centralisation de la gestion des **Groupes** et **Événements** dans le dashboard d'administration personnalisé.
+  - CRUD complet pour les Événements (Modération, Édition, Suppression).
+  - **Curated Tags** : Mise en place de badges visuels (GROUP, EVENT) avec codes couleurs dédiés dans les listes administratives.
+  - Statistiques en temps réel pour la communauté sur le dashboard principal.
+
+### Fixed
+- **Social UI (Otaku Card)** :
+  - Correction de l'alignement des icônes DM dans la liste d'amis ; les icônes sont désormais ancrées à l'intérieur des cartes pour un design plus propre.
+  - Amélioration des transitions et de l'effet de survol (hover) sur les éléments de la carte Otaku.
+- **Navigation Admin** : Sidebar mise à jour avec des liens directs vers les nouvelles sections communautaires.
+
+---
+
+## [2.3.1] - 2026-03-15 ([User Ranks & Event Management])
+
+### Added
+- **Système de Rangs (Phase 4)** :
+  - Implémentation de 13 rangs (Civil à Shadow Monarch) basés sur le niveau.
+  - Nouvelles métadonnées de rang dans le modèle `User` (Titres, Emojis, Couleurs).
+  - Affichage dynamique du rang et de l'icône sur le profil utilisateur.
+- **Gestion des Événements** :
+  - Suppression d'événements désormais possible pour les utilisateurs de Niveau 65+ (Yonko Commander).
+  - Interface de suppression avec confirmation sur la page Forum.
+- **Curated Admin Social** :
+  - Badges distinctifs pour les Groupes et Événements dans l'interface d'administration.
+  - Champs de recherche et filtres améliorés pour la section Social.
+
+### Changed
+- **Sécurité Événements** : Restriction stricte de la création et suppression d'événements au Niveau 65+ (Yonko Commander) ou au staff.
+- **UI Profil** : Refonte de l'identité du profil pour une meilleure visibilité du prestige de l'utilisateur.
+
+---
+
 ## [2.3.0] - 2026-03-12 ([Bulk Upload Stability & Security])
 
 ### Fixed Bulk Upload Tracking
@@ -54,7 +114,7 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### Fixed Infrastructure & Uploads
 
-- **Résilience des Uploads** : L'extraction de dossiers gère désormais les erreurs réseau avec un *Exponential Backoff* (retries auto) et décompresse un maximum de 5 fichiers en parallèle (Worker Pool) pour saturer la bande passante sans Timeout.
+- **Résilience des Uploads** : L'extraction de dossiers gère désormais des erreurs réseau avec un *Exponential Backoff* (retries auto) et décompresse un maximum de 5 fichiers en parallèle (Worker Pool) pour saturer la bande passante sans Timeout.
 - **Auto-Cleanup Médias** : Ajout de signaux Django `post_delete` purgeant automatiquement les fichiers physiques (images, ZIP) sur le disque dès qu'un Chapitre ou une Page est supprimé via l'admin.
 - **Migration R2 vers Local SSD** : Retour stratégique sur un stockage local (Nginx) pour éliminer la latence Cloudflare R2 ; les fichiers temporaires (`.cbz`/`.pdf`) sont désormais auto-purgés immédiatement après extraction pour économiser de l'espace.
 - **CSRF Uploads** : Ajout des domaines de production dans `CSRF_TRUSTED_ORIGINS` pour autoriser les requêtes AJAX JS.

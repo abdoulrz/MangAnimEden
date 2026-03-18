@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
 from .models import Group, Event, Message, Story, GroupMembership
+from .forms import GroupCreateForm, EventCreateForm
 from django.contrib.auth import get_user_model
 from django.db import models
 User = get_user_model()
@@ -20,6 +21,31 @@ def delete_message(request, message_id):
     group_id = message.group.id
     message.delete()
     return redirect(f'/forum/?group_id={group_id}')
+
+@login_required
+def delete_event(request, event_id):
+    """
+    Supprime un événement.
+    Uniquement accessible aux Yonko Commander (niv 65+) ou staff/modos.
+    """
+    event = get_object_or_404(Event, id=event_id)
+    
+    # Strictly Level 65+ (including organizers) OR Moderator/Staff
+    can_manage = (
+        request.user.level >= 65 or 
+        request.user.role_moderator or 
+        request.user.role_admin or 
+        request.user.is_staff
+    )
+    
+    if not can_manage:
+        messages.error(request, "Seuls les Yonko Commander (Niv. 65+) peuvent gérer les événements.")
+        return redirect('social:forum_home')
+        
+    title = event.title
+    event.delete()
+    messages.success(request, f"L'événement '{title}' a été supprimé.")
+    return redirect('social:forum_home')
 
 @login_required
 def join_group(request, group_id):
@@ -81,8 +107,74 @@ def forum_home(request):
         my_groups = my_groups.filter(name__icontains=search_query)
         other_groups = other_groups.filter(name__icontains=search_query)
 
+    # --- Unified Sidebar Logic (DMs & Groupes) ---
+    # 1. Fetch DM partners (Users I've exchanged messages with)
+    from .models import DirectMessage
+    sent_dms = DirectMessage.objects.filter(sender=request.user).values_list('recipient_id', flat=True)
+    received_dms = DirectMessage.objects.filter(recipient=request.user).values_list('sender_id', flat=True)
+    dm_user_ids = set(list(sent_dms) + list(received_dms))
+    dm_partners = User.objects.filter(id__in=dm_user_ids)
+
+    # 1.5 Fetch actual Friends for the dropdown
+    friends = request.user.get_friends()[:50] # Limit for performance
+
+    # 2. Build Sidebar List (Groups + DMs + Events)
+    sidebar_items = []
+    
+    # Add Groups
+    from django.db.models import Max
+    for g in my_groups:
+        latest_msg = Message.objects.filter(group=g).aggregate(Max('timestamp'))['timestamp__max']
+        sidebar_items.append({
+            'type': 'group',
+            'id': g.id,
+            'name': g.name,
+            'avatar': g.icon.url if g.icon else None,
+            'last_activity': latest_msg or g.created_at,
+            'unread': False, # Placeholder
+        })
+
+    # Add DMs
+    for u in dm_partners:
+        latest_dm = DirectMessage.objects.filter(
+            Q(sender=request.user, recipient=u) | Q(sender=u, recipient=request.user)
+        ).aggregate(Max('timestamp'))['timestamp__max']
+        sidebar_items.append({
+            'type': 'dm',
+            'id': u.id,
+            'name': u.nickname or u.username,
+            'avatar': u.avatar.url if u.avatar else None,
+            'last_activity': latest_dm or timezone.now(),
+            'is_online': u.is_online,
+            'unread': DirectMessage.objects.filter(sender=u, recipient=request.user, is_read=False).exists(),
+        })
+
+    # Add Events (Upcoming)
+    upcoming_events = Event.objects.filter(date__gte=timezone.now()).order_by('date')
+    for e in upcoming_events:
+        sidebar_items.append({
+            'type': 'event',
+            'id': e.id,
+            'name': e.title,
+            'avatar': e.image.url if e.image else None,
+            'last_activity': e.date, # Use date for proximity sorting
+            'location': e.location,
+            'unread': False,
+        })
+
+    # 3. Sort by LIFO
+    sidebar_items.sort(key=lambda x: x['last_activity'], reverse=True)
+
     # Events
     events = Event.objects.filter(date__gte=timezone.now()).order_by('date')
+    
+    # Event Management Permission (Yonko Commander Niv. 65+)
+    can_create_event = request.user.is_authenticated and (
+        request.user.level >= 65 or 
+        request.user.role_moderator or 
+        request.user.role_admin or 
+        request.user.is_staff
+    )
     
     # Permission Check for Stories
     can_post_story = request.user.is_authenticated and (
@@ -172,8 +264,48 @@ def forum_home(request):
                             pass  # If Celery unavailable, image is saved as-is
             return redirect('social:forum_home')
             
+        # 3.5 Event Creation Logic
+        elif 'event_title' in request.POST:
+            if can_create_event:
+                form = EventCreateForm(request.POST, request.FILES)
+                if form.is_valid():
+                    event = form.save(commit=False)
+                    event.organizer = request.user
+                    event.save()
+                    messages.success(request, f"L'événement '{event.title}' a été créé !")
+            return redirect('social:forum_home')
+            
         # 4. Chat Logic (Post Message)
-        elif active_group and 'content' in request.POST:
+        elif (active_group or 'dm_id' in request.POST) and 'content' in request.POST:
+            content = request.POST.get('content')
+            
+            if 'dm_id' in request.POST:
+                recipient_id = request.POST.get('dm_id')
+                recipient = get_object_or_404(User, id=recipient_id)
+                
+                # Verify friendship
+                if not request.user.is_friend_with(recipient):
+                    messages.error(request, "Vous devez être amis pour envoyer des messages privés.")
+                    return redirect('social:forum_home')
+                
+                dm = DirectMessage.objects.create(
+                    sender=request.user,
+                    recipient=recipient,
+                    content=content
+                )
+                
+                # Notification for DM
+                from .services import NotificationService
+                NotificationService.create_notification(
+                    recipient=recipient,
+                    actor=request.user,
+                    verb="vous a envoyé un message privé",
+                    type='message',
+                    target=dm
+                )
+                return redirect(f'/forum/?dm_id={recipient.id}')
+
+            # Group Message Logic (unchanged but wrapped)
             # Security check: Must be member and not banned
             if not is_member and not (request.user.is_staff or request.user.role_moderator or active_group.owner == request.user):
                  messages.error(request, "Vous devez rejoindre le groupe pour participer.")
@@ -183,7 +315,6 @@ def forum_home(request):
                 messages.error(request, "Vous êtes banni de ce groupe.")
                 return redirect(f'/forum/?group_id={active_group.id}')
 
-            content = request.POST.get('content')
             parent_id = request.POST.get('parent_id')
             parent_message = None
             
@@ -211,7 +342,6 @@ def forum_home(request):
                         type='reply',
                         target=msg
                     )
-                    
             return redirect(f'/forum/?group_id={active_group.id}')
 
     # 5. Fetch Active Stories & Group by Group
@@ -229,14 +359,28 @@ def forum_home(request):
     active_mode = 'default'
     active_story_group = None
     active_event = None
+    active_dm_user = None
     
     story_group_id = request.GET.get('story_group_id')
     event_id = request.GET.get('event_id')
+    dm_id = request.GET.get('dm_id')
     
     if story_group_id:
         active_mode = 'story'
         active_story_group = get_object_or_404(Group, id=story_group_id)
         active_group_stories = Story.objects.filter(group=active_story_group, expires_at__gt=now).order_by('created_at')
+    elif dm_id:
+        active_mode = 'dm'
+        active_dm_user = get_object_or_404(User, id=dm_id)
+        # Verify friendship? Spec says only friends can DM.
+        # Fetch DM history
+        from .models import DirectMessage
+        messages_list = DirectMessage.objects.filter(
+            (Q(sender=request.user) & Q(recipient=active_dm_user)) |
+            (Q(sender=active_dm_user) & Q(recipient=request.user))
+        ).order_by('timestamp')
+        # Mark as read
+        DirectMessage.objects.filter(sender=active_dm_user, recipient=request.user, is_read=False).update(is_read=True)
     elif active_group:
         active_mode = 'chat'
     elif event_id:
@@ -244,20 +388,25 @@ def forum_home(request):
         active_event = get_object_or_404(Event, id=event_id)
 
     context = {
+        'sidebar_items': sidebar_items,
         'my_groups': my_groups,
         'other_groups': other_groups,
         'active_tab': active_tab, 
         'events': events,
+        'active_mode': active_mode,
         'active_group': active_group,
-        'messages': messages_list,
+        'active_dm_user': active_dm_user,
+        'messages_list': messages_list,
         'is_member': is_member,
         'is_banned': is_banned,
         'story_groups': story_groups,
-        'active_mode': active_mode,
         'active_story_group': active_story_group,
         'active_group_stories': active_group_stories if active_mode == 'story' else None,
         'active_event': active_event,
         'can_post_story': can_post_story,
+        'can_create_event': can_create_event,
+        'event_form': EventCreateForm(),
+        'friends': friends,
         'STATIC_VERSION': settings.STATIC_VERSION,
     }
     return render(request, 'social/forum.html', context)
@@ -495,14 +644,15 @@ def create_group(request):
     from django.contrib import messages
     
     # 1. Level / Role Check
-    if request.user.level < 50 and not request.user.role_moderator and not request.user.is_staff:
+    is_privileged = request.user.is_staff or request.user.role_admin or request.user.role_moderator
+    if request.user.level < 50 and not is_privileged:
         messages.error(request, "Vous devez atteindre le niveau 50 pour créer un groupe.")
         return redirect('social:forum_home')
         
     # 2. Quota Check
     owned_groups_count = Group.objects.filter(owner=request.user).count()
     max_allowed = request.user.level // 50
-    if not request.user.is_staff and owned_groups_count >= max_allowed:
+    if not is_privileged and owned_groups_count >= max_allowed:
         messages.error(request, f"Vous avez atteint la limite de création de groupes ({max_allowed}). Montez de niveau pour en créer plus !")
         return redirect('social:forum_home')
 
