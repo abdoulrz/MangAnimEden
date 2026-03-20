@@ -1078,6 +1078,106 @@
         }
     });
 
+    // ==========================================
+    // Live Chat Polling (SPEC-012/Phase 3.2.1)
+    // ==========================================
+    const CHAT_POLL_INTERVAL = 3000; // 3 seconds for active chat
+    let lastMessageId = 0;
+    const activeGroupId = "{{ active_group.id|default:'' }}";
+    const activeDmId = "{{ active_dm_user.id|default:'' }}";
+
+    function updateLastMessageId() {
+        const messages = document.querySelectorAll('.message[data-message-id]');
+        if (messages.length > 0) {
+            const ids = Array.from(messages).map(m => parseInt(m.dataset.messageId));
+            lastMessageId = Math.max(...ids);
+        }
+    }
+
+    function scrollToBottom() {
+        const container = document.getElementById('chatMessages');
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+    }
+
+    function isAtBottom() {
+        const container = document.getElementById('chatMessages');
+        if (!container) return false;
+        return (container.scrollHeight - container.scrollTop - container.clientHeight) < 100;
+    }
+
+    function pollNewMessages() {
+        if (!activeGroupId && !activeDmId) return;
+
+        let url = '{% url "social:api_fetch_messages" %}?last_id=' + lastMessageId;
+        if (activeGroupId) url += '&group_id=' + activeGroupId;
+        else if (activeDmId) url += '&dm_id=' + activeDmId;
+
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success && data.messages.length > 0) {
+                    const container = document.getElementById('chatMessages');
+                    const wasAtBottom = isAtBottom();
+                    
+                    data.messages.forEach(msg => {
+                        // Avoid duplicates
+                        if (document.querySelector(`[data-message-id="${msg.id}"]`)) return;
+
+                        const msgDiv = document.createElement('div');
+                        msgDiv.className = `message ${msg.is_me ? 'my-message' : 'other-message'}`;
+                        msgDiv.dataset.messageId = msg.id;
+                        msgDiv.id = activeGroupId ? `msg-${msg.id}` : `dm-${msg.id}`;
+
+                        let replyHtml = '';
+                        if (msg.parent) {
+                            replyHtml = `
+                                <div class="reply-context">
+                                    <small>Réponse à <strong>${msg.parent.sender}</strong> : ${msg.parent.content}</small>
+                                </div>
+                            `;
+                        }
+
+                        const senderUrl = msg.sender_id ? `/users/profile/${msg.sender_id}/` : '#';
+                        msgDiv.innerHTML = `
+                            <div class="message-bubble">
+                                <div class="message-info">
+                                    <a href="${senderUrl}" class="sender-name forum-sender-link">${msg.sender}</a>
+                                    <span class="timestamp">${msg.timestamp}</span>
+                                </div>
+                                ${replyHtml}
+                                <p class="message-text">${msg.content}</p>
+                                <div class="message-actions">
+                                    <button type="button" class="action-btn like-btn" onclick="${activeGroupId ? 'toggleLike' : 'toggleDMLike'}(this, '${msg.id}')">
+                                        <i class="far fa-heart"></i>
+                                        <span class="like-count">0</span>
+                                    </button>
+                                    <button type="button" class="action-btn reply-btn" onclick="${activeGroupId ? 'startReply' : 'startDMReply'}('${msg.id}', '${msg.sender.replace(/'/g, "\\'")}')">
+                                        <i class="fas fa-reply"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        container.appendChild(msgDiv);
+                    });
+
+                    updateLastMessageId();
+                    if (wasAtBottom) scrollToBottom();
+                }
+            })
+            .catch(err => console.error('Chat poll error:', err));
+    }
+
+    // Initialize Polling
+    document.addEventListener('DOMContentLoaded', () => {
+        updateLastMessageId();
+        scrollToBottom();
+        if (activeGroupId || activeDmId) {
+            setInterval(pollNewMessages, CHAT_POLL_INTERVAL);
+        }
+    });
+
 </script>
 
 <!-- Global Emoji Picker Panel (populated by JS) -->

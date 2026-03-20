@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.humanize',
     # Third party apps
     'django.contrib.staticfiles',
     'django.contrib.sites',
@@ -261,7 +262,7 @@ SESSION_COOKIE_SECURE = not DEBUG  # True in prod (HTTPS), False in dev (HTTP)
 CSRF_COOKIE_SECURE = not DEBUG
 
 # Versioning for cache busting 
-STATIC_VERSION = '2.10.26'
+STATIC_VERSION = '2.10.33'
 
 # Admin bootstrap via secret passphrase on registration
 ADMIN_BOOTSTRAP_PASSPHRASE = config('ADMIN_BOOTSTRAP_PASSPHRASE', default='Nefe')

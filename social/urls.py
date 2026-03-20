@@ -27,11 +27,15 @@ urlpatterns = [
     # Notifications (Phase 3.2)
     path('notifications/', views.notifications_list, name='notifications_list'),
     path('notifications/read/<int:notification_id>/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/clear/', views.delete_all_notifications, name='delete_all_notifications'),
     
     # Interactions (Phase 3.2)
     path('messages/<int:message_id>/like/', views.like_message, name='like_message'),
     path('messages/<int:message_id>/reply/', views.reply_message, name='reply_message'),
     path('dms/<int:dm_id>/like/', views.like_dm, name='like_dm'),
     path('events/delete/<int:event_id>/', views.delete_event, name='delete_event'),
+    path('search/api/', views.group_search_api, name='group_search_api'),
+    path('api/poll/', views.api_poll_updates, name='api_poll_updates'),
+    path('api/messages/', views.api_fetch_messages, name='api_fetch_messages'),
 ]
 

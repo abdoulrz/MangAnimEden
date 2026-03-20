@@ -15,9 +15,13 @@
         <main class="catalog-main">
             <!-- Search Section -->
             <div class="catalog-search">
-                <div class="catalog-search-wrapper">
-                    <input type="text" placeholder="Rechercher un manga..." class="input catalog-search-input">
+                <div class="navbar-search-wrapper">
+                    <input type="text" id="catalogSearchInput" placeholder="Rechercher un manga..." 
+                        class="input catalog-search-input" autocomplete="off">
                     <span class="catalog-search-icon">🔍</span>
+                    <div id="catalogSearchResultsPanel" class="search-results-panel glass-panel hidden">
+                        <!-- Results injected here -->
+                    </div>
                 </div>
             </div>
 

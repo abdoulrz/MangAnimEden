@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static humanize %}
 
 {% block title %}Notifications - MangaAnimEden{% endblock %}
 
@@ -15,14 +15,28 @@
                 <p class="page-subtitle">Restez informé de vos dernières interactions</p>
             </div>
 
-            {% if notifications %}
-            <form action="{% url 'social:notifications_list' %}" method="post">
-                {% csrf_token %}
-                <button type="submit" name="mark_all_read" class="btn-mark-all">
-                    <i class="fas fa-check-double"></i> Tout marquer lu
-                </button>
-            </form>
-            {% endif %}
+            <div class="header-actions">
+                {% if notifications %}
+                <div class="notification-buttons">
+                    <form id="page-mark-all-read-form" action="{% url 'social:notifications_list' %}" method="post"
+                        class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="mark_all_read" value="1">
+                        <button type="submit" class="btn-mark-all">
+                            <i class="fas fa-check-double"></i> Tout marquer lu
+                        </button>
+                    </form>
+
+                    <form id="page-clear-all-form" action="{% url 'social:delete_all_notifications' %}" method="post" class="d-inline"
+                        onsubmit="return confirm('Voulez-vous vraiment supprimer toutes vos notifications ?');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-clear-all">
+                            <i class="fas fa-trash-alt"></i> Vider tout
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
         </div>
 
         <!-- Notifications List Container -->
@@ -57,7 +71,7 @@
                 <div class="item-content-section">
                     <div class="content-header">
                         <span class="type-label">{{ notif.get_notification_type_display|upper }}</span>
-                        <span class="time-stamp"><i class="far fa-clock"></i> {{ notif.created_at|timesince }}</span>
+                        <span class="time-stamp"><i class="far fa-clock"></i> {{ notif.created_at|naturaltime }}</span>
                     </div>
 
                     <div class="content-body">
@@ -174,6 +188,37 @@
         background: var(--color-purple-primary);
         color: white;
         box-shadow: 0 0 15px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-clear-all {
+        background: transparent;
+        border: 1px solid #ef4444;
+        color: #ef4444;
+        padding: 0.6rem 1.25rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-clear-all:hover {
+        background: #ef4444;
+        color: white;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+    }
+
+    .notification-buttons {
+        display: flex;
+        gap: 1rem;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
     }
 
     /* Glass Card Container */
@@ -448,4 +493,94 @@
         }
     }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const pageMarkReadForm = document.getElementById('page-mark-all-read-form');
+    if (pageMarkReadForm) {
+        pageMarkReadForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(pageMarkReadForm);
+            
+            fetch(pageMarkReadForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update unread items
+                    document.querySelectorAll('.notification-item.unread').forEach(item => {
+                        item.classList.remove('unread');
+                        const icon = item.querySelector('.unread-icon');
+                        if (icon) {
+                            icon.classList.remove('unread-icon');
+                            icon.classList.add('read-icon');
+                        }
+                    });
+                    
+                    // Hide the mark-all-read form
+                    pageMarkReadForm.style.display = 'none';
+                    
+                    // Update navbar badge if it exists
+                    const navbarBadge = document.getElementById('navbar-notif-badge');
+                    if (navbarBadge) navbarBadge.style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+
+    const pageClearAllForm = document.getElementById('page-clear-all-form');
+    if (pageClearAllForm) {
+        pageClearAllForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!confirm('Voulez-vous vraiment supprimer toutes vos notifications ?')) return;
+            
+            const formData = new FormData(pageClearAllForm);
+            
+            fetch(pageClearAllForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Empty the list container
+                    const container = document.querySelector('.notifications-list-container');
+                    if (container) {
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">
+                                    <i class="fas fa-bell-slash"></i>
+                                </div>
+                                <h4 class="empty-title">Tout est calme ici...</h4>
+                                <p class="empty-text">Notifications supprimées avec succès.</p>
+                                <a href="/forum/" class="empty-btn">Aller au Forum</a>
+                            </div>
+                        `;
+                    }
+                    
+                    // Hide the header actions
+                    const headerActions = document.querySelector('.header-actions');
+                    if (headerActions) headerActions.style.display = 'none';
+
+                    // Update navbar badge
+                    const navbarBadge = document.getElementById('navbar-notif-badge');
+                    if (navbarBadge) navbarBadge.style.display = 'none';
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    }
+});
+</script>
 {% endblock %}

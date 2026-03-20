@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.conf import settings
@@ -726,9 +727,15 @@ def notifications_list(request):
     """
     from .models import Notification
     from .services import NotificationService
+    from django.utils import timezone
+    from datetime import timedelta
     
+    # --- AUTO-CLEANUP (Phase 3.2.1) ---
+    # Delete read notifications older than 24h
+    cutoff = timezone.now() - timedelta(hours=24)
+    Notification.objects.filter(recipient=request.user, is_read=True, created_at__lt=cutoff).delete()
+
     # Check if user wants to mark specific notification as read via GET param (simple redirect implementation)
-    # Ideally use AJAX for individual, but this is fallback
     notif_id = request.GET.get('read')
     if notif_id:
         NotificationService.mark_as_read(request.user, notif_id)
@@ -737,8 +744,14 @@ def notifications_list(request):
     # Mark all as read logic
     if request.method == 'POST' and 'mark_all_read' in request.POST:
         NotificationService.mark_as_read(request.user) # Mark all
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            return JsonResponse({'success': True, 'unread_count': 0})
+            
         messages.success(request, "Toutes les notifications ont été marquées comme lues.")
-        return redirect('social:notifications_list')
+        # If it's a regular form POST, redirect back to where we came from if possible
+        next_url = request.POST.get('next', 'social:notifications_list')
+        return redirect(next_url)
         
     notifications = Notification.objects.filter(recipient=request.user).select_related('actor', 'content_type')
     
@@ -747,6 +760,25 @@ def notifications_list(request):
         'STATIC_VERSION': settings.STATIC_VERSION,
     }
     return render(request, 'social/notifications.html', context)
+
+
+@login_required
+def delete_all_notifications(request):
+    """
+    Supprime toutes les notifications de l'utilisateur.
+    """
+    from .models import Notification
+    from django.contrib import messages
+    
+    if request.method == 'POST':
+        count, _ = Notification.objects.filter(recipient=request.user).delete()
+        
+        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+             return JsonResponse({'success': True, 'count_deleted': count})
+             
+        messages.success(request, f"{count} notifications supprimées.")
+        
+    return redirect('social:notifications_list')
 
 @login_required
 def mark_notification_read(request, notification_id):
@@ -863,3 +895,118 @@ def reply_message(request, message_id):
                 )
                 
     return redirect(f'/forum/?group_id={group_id}')
+
+
+@login_required
+def group_search_api(request):
+    """
+    Live search API for groups (used by the navbar search.js on forum pages).
+    Returns JSON results matching group names.
+    """
+    from django.http import JsonResponse
+
+    query = request.GET.get('q', '').strip()
+    if len(query) < 2:
+        return JsonResponse({'results': []})
+
+    groups = Group.objects.filter(name__icontains=query).order_by('name')[:10]
+
+    results = []
+    for group in groups:
+        results.append({
+            'id': group.id,
+            'name': group.name,
+            'icon': group.icon.url if group.icon else None,
+            'url': f'/forum/?group_id={group.id}',
+        })
+
+    return JsonResponse({'results': results})
+
+@login_required
+def api_poll_updates(request):
+    """
+    Lightweight endpoint for periodic polling.
+    Returns unread counts for notifications and DMs.
+    """
+    from .models import Notification, DirectMessage
+    
+    unread_notifs = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    unread_dms = DirectMessage.objects.filter(recipient=request.user, is_read=False).count()
+    
+    return JsonResponse({
+        'success': True,
+        'unread_notifications': unread_notifs,
+        'unread_dms': unread_dms
+    })
+
+
+@login_required
+def api_fetch_messages(request):
+    """
+    API to fetch new messages/DMs after a certain ID.
+    Used for live chat updates without a full refresh.
+    """
+    from .models import Message, DirectMessage
+    
+    group_id = request.GET.get('group_id')
+    dm_user_id = request.GET.get('dm_id')
+    last_id = request.GET.get('last_id', 0)
+    
+    try:
+        last_id = int(last_id)
+    except ValueError:
+        last_id = 0
+        
+    messages_data = []
+    
+    if group_id:
+        new_msgs = Message.objects.filter(
+            group_id=group_id, 
+            id__gt=last_id
+        ).select_related('sender').order_by('timestamp')
+        
+        for msg in new_msgs:
+            messages_data.append({
+                'id': msg.id,
+                'sender': msg.sender.nickname if msg.sender else "Système",
+                'sender_id': msg.sender.id if msg.sender else None,
+                'content': msg.content,
+                'timestamp': msg.timestamp.strftime('%H:%M'),
+                'is_me': msg.sender == request.user,
+                'parent': {
+                    'sender': getattr(msg.parent.sender, 'nickname', 'Système'),
+                    'content': msg.parent.content[:30]
+                } if msg.parent else None,
+                'type': 'group'
+            })
+            
+    elif dm_user_id:
+        # Fetch DMs between current user and target user
+        new_dms = DirectMessage.objects.filter(
+            models.Q(sender=request.user, recipient_id=dm_user_id) |
+            models.Q(sender_id=dm_user_id, recipient=request.user),
+            id__gt=last_id
+        ).select_related('sender').order_by('timestamp')
+        
+        for dm in new_dms:
+            messages_data.append({
+                'id': dm.id,
+                'sender': dm.sender.nickname if dm.sender else "Système",
+                'content': dm.content,
+                'timestamp': dm.timestamp.strftime('%H:%M'),
+                'is_me': dm.sender == request.user,
+                'parent': {
+                    'sender': getattr(dm.parent.sender, 'nickname', 'Système') if dm.parent else 'Système',
+                    'content': dm.parent.content[:30] if dm.parent else ''
+                } if dm.parent else None,
+                'type': 'dm'
+            })
+            # Mark as read if receiving
+            if dm.recipient == request.user and not dm.is_read:
+                dm.is_read = True
+                dm.save()
+
+    return JsonResponse({
+        'success': True,
+        'messages': messages_data
+    })

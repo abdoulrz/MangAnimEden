@@ -8,13 +8,13 @@
                 <p class="footer-copyright">Made with ❤️ © 2026</p>
             </div>
 
-            <!-- Middle: Quote -->
-            {% if RANDOM_QUOTE %}
-            <div class="footer-quote-container">
+            <!-- Middle: Quote (JS-driven from wisdom.json) -->
+            <div id="wisdom-container" class="footer-quote-container" style="transition: opacity 0.3s ease;">
+                {% if RANDOM_QUOTE %}
                 <p class="footer-quote-text">"{{ RANDOM_QUOTE.text }}"</p>
                 <span class="footer-quote-author">— {{ RANDOM_QUOTE.author }}</span>
+                {% endif %}
             </div>
-            {% endif %}
 
             <!-- Right: Links -->
             <div class="footer-links">

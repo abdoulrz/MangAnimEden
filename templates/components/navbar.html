@@ -32,14 +32,21 @@
             <!-- Search Bar Navigation Logic -->
             {% with view_name=request.resolver_match.view_name namespace=request.resolver_match.namespace %}
             {% if view_name != 'catalog:index' and view_name != 'users:profile' and view_name != 'users:edit_profile' and namespace != 'administration' %}
-            <form method="get"
-                action="{% if namespace == 'social' %}{% url 'social:forum_home' %}{% else %}{% url 'catalog:index' %}{% endif %}"
-                class="navbar-search">
-                <input type="text" name="q"
-                    placeholder="{% if namespace == 'social' %}Rechercher un groupe...{% else %}Rechercher un manga...{% endif %}"
-                    class="input navbar-search-input" value="{{ request.GET.q }}">
-                <button type="submit" class="navbar-search-btn">🔍</button>
-            </form>
+            <div class="navbar-search-wrapper">
+                <form method="get"
+                    action="{% if namespace == 'social' %}{% url 'social:forum_home' %}{% else %}{% url 'catalog:index' %}{% endif %}"
+                    class="navbar-search" id="navbarSearchForm">
+                    <input type="text" name="q" id="navbarSearchInput"
+                        placeholder="{% if namespace == 'social' %}Rechercher un groupe...{% else %}Rechercher un manga...{% endif %}"
+                        class="input navbar-search-input" value="{{ request.GET.q }}" autocomplete="off"
+                        data-api="{% if namespace == 'social' %}{% url 'social:group_search_api' %}{% else %}{% url 'catalog:search_api' %}{% endif %}"
+                        data-context="{% if namespace == 'social' %}groups{% else %}manga{% endif %}">
+                    <button type="submit" class="navbar-search-btn">🔍</button>
+                </form>
+                <div id="searchResultsPanel" class="search-results-panel glass-panel hidden">
+                    <!-- Results will be injected here via JS -->
+                </div>
+            </div>
             {% endif %}
             {% endwith %}
 
@@ -123,49 +130,100 @@
             <!-- Profile and Notif Dropdown Scripts -->
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
-                    // Profile Dropdown
+                    // ==========================================
+                    // Profile & Notification Dropdowns
+                    // ==========================================
                     const trigger = document.getElementById('profileDropdownTrigger');
                     const dropdown = document.getElementById('profileDropdown');
+                    const notifTrigger = document.getElementById('notificationDropdownTrigger');
+                    const notifDropdown = document.getElementById('notificationDropdown');
 
                     if (trigger && dropdown) {
                         trigger.addEventListener('click', function (e) {
                             e.stopPropagation();
                             dropdown.classList.toggle('active');
-
-                            const notifDropdown = document.getElementById('notificationDropdown');
-                            if (notifDropdown && notifDropdown.classList.contains('active')) {
-                                notifDropdown.classList.remove('active');
-                            }
-                        });
-
-                        document.addEventListener('click', function (e) {
-                            if (!dropdown.contains(e.target) && !trigger.contains(e.target)) {
-                                dropdown.classList.remove('active');
-                            }
+                            if (notifDropdown) notifDropdown.classList.remove('active');
                         });
                     }
-
-                    // Notification Dropdown
-                    const notifTrigger = document.getElementById('notificationDropdownTrigger');
-                    const notifDropdown = document.getElementById('notificationDropdown');
 
                     if (notifTrigger && notifDropdown) {
                         notifTrigger.addEventListener('click', function (e) {
                             e.stopPropagation();
                             notifDropdown.classList.toggle('active');
-
-                            const profileDropdown = document.getElementById('profileDropdown');
-                            if (profileDropdown && profileDropdown.classList.contains('active')) {
-                                profileDropdown.classList.remove('active');
-                            }
-                        });
-
-                        document.addEventListener('click', function (e) {
-                            if (!notifDropdown.contains(e.target) && !notifTrigger.contains(e.target)) {
-                                notifDropdown.classList.remove('active');
-                            }
+                            if (dropdown) dropdown.classList.remove('active');
                         });
                     }
+
+                    document.addEventListener('click', function (e) {
+                        if (dropdown && !dropdown.contains(e.target) && !trigger.contains(e.target)) {
+                            dropdown.classList.remove('active');
+                        }
+                        if (notifDropdown && !notifDropdown.contains(e.target) && !notifTrigger.contains(e.target)) {
+                            notifDropdown.classList.remove('active');
+                        }
+                    });
+
+                    // ==========================================
+                    // AJAX Sync for "Mark all as Read"
+                    // ==========================================
+                    const markReadForm = document.getElementById('mark-all-read-notif-form');
+                    if (markReadForm) {
+                        markReadForm.addEventListener('submit', function (e) {
+                            e.preventDefault();
+                            const formData = new FormData(this);
+                            fetch(this.action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    updateNotifBadge(0);
+                                    document.querySelectorAll('#notificationDropdown .notification-item.unread').forEach(item => {
+                                        item.classList.remove('unread');
+                                    });
+                                    markReadForm.style.display = 'none';
+                                }
+                            });
+                        });
+                    }
+
+                    // ==========================================
+                    // Global Notification Polling (10s)
+                    // ==========================================
+                    const badgeId = 'navbar-notif-badge';
+                    
+                    function updateNotifBadge(count) {
+                        let badge = document.getElementById(badgeId);
+                        const btn = document.getElementById('notificationDropdownTrigger');
+                        
+                        if (count > 0) {
+                            if (!badge && btn) {
+                                badge = document.createElement('span');
+                                badge.id = badgeId;
+                                badge.className = 'notif-count-badge';
+                                btn.appendChild(badge);
+                            }
+                            if (badge) {
+                                badge.textContent = count;
+                                badge.style.display = 'flex';
+                            }
+                        } else {
+                            if (badge) badge.style.display = 'none';
+                        }
+                    }
+
+                    setInterval(() => {
+                        fetch('{% url "social:api_poll_updates" %}')
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    updateNotifBadge(data.unread_notifications);
+                                }
+                            })
+                            .catch(err => console.log('Poll inactive'));
+                    }, 10000);
                 });
             </script>
             {% else %}

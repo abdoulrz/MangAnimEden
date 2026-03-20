@@ -1176,7 +1176,7 @@
     min-height: 400px;
     margin-bottom: 2rem;
     /* Default (Dark Mode) -> Light Image (tori_domaine.jpg) */
-    background: url('/media/Background/tori_domaine.jpg') no-repeat center center;
+    background: url('../images/backgrounds/tori_domaine.jpg') no-repeat center center;
     background-size: cover;
     position: relative;
     z-index: 1;
@@ -1199,7 +1199,7 @@
 /* Light Mode Overrides -> Dark Image (tori_domaine.png) */
 @media (prefers-color-scheme: light) {
     .light-mode .domaine-dynamic-content {
-        background: url('/media/Background/tori_domaine.png') no-repeat center center;
+        background: url('../images/backgrounds/tori_domaine.png') no-repeat center center;
         background-size: cover;
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
@@ -2344,7 +2344,7 @@
 /* NOTE: Removed @media (prefers-color-scheme: light) to ensure class overrides work regardless of OS setting */
 .light-mode .domaine-dynamic-content {
     /* Ensure background is swapped correctly here too if needed, though previously handled above */
-    background: url('/media/Background/tori_domaine.png') no-repeat center center !important;
+    background: url('../images/backgrounds/tori_domaine.png') no-repeat center center !important;
     background-size: cover !important;
     border: 1px solid rgba(255, 255, 255, 0.2);
 }

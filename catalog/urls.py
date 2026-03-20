@@ -8,4 +8,5 @@ urlpatterns = [
     path('series/<int:series_id>/', views.manga_detail, name='detail'),
     path('series/<int:series_id>/favorite/', views.toggle_favorite, name='toggle_favorite'),
     path('series/<int:series_id>/review/', views.submit_review, name='submit_review'),
+    path('search/api/', views.search_api, name='search_api'),
 ]

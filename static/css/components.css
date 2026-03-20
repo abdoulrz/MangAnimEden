@@ -110,9 +110,105 @@
     justify-content: flex-end;
 }
 
+.navbar-search-wrapper {
+    position: relative;
+    z-index: 1001;
+}
+
 .navbar-search {
     position: relative;
     margin-right: var(--space-sm);
+}
+
+.search-results-panel {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 320px;
+    max-height: 400px;
+    overflow-y: auto;
+    z-index: 1000;
+    padding: 0.5rem;
+    animation: slideInDown 0.2s ease-out;
+}
+
+.search-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.search-result-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.6rem;
+    border-radius: 0.75rem;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.search-result-item:hover {
+    background: rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+    transform: translateX(4px);
+}
+
+.search-result-thumb {
+    width: 40px;
+    height: 56px;
+    object-fit: cover;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.search-result-info {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.search-result-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.search-result-meta {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
+.search-result-empty {
+    padding: 1rem;
+    text-align: center;
+    color: var(--color-text-muted);
+    font-style: italic;
+}
+
+.search-result-view-all {
+    display: block;
+    margin-top: 0.5rem;
+    padding: 0.6rem;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-purple-primary);
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    transition: color 0.2s;
+}
+
+.search-result-view-all:hover {
+    color: var(--color-pink-primary);
+}
+
+@keyframes slideInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 .navbar-search-input {
@@ -604,6 +700,16 @@
     .footer-links {
         justify-content: center;
     }
+}
+
+/* ==================== GLASS PANEL (Global) ==================== */
+.glass-panel {
+    background: rgba(30, 30, 30, 0.85);
+    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    border-radius: 16px;
 }
 
 /* ==================== UTILITY CLASSES ==================== */

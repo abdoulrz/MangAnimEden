@@ -22,7 +22,12 @@ def catalog_index(request):
 
     # Filtering
     if query:
-        series_list = series_list.filter(title__icontains=query)
+        from django.db.models import Q
+        series_list = series_list.filter(
+            Q(title__icontains=query) |
+            Q(type__icontains=query) |
+            Q(genres__name__icontains=query)
+        ).distinct()
     
     if genre:
         series_list = series_list.filter(genres__name__icontains=genre)
@@ -148,3 +153,32 @@ def submit_review(request, series_id):
          return JsonResponse({'success': False, 'error': 'Données invalides.'})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)})
+
+def search_api(request):
+    """
+    JSON endpoint for live search.
+    Matches on: title, series type, or genre name.
+    """
+    from django.db.models import Q
+
+    query = request.GET.get('q', '').strip()
+    if not query or len(query) < 2:
+        return JsonResponse({'results': []})
+
+    results = Series.objects.filter(
+        Q(title__icontains=query) |
+        Q(type__icontains=query) |
+        Q(genres__name__icontains=query)
+    ).distinct()[:8]
+
+    data = []
+    for s in results:
+        data.append({
+            'id': s.id,
+            'title': s.title,
+            'cover': s.cover.url if s.cover else settings.STATIC_URL + 'img/default_cover.jpg',
+            'url': f'/catalogue/series/{s.id}/',
+            'type': s.get_type_display() if hasattr(s, 'get_type_display') else s.type
+        })
+
+    return JsonResponse({'results': data})

@@ -146,30 +146,8 @@
     gap: 0.8rem;
 }
 
-.organizer-info {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 1rem;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    margin-top: 1rem;
-    /* Reduced margin */
-    border: 1px solid var(--color-border);
-}
 
-.organizer-info span {
-    font-weight: 500;
-    color: var(--color-text-secondary);
-    border: 1px solid var(--color-border);
-}
-
-.organizer-avatar {
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-}
+/* Moved to specific UI fixes section to avoid overrides */
 
 .group-card {
     display: flex !important;
@@ -2210,3 +2188,33 @@ input[type="file"] {
 .btn-profile-view:hover {
     background: rgba(255, 255, 255, 0.1);
 }
+
+/* ===== Fix for Event Organizer UI Overlap ===== */
+.organizer-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 0.8rem 1.2rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    margin-top: 1rem;
+    border: 1px solid var(--color-border);
+    max-width: fit-content;
+}
+
+.organizer-info span {
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    border: none !important; /* Removed bugged border */
+    background: transparent !important;
+}
+
+/* Specificity boost to override .story-user-avatar if present */
+.organizer-info .organizer-avatar {
+    width: 40px !important;
+    height: 40px !important;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}

@@ -1,4 +1,4 @@
-{% load static %}
+{% load static humanize %}
 <style>
     .notif-mark-read-btn {
         font-size: 0.75rem;
@@ -13,18 +13,20 @@
     <button class="btn-ghost navbar-icon-btn" type="button" id="notificationDropdownTrigger">
         🔔
         {% if notification_count > 0 %}
-        <span class="notif-count-badge">{{ notification_count }}</span>
+        <span class="notif-count-badge" id="navbar-notif-badge">{{ notification_count }}</span>
         {% endif %}
     </button>
 
     <div class="notification-menu" id="notificationDropdown">
-        <div class="notification-header">
-            <h6 class="dropdown-title">Notifications</h6>
-            {% if notification_count > 0 %}
-            <form action="{% url 'social:notifications_list' %}" method="post" class="d-inline">
+        <div class="notification-header border-bottom pb-2 mb-2 d-flex justify-content-between align-items-center">
+            <h6 class="dropdown-title mb-0">Notifications</h6>
+            {% if navbar_notifications %}
+            <form id="mark-all-read-notif-form" action="{% url 'social:notifications_list' %}" method="post"
+                class="d-inline">
                 {% csrf_token %}
-                <button type="submit" name="mark_all_read" class="btn-link notif-mark-read-btn">Tout
-                    marquer lu</button>
+                <input type="hidden" name="mark_all_read" value="1">
+                <input type="hidden" name="next" value="{{ request.path }}">
+                <button type="submit" class="btn-link notif-mark-read-btn">Tout marquer lu</button>
             </form>
             {% endif %}
         </div>
@@ -50,7 +52,7 @@
                             {% if notif.actor %}<strong>{{ notif.actor.nickname }}</strong>{% endif %}
                             {{ notif.verb }}
                         </p>
-                        <span class="notification-time">{{ notif.created_at|timesince }}</span>
+                        <span class="notification-time">{{ notif.created_at|naturaltime }}</span>
                     </div>
                 </a>
             </li>
