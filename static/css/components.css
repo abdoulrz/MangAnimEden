@@ -49,36 +49,13 @@
     /* Pressed */
 }
 
-.navbar-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-top: var(--space-md);
-    padding-bottom: var(--space-md);
-}
 
-.navbar-left {
-    display: flex;
-    align-items: center;
-    gap: 0;
-    /* Control internal gaps specifically */
-}
 
-.navbar-brand {
-    display: flex;
-    align-items: center;
-    gap: var(--space-sm);
-    text-decoration: none;
-    margin-right: var(--space-3xl);
-    /* Large gap between Brand and Menu as per image */
-}
 
-/* Menu Flowing next to Brand */
-.navbar-menu {
-    display: flex;
-    gap: var(--space-xl);
-    /* Spacing between links */
-}
+
+
+
+
 
 .nav-link {
     padding: var(--space-xs) 0;
@@ -102,13 +79,28 @@
     /* White active state */
 }
 
-.navbar-right {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
-    flex: 1;
-    justify-content: flex-end;
+/* ==================== MICRO-MOBILE (<= 360px) ==================== */
+@media (max-width: 360px) {
+    .navbar-brand-text {
+        font-size: 1.1rem !important;
+    }
+    .navbar-icon-btn {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 1rem !important;
+    }
+    .user-avatar {
+        width: 32px !important;
+        height: 32px !important;
+        font-size: 0.85rem !important;
+    }
+    .navbar-toggle {
+        margin-left: 2px !important;
+        padding: 4px !important;
+    }
 }
+
+
 
 .navbar-search-wrapper {
     position: relative;
@@ -357,7 +349,19 @@
 @media (max-width: 768px) {
     .notification-menu {
         right: -20px;
-        width: 280px;
+        width: 300px;
+    }
+}
+@media (max-width: 480px) {
+    .notification-menu {
+        right: -45px;
+        width: 300px;
+    }
+}
+@media (max-width: 360px) {
+    .notification-menu {
+        right: -65px;
+        width: 290px;
     }
 }
 
@@ -610,13 +614,7 @@
     padding: var(--space-2xl) 0;
 }
 
-.footer-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: var(--space-lg);
-}
+
 
 .footer-brand-text {
     font-size: var(--font-size-lg);
@@ -629,11 +627,7 @@
     font-size: var(--font-size-sm);
 }
 
-.footer-links {
-    display: flex;
-    gap: var(--space-xl);
-    flex-wrap: wrap;
-}
+
 
 .footer-link {
     color: var(--color-text-secondary);

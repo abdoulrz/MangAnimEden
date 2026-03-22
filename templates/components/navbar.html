@@ -1,17 +1,17 @@
 <!-- Navigation Bar Component -->
 {% load static %}
 <nav class="navbar">
-    <div class="container navbar-container">
+    <div class="container navbar-container d-flex align-items-center justify-content-between py-2 px-1 px-sm-3">
         <!-- 1. Left: Logo + Brand + Menu -->
-        <div class="navbar-left">
-            <a href="{% url 'home' %}" class="navbar-brand">
+        <div class="navbar-left d-flex align-items-center">
+            <a href="{% url 'home' %}" class="navbar-brand d-flex align-items-center me-lg-5 text-decoration-none">
                 <img src="{% static 'images/logo.jpeg' %}" alt="Logo" class="navbar-logo">
                 <span class="gradient-text navbar-brand-text">MangAnimEDen</span>
             </a>
 
 
             <!-- Navigation Links (Grouped with Brand) -->
-            <div class="navbar-menu">
+            <div class="navbar-menu d-flex gap-4">
                 {% if request.resolver_match.view_name == 'login' or request.resolver_match.view_name == 'register' %}
                 <a href="{% url 'catalog:index' %}" class="nav-link">Catalogue</a>
                 {% else %}
@@ -28,7 +28,7 @@
         </div>
 
         <!-- 3. Right: Search + Icons + Profile -->
-        <div class="navbar-right">
+        <div class="navbar-right d-flex align-items-center justify-content-end gap-1 gap-sm-2 gap-lg-3 flex-grow-1">
             <!-- Search Bar Navigation Logic -->
             {% with view_name=request.resolver_match.view_name namespace=request.resolver_match.namespace %}
             {% if view_name != 'catalog:index' and view_name != 'users:profile' and view_name != 'users:edit_profile' and namespace != 'administration' %}

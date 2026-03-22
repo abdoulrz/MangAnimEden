@@ -1,0 +1,40 @@
+/**
+ * BOOTSTRAP OVERRIDES
+ * Maps Bootstrap variables to our custom design tokens so Bootstrap utility classes
+ * automatically inherit our premium design colors and typography.
+ */
+
+ :root {
+    /* Colors */
+    --bs-primary: var(--color-purple-primary);
+    --bs-primary-rgb: 139, 92, 246; /* Purple Primary RGB for opacity utilities */
+    
+    --bs-secondary: var(--color-pink-primary);
+    --bs-secondary-rgb: 236, 72, 153; /* Pink Primary RGB */
+
+    --bs-dark: var(--color-bg-primary);
+    --bs-dark-rgb: 10, 10, 10;
+
+    --bs-body-color: var(--color-text-primary);
+    --bs-body-bg: transparent; /* Keep body bg handling in our global sweep */
+
+    /* Typography */
+    --bs-font-sans-serif: var(--font-ui);
+    --bs-body-font-family: var(--font-ui);
+
+    /* Typography Scale (can be synced if needed, currently leaving default bootstrap scale for utils) */
+}
+
+/* Light Mode Overrides */
+.light-mode {
+    --bs-primary: var(--color-purple-primary);
+    --bs-primary-rgb: 124, 58, 237; /* Adjusted light mode purple rgb */
+    
+    --bs-secondary: var(--color-pink-primary);
+    --bs-secondary-rgb: 219, 39, 119; /* Adjusted light mode pink rgb */
+
+    --bs-dark: var(--color-bg-primary);
+    --bs-dark-rgb: 245, 245, 245; /* whitesmoke */
+
+    --bs-body-color: var(--color-text-primary);
+}

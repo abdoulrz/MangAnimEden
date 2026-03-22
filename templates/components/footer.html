@@ -1,7 +1,7 @@
 <!-- Footer Component -->
 <footer class="footer">
     <div class="container">
-        <div class="footer-content">
+        <div class="footer-content d-flex justify-content-between align-items-center flex-wrap gap-4">
             <!-- Left: Brand -->
             <div>
                 <div class="gradient-text footer-brand-text">MangAnimEDen</div>
@@ -17,7 +17,7 @@
             </div>
 
             <!-- Right: Links -->
-            <div class="footer-links">
+            <div class="footer-links d-flex gap-4 flex-wrap">
                 <a href="{% url 'catalog:index' %}" class="footer-link">Catalogue</a>
                 <a href="{% url 'terms' %}" class="footer-link">Conditions (CGU)</a>
                 <a href="{% url 'privacy' %}" class="footer-link">Confidentialité</a>
