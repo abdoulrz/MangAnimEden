@@ -46,7 +46,7 @@
     {% include 'components/footer.html' %}
 
     <!-- Toast Container -->
-    <div id="toast-container" class="toast-container"></div>
+    <div id="toast-container" class="toast-container d-flex flex-column gap-2"></div>
 
     <!-- Global Scripts -->
     <script src="{% static 'js/app.js' %}?v={{ STATIC_VERSION }}"></script>
@@ -61,7 +61,7 @@
             if (!container) return;
 
             const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
+            toast.className = `toast toast-${type} d-flex align-items-center gap-3`;
 
             let icon = 'info-circle';
             if (type === 'success') icon = 'check-circle';

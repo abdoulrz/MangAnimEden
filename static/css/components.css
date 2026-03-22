@@ -124,16 +124,7 @@
     animation: slideInDown 0.2s ease-out;
 }
 
-.search-results-list {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-
 .search-result-item {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
     padding: 0.6rem;
     border-radius: 0.75rem;
     text-decoration: none;
@@ -153,12 +144,6 @@
     object-fit: cover;
     border-radius: 4px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.search-result-info {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
 }
 
 .search-result-title {
@@ -369,9 +354,6 @@
     padding: var(--space-sm) var(--space-md);
     background: var(--color-bg-card);
     border-bottom: 1px solid var(--color-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 }
 
 .notification-list {
@@ -383,8 +365,6 @@
 }
 
 .notification-item {
-    display: flex;
-    align-items: center;
     padding: var(--space-md);
     text-decoration: none;
     border-bottom: 1px solid var(--color-border);
@@ -412,9 +392,6 @@
     height: 40px;
     border-radius: 50%;
     background: var(--color-purple-primary);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     color: white;
     margin-right: var(--space-md);
 }
@@ -459,9 +436,6 @@
 }
 
 .dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-md);
     padding: 10px 16px;
     color: var(--color-text-secondary);
     /* Greyish default */
@@ -524,9 +498,6 @@
 }
 
 .cta-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-xs);
     background: rgba(255, 255, 255, 0.2);
     padding: var(--space-xs) var(--space-md);
     border-radius: var(--radius-full);
@@ -550,17 +521,7 @@
     line-height: 1.6;
 }
 
-.cta-buttons {
-    display: flex;
-    gap: var(--space-md);
-    justify-content: center;
-    flex-wrap: wrap;
-}
-
 .cta-btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-sm);
     padding: 14px 32px;
     background: white;
     color: var(--color-purple-primary);
@@ -577,9 +538,6 @@
 }
 
 .cta-btn-secondary {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-sm);
     padding: 14px 32px;
     background: rgba(255, 255, 255, 0.1);
     color: white;
@@ -728,9 +686,6 @@
     bottom: 2rem;
     right: 2rem;
     z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
     pointer-events: none;
 }
 
@@ -744,9 +699,6 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: var(--radius-lg);
     padding: 1rem 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
     color: var(--color-text-primary);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
     animation: toast-slide-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
@@ -840,10 +792,6 @@
 
 .notification-list li.empty-notif-item {
     padding: var(--space-2xl) var(--space-md) !important;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
 }
 
 /* --- NOTIFICATION BADGE COUNTER --- */

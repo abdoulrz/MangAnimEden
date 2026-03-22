@@ -1,7 +1,7 @@
 <!-- CTA Banner Component -->
 <div class="cta-banner">
     <!-- Badge -->
-    <div class="cta-badge">
+    <div class="cta-badge d-inline-flex align-items-center gap-2">
         <span>👋</span>
         Rejoignez-nous
     </div>
@@ -18,12 +18,12 @@
     </p>
 
     <!-- Action Buttons -->
-    <div class="cta-buttons">
-        <a href="{% url 'register' %}" class="cta-btn-primary">
+    <div class="cta-buttons d-flex justify-content-center flex-wrap gap-3">
+        <a href="{% url 'register' %}" class="cta-btn-primary d-inline-flex align-items-center gap-2">
             Créer un compte gratuit
         </a>
 
-        <a href="{% url 'catalog:index' %}" class="cta-btn-secondary">
+        <a href="{% url 'catalog:index' %}" class="cta-btn-secondary d-inline-flex align-items-center gap-2">
             Explorer le catalogue
         </a>
     </div>

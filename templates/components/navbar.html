@@ -98,18 +98,18 @@
                         <span class="dropdown-title">Mon compte</span>
                     </div>
 
-                    <a href="{% url 'users:profile' %}" class="dropdown-item">
+                    <a href="{% url 'users:profile' %}" class="dropdown-item d-flex align-items-center gap-2">
                         <span class="dropdown-icon">👤</span>
                         Mon Profil
                     </a>
 
-                    <a href="{% url 'about' %}" class="dropdown-item">
+                    <a href="{% url 'about' %}" class="dropdown-item d-flex align-items-center gap-2">
                         <span class="dropdown-icon">ℹ️</span>
                         A propos
                     </a>
 
                     {% if user.is_staff or user.role_admin or user.role_moderator %}
-                    <a href="{% url 'administration:dashboard' %}" class="dropdown-item">
+                    <a href="{% url 'administration:dashboard' %}" class="dropdown-item d-flex align-items-center gap-2">
                         <span class="dropdown-icon">⚡</span>
                         Tableau de bord
                     </a>
@@ -119,7 +119,7 @@
 
                     <form action="{% url 'logout' %}" method="post" class="dropdown-form">
                         {% csrf_token %}
-                        <button type="submit" class="dropdown-item text-danger">
+                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center gap-2">
                             <span class="dropdown-icon">↪️</span>
                             Déconnexion
                         </button>

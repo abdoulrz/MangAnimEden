@@ -68,15 +68,15 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsPanel.innerHTML = `<div class="search-result-empty">${label}</div>`;
         } else if (context === 'groups') {
             // Render group results
-            let html = '<div class="search-results-list">';
+            let html = '<div class="search-results-list d-flex flex-column gap-1">';
             results.forEach(item => {
                 const icon = item.icon
                     ? `<img src="${item.icon}" alt="${item.name}" class="search-result-thumb">`
                     : `<div class="search-result-thumb search-result-thumb-placeholder">👥</div>`;
                 html += `
-                    <a href="${item.url}" class="search-result-item">
+                    <a href="${item.url}" class="search-result-item d-flex align-items-center gap-3">
                         ${icon}
-                        <div class="search-result-info">
+                        <div class="search-result-info d-flex flex-column overflow-hidden">
                             <span class="search-result-title">${item.name}</span>
                             <span class="search-result-meta">Groupe</span>
                         </div>
@@ -87,12 +87,12 @@ document.addEventListener('DOMContentLoaded', () => {
             resultsPanel.innerHTML = html;
         } else {
             // Render manga results
-            let html = '<div class="search-results-list">';
+            let html = '<div class="search-results-list d-flex flex-column gap-1">';
             results.forEach(item => {
                 html += `
-                    <a href="${item.url}" class="search-result-item">
+                    <a href="${item.url}" class="search-result-item d-flex align-items-center gap-3">
                         <img src="${item.cover}" alt="${item.title}" class="search-result-thumb">
-                        <div class="search-result-info">
+                        <div class="search-result-info d-flex flex-column overflow-hidden">
                             <span class="search-result-title">${item.title}</span>
                             <span class="search-result-meta">${item.type}</span>
                         </div>
