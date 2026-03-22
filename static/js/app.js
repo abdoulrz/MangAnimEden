@@ -37,7 +37,8 @@ async function renderWisdom(forceNew = false) {
 
         // 2. Load quotes if not yet cached
         if (!wisdomCache) {
-            const response = await fetch('/static/data/wisdom.json?cb=2.10.29');
+            const cbVersion = window.APP_STATIC_VERSION || new Date().getTime();
+            const response = await fetch('/static/data/wisdom.json?cb=' + cbVersion);
             if (!response.ok) throw new Error('Failed to load wisdom');
             wisdomCache = await response.json();
         }
