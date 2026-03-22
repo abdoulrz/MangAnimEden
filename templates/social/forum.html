@@ -628,7 +628,7 @@
                     
                     {% if active_event.organizer %}
                     <div class="organizer-info">
-                        <img src="{% if active_event.organizer.avatar %}{{ active_event.organizer.avatar.url }}{% else %}/static/images/default_avatar.png{% endif %}" alt="Avatar" class="story-user-avatar organizer-avatar">
+                        <img src="{% if active_event.organizer.avatar %}{{ active_event.organizer.avatar.url }}{% else %}/static/images/default_avatar.png{% endif %}" alt="Avatar" class="organizer-avatar">
                         <span>Contacter l'organisateur</span>
                         <a href="?dm_id={{ active_event.organizer.id }}" class="btn-event-action">💬</a>
                     </div>

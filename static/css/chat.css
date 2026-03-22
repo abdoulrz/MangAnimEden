@@ -533,6 +533,7 @@
     font-size: 1.3rem;
     transition: transform 0.2s, box-shadow 0.2s;
     box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+    flex-shrink: 0;
 }
 
 .send-btn:hover {
@@ -1681,6 +1682,7 @@ input[type="file"] {
     height: auto;
     max-height: 400px;
     object-fit: cover;
+    border-radius: 15px; /* Explicitly constrain inner image */
     display: block;
 }
 
