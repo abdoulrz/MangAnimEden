@@ -54,3 +54,4 @@ package-lock.json
 # */migrations/*.py
 # JSON Data Dumps
 *.json
+!static/data/wisdom.json
