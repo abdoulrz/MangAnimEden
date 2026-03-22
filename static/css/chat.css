@@ -501,6 +501,7 @@
 
 .chat-input {
     flex: 1;
+    min-width: 0;
     padding: 1rem 1.2rem;
     border-radius: 25px;
     border: 1px solid var(--color-border);
@@ -2219,4 +2220,26 @@ input[type="file"] {
     border-radius: 50%;
     object-fit: cover;
     flex-shrink: 0;
+}
+
+/* Fix Chat Input Overflow on 320px Ultra-Small Mobile */
+@media (max-width: 480px) {
+    .chat-input-area {
+        padding: 0.75rem 0.5rem;
+    }
+    .chat-form {
+        gap: 0.4rem;
+    }
+    .chat-input {
+        padding: 0.75rem 0.8rem;
+        min-width: 0;
+    }
+    .emoji-trigger-btn {
+        padding: 0 0.2rem;
+    }
+    .send-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
 }
