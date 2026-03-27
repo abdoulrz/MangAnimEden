@@ -214,16 +214,62 @@
                         }
                     }
 
+                    // Build a single notification item HTML string
+                    function buildNotifItem(notif) {
+                        const avatarHtml = notif.actor_avatar
+                            ? `<img src="${notif.actor_avatar}" alt="${notif.actor_nickname}" class="notification-actor-avatar">`
+                            : `<div class="notification-placeholder-avatar d-flex justify-content-center align-items-center"><i class="fas fa-bell"></i></div>`;
+                        const actorHtml = notif.actor_nickname ? `<strong>${notif.actor_nickname}</strong> ` : '';
+                        return `
+                        <li data-notif-id="${notif.id}">
+                            <a class="notification-item d-flex align-items-center unread" href="${notif.read_url}">
+                                <div class="flex-shrink-0">${avatarHtml}</div>
+                                <div class="notification-content">
+                                    <p class="notification-verb">${actorHtml}${notif.verb}</p>
+                                    <span class="notification-time">À l'instant</span>
+                                </div>
+                            </a>
+                        </li>`;
+                    }
+
+                    function updateNotifList(notifications) {
+                        const list = document.querySelector('#notificationDropdown .notification-list');
+                        if (!list) return;
+
+                        // Remove empty-state placeholder if present
+                        const emptyItem = list.querySelector('.empty-notif-item');
+
+                        notifications.forEach(notif => {
+                            // Don't add if already in DOM
+                            if (list.querySelector(`[data-notif-id="${notif.id}"]`)) return;
+
+                            if (emptyItem) emptyItem.remove();
+
+                            // Prepend new item before the footer link (or at top)
+                            const footer = list.querySelector('.notification-footer');
+                            const newItem = document.createElement('template');
+                            newItem.innerHTML = buildNotifItem(notif).trim();
+                            if (footer) {
+                                list.insertBefore(newItem.content.firstChild, footer);
+                            } else {
+                                list.prepend(newItem.content.firstChild);
+                            }
+                        });
+                    }
+
                     setInterval(() => {
                         fetch('{% url "social:api_poll_updates" %}')
                             .then(res => res.json())
                             .then(data => {
                                 if (data.success) {
                                     updateNotifBadge(data.unread_notifications);
+                                    if (data.notifications && data.notifications.length > 0) {
+                                        updateNotifList(data.notifications);
+                                    }
                                 }
                             })
                             .catch(err => console.log('Poll inactive'));
-                    }, 10000);
+                    }, 5000);
                 });
             </script>
             {% else %}

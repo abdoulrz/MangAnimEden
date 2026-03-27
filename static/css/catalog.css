@@ -13,6 +13,8 @@
     padding-left: var(--space-md);
     padding-right: var(--space-md);
     z-index: 1;
+    overflow-x: hidden;
+    overflow-x: clip; /* Modern clean constraint avoiding scrollbars entirely */
 }
 
 /* Ambient Background Glow */
@@ -109,35 +111,9 @@
     padding-bottom: 5px;
 }
 
-.block-title::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 60px;
-    height: 3px;
-    background: linear-gradient(90deg, var(--color-purple-primary), transparent);
-    border-radius: 2px;
-}
-
-.catalog-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--space-xl);
-}
-
-@media (max-width: 768px) {
-    .catalog-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: var(--space-md);
-    }
-}
+/* Layout handled by Bootstrap row-cols */
 
 @media (max-width: 480px) {
-    .catalog-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 10px;
-    }
 
     .manga-info {
         padding: var(--space-sm);
@@ -154,7 +130,7 @@
     .badge-status,
     .badge-type {
         font-size: 0.55rem;
-        padding: 4px 8px;
+        padding: 4px 6px;
     }
 
     .manga-badges {
@@ -165,7 +141,7 @@
     .badge-rating {
         font-size: 0.55rem;
         padding: 4px 8px;
-        top: 8px;
+        bottom: 8px;
         right: 8px;
     }
 }
@@ -185,6 +161,7 @@
     display: flex;
     flex-direction: column;
     height: 100%;
+    min-width: 0; /* CRITICAL: Prevent flexbox blowout */
 }
 
 .manga-card:hover {
@@ -282,7 +259,7 @@
 
 .badge-rating {
     position: absolute;
-    top: 12px;
+    bottom: 12px;
     right: 12px;
     padding: 6px 12px;
     background: rgba(0, 0, 0, 0.7);
@@ -307,6 +284,7 @@
     flex-direction: column;
     /* Clean gradient overlay */
     background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 100%);
+    min-width: 0; /* CRITICAL: Allow text-overflow ellipsis to function natively inside a flex container */
 }
 
 .manga-title {
@@ -321,6 +299,7 @@
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    word-break: break-word; /* CRITICAL: Prevent long words from breaking flex boundaries */
 }
 
 .manga-meta {
@@ -511,6 +490,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap; /* CRITICAL: Prevent horizontal stretching on mobile */
     gap: var(--space-md);
     background: var(--glass-bg);
     -webkit-backdrop-filter: blur(10px);
@@ -542,4 +522,42 @@
     font-size: 0.9rem;
     color: var(--color-text-muted);
     font-weight: 500;
+}
+
+/* Make sure pagination strictly respects mobile boundaries */
+@media (max-width: 480px) {
+    .pagination {
+        gap: var(--space-sm);
+        padding: var(--space-sm);
+    }
+    .pagination-btn {
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+    .pagination-current {
+        font-size: 0.8rem;
+        /* Force line break for symmetry if needed */
+        width: 100%;
+        text-align: center;
+        order: -1; /* Put current page on top */
+        margin-bottom: 4px;
+    }
+}
+
+/* ==================== GRID MARGIN OVERRIDES (PERFECT CENTERING) ==================== */
+@media (max-width: 480px) {
+    /* Provide safe wrapping padding since catalog lacks .home-block's generic padding */
+    .catalog-section {
+        padding-left: var(--space-sm);
+        padding-right: var(--space-sm);
+    }
+    
+    /* Manually lock the gutters if Bootstrap util classes (g-2) fail on edge networks */
+    .catalog-grid {
+        --bs-gutter-x: 0.75rem !important; /* 12px */
+        --bs-gutter-y: 0.75rem !important;
+        /* Zero-margin to remove the bleed, relying strictly on col padding and section padding */
+        margin-left: 0 !important;
+        margin-right: 0 !important;
+    }
 }

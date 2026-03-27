@@ -846,7 +846,8 @@
     .navbar-menu {
         position: fixed;
         top: 0;
-        right: -100%;
+        right: 0;
+        transform: translateX(100%);
         width: 85%;
         max-width: 320px;
         height: 100vh;
@@ -860,7 +861,7 @@
         flex-direction: column;
         padding: 120px var(--space-xl) var(--space-lg);
         gap: var(--space-xl);
-        transition: right 0.35s cubic-bezier(0.19, 1, 0.22, 1), visibility 0.35s;
+        transition: transform 0.35s cubic-bezier(0.19, 1, 0.22, 1), visibility 0.35s;
         box-shadow: -10px 0 40px rgba(0, 0, 0, 0.6);
         border-left: 1px solid rgba(255, 255, 255, 0.05);
         z-index: 9999;
@@ -878,7 +879,7 @@
     }
 
     .navbar-menu.active {
-        right: 0;
+        transform: translateX(0);
         visibility: visible;
     }
 

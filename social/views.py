@@ -925,19 +925,55 @@ def group_search_api(request):
 @login_required
 def api_poll_updates(request):
     """
-    Lightweight endpoint for periodic polling.
-    Returns unread counts for notifications and DMs.
+    Lightweight endpoint for periodic polling (called every 5s by all logged-in users).
+    Uses Django's low-level per-user cache to protect the DB at high concurrency
+    (10,000+ users). Each user gets their own isolated cache slot — no cross-user leakage.
+
+    Cache TTL is 3s (shorter than the 5s frontend interval) so a user always
+    sees notifications within at most one extra polling cycle after they arrive.
     """
+    from django.core.cache import cache
     from .models import Notification, DirectMessage
-    
-    unread_notifs = Notification.objects.filter(recipient=request.user, is_read=False).count()
+
+    # Unique key per user — prevents any possibility of User A seeing User B's data
+    cache_key = f'poll_updates_user_{request.user.id}'
+    cached_response = cache.get(cache_key)
+
+    if cached_response is not None:
+        # Cache hit: return the stored result immediately, no DB queries
+        return JsonResponse(cached_response)
+
+    # Cache miss: run the two lightweight indexed queries
+    unread_notifs_qs = Notification.objects.filter(
+        recipient=request.user, is_read=False
+    ).select_related('actor').order_by('-created_at')
+
+    unread_count = unread_notifs_qs.count()
     unread_dms = DirectMessage.objects.filter(recipient=request.user, is_read=False).count()
-    
-    return JsonResponse({
+
+    # Serialize the 5 most recent unread notifications for live dropdown injection
+    notifications_data = []
+    for notif in unread_notifs_qs[:5]:
+        notifications_data.append({
+            'id': notif.id,
+            'verb': notif.verb,
+            'actor_nickname': notif.actor.nickname if notif.actor else None,
+            'actor_avatar': notif.actor.avatar.url if notif.actor and notif.actor.avatar else None,
+            'read_url': f'/social/notifications/?read={notif.id}',
+        })
+
+    result = {
         'success': True,
-        'unread_notifications': unread_notifs,
-        'unread_dms': unread_dms
-    })
+        'unread_notifications': unread_count,
+        'unread_dms': unread_dms,
+        'notifications': notifications_data,
+    }
+
+    # Store in cache for 3 seconds — short enough for near-real-time UX,
+    # long enough to absorb bursts from many concurrent users
+    cache.set(cache_key, result, timeout=3)
+
+    return JsonResponse(result)
 
 
 @login_required

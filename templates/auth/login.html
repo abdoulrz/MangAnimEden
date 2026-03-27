@@ -8,33 +8,33 @@
 {% endblock %}
 
 {% block content %}
-<div class="auth-container">
+<div class="auth-container d-flex align-items-center justify-content-center py-5 px-3">
     <div class="auth-wrapper">
 
         <!-- Logo/Brand -->
-        <div class="auth-header">
-            <h1 class="gradient-text auth-brand">MangAnimEDen</h1>
+        <div class="text-center mb-5">
+            <h1 class="gradient-text auth-brand mb-2">MangAnimEDen</h1>
         </div>
 
         <!-- Login Card -->
-        <div class="card auth-card">
-            <h2 class="auth-title">Bon retour !</h2>
+        <div class="card auth-card p-4 p-sm-5">
+            <h2 class="auth-title mb-1">Bon retour !</h2>
 
-            <p class="auth-subtitle">Connectez-vous pour accéder à vos mangas</p>
+            <p class="auth-subtitle text-secondary mb-4">Connectez-vous pour accéder à vos mangas</p>
 
             <!-- Login Form -->
             <form method="post">
                 {% csrf_token %}
 
                 {% if form.non_field_errors %}
-                <div class="auth-errors">
+                <div class="auth-errors mb-3 p-2 rounded">
                     {{ form.non_field_errors }}
                 </div>
                 {% endif %}
 
                 <!-- Email Field -->
-                <div class="auth-form-group">
-                    <label class="auth-label">Email</label>
+                <div class="mb-4">
+                    <label class="auth-label d-block mb-2">Email</label>
                     <div class="auth-input-wrapper">
                         {{ form.username }}
                         <span class="auth-input-icon">✉️</span>
@@ -45,9 +45,9 @@
                 </div>
 
                 <!-- Password Field -->
-                <div class="auth-form-group">
-                    <div class="auth-label-row">
-                        <label class="auth-label">Mot de passe</label>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                        <label class="auth-label m-0">Mot de passe</label>
                         <a href="#" class="auth-link">Oublié ?</a>
                     </div>
                     <div class="auth-input-wrapper">
@@ -60,20 +60,20 @@
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="btn-primary auth-submit">
+                <button type="submit" class="btn-primary auth-submit w-100 mt-4 py-3">
                     <span>🔑</span>
                     Se connecter
                 </button>
 
                 <!-- Divider -->
-                <div class="auth-divider">
+                <div class="auth-divider d-flex align-items-center gap-3 my-4">
                     <div class="auth-divider-line"></div>
                     <span class="auth-divider-text">ou</span>
                     <div class="auth-divider-line"></div>
                 </div>
 
                 <!-- Google Sign In -->
-                <a href="{% url 'google_login' %}" class="btn-secondary auth-social-btn btn-google">
+                <a href="{% url 'google_login' %}" class="btn-secondary auth-social-btn btn-google w-100 d-flex align-items-center justify-content-center gap-2 p-3 text-decoration-none">
                     <svg width="20" height="20" viewBox="0 0 24 24">
                         <path fill="#4285F4"
                             d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -89,7 +89,7 @@
             </form>
 
             <!-- Sign Up Link -->
-            <p class="auth-footer-text">
+            <p class="auth-footer-text text-center mt-5">
                 Pas encore de compte ?
                 <a href="{% url 'register' %}" class="auth-footer-link">Créer un compte</a>
             </p>

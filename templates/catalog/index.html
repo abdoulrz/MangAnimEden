@@ -31,34 +31,38 @@
                     <h2 class="block-title"><span>📚</span> Catalogue Complet</h2>
                 </div>
 
-                <div class="catalog-grid">
+                <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-2 g-sm-3 g-md-4 mx-0 catalog-grid">
                     {% for series in page_obj %}
-                    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
-                        <div class="manga-cover">
-                            {% if series.cover %}
-                            <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
-                            {% else %}
-                            <div class="manga-image placeholder"></div>
-                            {% endif %}
-                            <div class="manga-badges">
-                                <span class="badge-status">{{ series.get_status_display }}</span>
-                                <span class="badge-type">{{ series.get_type_display }}</span>
+                    <div class="col">
+                        <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
+                            <div class="manga-cover">
+                                {% if series.cover %}
+                                <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
+                                {% else %}
+                                <div class="manga-image placeholder"></div>
+                                {% endif %}
+                                <div class="manga-badges">
+                                    <span class="badge-status">{{ series.get_status_display }}</span>
+                                    <span class="badge-type">{{ series.get_type_display }}</span>
+                                </div>
+                                <div class="badge-rating"><span>★</span> {{ series.average_rating }}</div>
                             </div>
-                            <div class="badge-rating"><span>★</span> {{ series.average_rating }}</div>
-                        </div>
-                        <div class="manga-info">
-                            <h3 class="manga-title">{{ series.title }}</h3>
-                            <p class="manga-meta">
-                                {% for genre in series.genres.all %}
-                                {{ genre.name }}{% if not forloop.last %}, {% endif %}
-                                {% empty %}
-                                Action, Aventure
-                                {% endfor %}
-                            </p>
-                        </div>
-                    </a>
+                            <div class="manga-info">
+                                <h3 class="manga-title">{{ series.title }}</h3>
+                                <p class="manga-meta">
+                                    {% for genre in series.genres.all %}
+                                    {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                                    {% empty %}
+                                    Action, Aventure
+                                    {% endfor %}
+                                </p>
+                            </div>
+                        </a>
+                    </div>
                     {% empty %}
-                    <p>Aucun manga trouvé.</p>
+                    <div class="col-12 w-100">
+                        <p class="text-center py-5">Aucun manga trouvé.</p>
+                    </div>
                     {% endfor %}
                 </div>
 

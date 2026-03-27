@@ -5,10 +5,6 @@
 
 .auth-container {
     min-height: calc(100vh - 200px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-2xl) var(--space-lg);
 }
 
 .auth-wrapper {
@@ -16,48 +12,23 @@
     max-width: 450px;
 }
 
-.auth-header {
-    text-align: center;
-    margin-bottom: var(--space-2xl);
-}
-
 .auth-brand {
     font-size: var(--font-size-3xl);
     font-weight: var(--font-weight-bold);
-    margin-bottom: var(--space-sm);
 }
 
 .auth-card {
     background: var(--color-bg-secondary);
-    padding: var(--space-2xl);
 }
 
 .auth-title {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);
-    margin-bottom: var(--space-xs);
-}
-
-.auth-subtitle {
-    color: var(--color-text-secondary);
-    margin-bottom: var(--space-xl);
-}
-
-.auth-form-group {
-    margin-bottom: var(--space-lg);
 }
 
 .auth-label {
-    display: block;
-    margin-bottom: var(--space-sm);
     color: var(--color-text-primary);
     font-weight: var(--font-weight-medium);
-}
-
-.auth-label-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: var(--space-sm);
 }
 
 .auth-link {
@@ -96,17 +67,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 }
 
 .auth-submit {
-    width: 100%;
-    margin-top: var(--space-lg);
-    padding: 14px;
     font-size: var(--font-size-base);
-}
-
-.auth-divider {
-    display: flex;
-    align-items: center;
-    margin: var(--space-xl) 0;
-    gap: var(--space-md);
 }
 
 .auth-divider-line {
@@ -120,18 +81,7 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
     font-size: var(--font-size-sm);
 }
 
-.auth-social-btn {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--space-sm);
-    padding: 12px;
-}
-
 .auth-footer-text {
-    text-align: center;
-    margin-top: var(--space-xl);
     color: var(--color-text-secondary);
     font-size: var(--font-size-sm);
 }
@@ -144,19 +94,9 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 /* Error Messages */
 .auth-errors {
     color: #ef4444;
-    margin-bottom: var(--space-md);
     font-size: var(--font-size-sm);
     background: rgba(239, 68, 68, 0.1);
-    padding: var(--space-sm);
-    border-radius: var(--radius-sm);
     border: 1px solid rgba(239, 68, 68, 0.2);
-}
-
-.btn-google {
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .field-error {
@@ -179,19 +119,12 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
 /* Founder / Admin Bootstrap section */
 .founder-section {
-    margin-bottom: var(--space-lg);
     border: 1px solid rgba(255, 255, 255, 0.06);
-    border-radius: var(--radius-sm);
-    padding: var(--space-sm) var(--space-md);
 }
 
 .founder-summary {
     cursor: pointer;
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    user-select: none;
     list-style: none;
-    padding: var(--space-xs) 0;
 }
 
 .founder-summary::-webkit-details-marker {
@@ -205,9 +138,4 @@ input[type="password"]::-webkit-credentials-auto-fill-button {
 
 .founder-section[open] .founder-summary::before {
     content: "▼ ";
-}
-
-.founder-field {
-    margin-top: var(--space-md);
-    margin-bottom: 0;
 }

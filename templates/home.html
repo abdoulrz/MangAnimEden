@@ -64,11 +64,11 @@
                 <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
             </div>
             <div class="block-content">
-                <div class="cards-grid-3">
+                <div class="row row-cols-2 row-cols-md-3 g-2 g-sm-3 g-md-4">
                     {% for series in latest_updates %}
-                    <!-- Card {{ forloop.counter }} -->
-                    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
-                        <div class="manga-cover">
+                    <div class="col">
+                        <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
+                            <div class="manga-cover">
                             {% if series.cover %}
                             <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
                             {% else %}
@@ -91,7 +91,8 @@
                                 {% endfor %}
                             </p>
                         </div>
-                    </a>
+                        </a>
+                    </div>
                     {% empty %}
                     <p class="empty-text">Aucun manga récent.</p>
                     {% endfor %}
@@ -117,10 +118,11 @@
                 <a href="{% url 'catalog:index' %}" class="section-link">Voir tout <span>→</span></a>
             </div>
             <div class="block-content">
-                <div class="cards-grid-3">
+                <div class="row row-cols-2 row-cols-md-3 g-2 g-sm-3 g-md-4">
                     {% for series in popular_series %}
-                    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
-                        <div class="manga-cover">
+                    <div class="col">
+                        <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
+                            <div class="manga-cover">
                             {% if series.cover %}
                             <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
                             {% else %}
@@ -142,7 +144,8 @@
                                 {% endfor %}
                             </p>
                         </div>
-                    </a>
+                        </a>
+                    </div>
                     {% empty %}
                     <p class="empty-text">Aucun manga populaire.</p>
                     {% endfor %}

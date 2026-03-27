@@ -34,7 +34,7 @@
         <ul class="notification-list">
             {% if navbar_notifications %}
             {% for notif in navbar_notifications %}
-            <li>
+            <li data-notif-id="{{ notif.id }}">
                 <a class="notification-item d-flex align-items-center {% if not notif.is_read %}unread{% endif %}"
                     href="{% url 'social:notifications_list' %}?read={{ notif.id }}">
                     <div class="flex-shrink-0">
