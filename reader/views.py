@@ -69,6 +69,18 @@ def chap_view(request, chapter_id=None):
                 request.session['free_chapters_read'] = free_chapters
                 request.session.modified = True
     
+    # Recommendations (Phase 3.4.2)
+    from catalog.models import Series
+    from django.db.models import Count
+    
+    recommendations = Series.objects.filter(
+        genres__in=chapter.series.genres.all()
+    ).exclude(
+        id=chapter.series.id
+    ).annotate(
+        shared_genres=Count('genres')
+    ).order_by('-shared_genres', '-views_count')[:4]
+    
     # Context
     context = {
         'page': first_page, # For backward compatibility with existing template logic that expects 'page'
@@ -77,6 +89,7 @@ def chap_view(request, chapter_id=None):
         'current_page': current_page,
         'prev_chapter': prev_chapter,
         'next_chapter': next_chapter,
+        'recommendations': recommendations,
         'STATIC_VERSION': settings.STATIC_VERSION
     }
     

@@ -7,59 +7,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from catalog.models import Series
 from collections import defaultdict
-from administration.models import Report
-
 User = get_user_model()
-
-@requires_admin
-def admin_dashboard(request):
-    """
-    Tableau de bord pour l'administration métier (Site Administrators).
-    Permet de gérer les utilisateurs, le contenu, et les signalements.
-    """
-    users = User.objects.all().order_by('-date_joined')
-    recent_series = Series.objects.all().order_by('-updated_at')[:5]
-    
-    # Reports
-    pending_reports = Report.objects.filter(status='pending').order_by('-created_at')
-
-    if request.method == 'POST':
-        action_type = request.POST.get('action_type', 'user') # 'user' or 'report'
-        
-        if action_type == 'user':
-            user_id = request.POST.get('user_id')
-            action = request.POST.get('action')
-            
-            if user_id and action:
-                target_user = get_object_or_404(User, id=user_id)
-                if action == 'toggle_admin':
-                    if target_user != request.user:
-                        target_user.role_admin = not target_user.role_admin
-                elif action == 'toggle_moderator':
-                    target_user.role_moderator = not target_user.role_moderator
-                elif action == 'toggle_ban':
-                    target_user.is_banned = not target_user.is_banned
-                
-                target_user.save()
-                return redirect('users:admin_dashboard')
-                
-        elif action_type == 'report':
-            report_id = request.POST.get('report_id')
-            action = request.POST.get('action')
-            
-            if report_id and action in ['resolve', 'dismiss']:
-                report = get_object_or_404(Report, id=report_id)
-                report.status = 'resolved' if action == 'resolve' else 'dismissed'
-                report.resolved_by = request.user
-                report.save()
-                return redirect('users:admin_dashboard')
-
-    return render(request, 'users/admin_dashboard.html', {
-        'users': users,
-        'recent_series': recent_series,
-        'pending_reports': pending_reports,
-        'STATIC_VERSION': settings.STATIC_VERSION
-    })
 
 @login_required
 def profile_view(request):

@@ -6,17 +6,14 @@
 /* ==================== NAVBAR ==================== */
 /* ==================== NAVBAR ==================== */
 .navbar {
-    background: rgba(20, 20, 20, 0.85);
-    /* Semi-transparent for Glassmorphism */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-    /* Subtle border */
+    background: var(--glass-panel-bg);
+    border-bottom: 1px solid var(--glass-border);
     position: sticky;
     top: 0;
     z-index: var(--z-sticky);
     -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-    /* Soft shadow for depth */
+    box-shadow: var(--glass-shadow);
 }
 
 /* Neumorphic Connexion Button Override */
@@ -59,24 +56,21 @@
 
 .nav-link {
     padding: var(--space-xs) 0;
-    /* Minimal padding, text focus */
-    color: rgba(255, 255, 255, 0.7);
-    /* Greyish default */
+    color: var(--color-text-secondary);
     font-weight: 700;
-    /* Bold as per image */
     transition: all var(--transition-fast);
     text-decoration: none;
     font-size: 0.95rem;
 }
 
 .nav-link:hover {
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .nav-link.active {
     background: transparent;
-    color: #fff;
-    /* White active state */
+    color: var(--color-text-primary);
+    font-weight: 900;
 }
 
 /* ==================== MICRO-MOBILE (<= 360px) ==================== */
@@ -146,10 +140,12 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
+
+
 .search-result-title {
     font-size: 0.95rem;
     font-weight: 600;
-    color: #fff;
+    color: var(--color-text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -191,11 +187,14 @@
 .navbar-search-input {
     width: 250px;
     padding-left: 40px;
-    background: #000000;
-    /* Pure black as per image */
+    background: var(--color-input-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
-    /* Capsule shape */
+    color: var(--color-text-primary);
+}
+
+.navbar-search-input::placeholder {
+    color: var(--color-input-placeholder);
 }
 
 .navbar-search-input:focus {
@@ -228,6 +227,8 @@
     transform: translateY(-50%) scale(1.1);
     filter: brightness(1.2);
 }
+
+
 
 .navbar-icon-btn {
     width: 40px;
@@ -656,11 +657,11 @@
 
 /* ==================== GLASS PANEL (Global) ==================== */
 .glass-panel {
-    background: rgba(30, 30, 30, 0.85);
+    background: var(--glass-panel-bg);
     -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
     border-radius: 16px;
 }
 

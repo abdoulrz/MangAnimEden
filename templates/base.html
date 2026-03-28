@@ -7,6 +7,16 @@
     <title>{% block title %}MangAnimEDen - Lecture de manga{% endblock %}</title>
     {% load static %}
     <link rel="icon" href="{% static 'images/logo.jpeg' %}">
+    
+    <!-- Pre-Render Theme Sync -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                document.documentElement.classList.add('light-mode');
+            }
+        })();
+    </script>
 
     <!-- Design Tokens -->
     <link rel="stylesheet" href="{% static 'css/tokens.css' %}?v={{ STATIC_VERSION }}&t=8">

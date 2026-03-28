@@ -17,8 +17,11 @@ def catalog_index(request):
     type_filter = request.GET.get('type', '')
     order = request.GET.get('order', 'title') # Default sort by title
 
-    # Base queryset with prefetch to avoid N+1 on genres
-    series_list = Series.objects.prefetch_related('genres').all()
+    # Base queryset with annotations to avoid N+1 queries
+    from django.db.models import Count
+    series_list = Series.objects.prefetch_related('genres').annotate(
+        real_chapters_count=Count('chapters') # Using a different name to avoid conflict with denormalized field if needed, but let's just use it to override or supplement
+    ).all()
 
     # Filtering
     if query:
@@ -68,8 +71,9 @@ def manga_detail(request, series_id):
     Fetches the series and its chapters.
     """
     series = get_object_or_404(Series, pk=series_id)
-    # Increment views
-    series.views_count += 1
+    # Increment views atomatically
+    from django.db.models import F
+    series.views_count = F('views_count') + 1
     series.save(update_fields=['views_count'])
     chapters = series.chapters.all().order_by('number')
     

@@ -42,4 +42,4 @@
 
 ## 6. The "Self-Correction" Loop
 
-* **Rule:** "After generating code, perform a **Self-Review** phase. Check your own code against the `SPEC.md` and the rules above. If you find a hallucination or a violation, correct it immediately before showing me the result."
+* **Rule:** "After generating code, perform a **Self-Review** phase. Check your own code against the `SPEC.md` and the rules above. If you find a hallucination or a violation, correct it immediately before showing me the result."(No need to rewrite a whole file if fixing the bug line will do.)

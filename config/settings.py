@@ -13,6 +13,18 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from decouple import config, Csv
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+# Sentry SDK Initialization (Phase 3.5.1)
+SENTRY_DSN = config('SENTRY_DSN', default='')
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=1.0,
+        send_default_pii=True
+    )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -205,7 +217,8 @@ STORAGES = {
 
 # Data Upload Settings
 DATA_UPLOAD_MAX_NUMBER_FILES = 10000  # Increased limit for bulk chapter uploads
-DATA_UPLOAD_MAX_MEMORY_SIZE = 2147483648  # 2 GB
+STORAGE_LIMIT_MB = config('STORAGE_LIMIT_MB', default=2000, cast=int)
+DATA_UPLOAD_MAX_MEMORY_SIZE = STORAGE_LIMIT_MB * 1024 * 1024
 
 # Custom User Model
 AUTH_USER_MODEL = 'users.User'
@@ -261,8 +274,13 @@ SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SECURE = not DEBUG  # True in prod (HTTPS), False in dev (HTTP)
 CSRF_COOKIE_SECURE = not DEBUG
 
+# Extra Security Headers
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
 # Versioning for cache busting 
-STATIC_VERSION = '2.10.42'
+STATIC_VERSION = '2.10.48'
 
 # Admin bootstrap via secret passphrase on registration
 ADMIN_BOOTSTRAP_PASSPHRASE = config('ADMIN_BOOTSTRAP_PASSPHRASE', default='Nefe')

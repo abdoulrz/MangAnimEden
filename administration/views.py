@@ -11,9 +11,9 @@ from django.contrib import messages
 from django.urls import reverse_lazy
 from django.utils import timezone
 from .decorators import requires_admin, requires_moderator, log_admin_action, create_system_log
-from .models import SystemLog
-from catalog.models import Series, Chapter, Genre
-from social.models import Group, Event  # Import Group and Event models
+from administration.models import SystemLog, Report # Added Report
+from catalog.models import Series, Chapter, Genre, Review # Added Review
+from social.models import Message, Group, Event # Added Message
 from users.models import Badge
 
 User = get_user_model()
@@ -35,10 +35,14 @@ class AdminDashboardView(TemplateView):
         context['total_events'] = Event.objects.count()
         
         # Recent Activity (Logs)
-        context['recent_logs'] = SystemLog.objects.select_related('actor', 'target_user').order_by('-created_at')[:10]
+        context['recent_logs'] = SystemLog.objects.select_related('actor', 'target_user').order_by('-created_at')[:15]
         
-        # Pending Reports (Placeholder for future)
-        context['pending_reports_count'] = 0
+        # Moderation Context
+        context['pending_reports'] = Report.objects.filter(status='pending').select_related('reporter').order_by('-created_at')
+        context['pending_reports_count'] = context['pending_reports'].count()
+        
+        # Recent Reviews for moderation
+        context['recent_reviews'] = Review.objects.select_related('user', 'series').order_by('-created_at')[:10]
         
         context['active_tab'] = 'dashboard'
         return context
@@ -103,6 +107,56 @@ class UserActionView(View):
         messages.success(request, f"User {target_user.nickname}: {msg}")
         
         return redirect('administration:user_list')
+
+
+@method_decorator(requires_moderator, name='dispatch')
+class ContentModerationView(View):
+    """
+    Handles moderation actions for reports and user-generated content (reviews, messages).
+    """
+    def post(self, request, *args, **kwargs):
+        action_type = request.POST.get('action_type') # 'report' or 'review'
+        action = request.POST.get('action') # 'resolve', 'dismiss', 'delete'
+        
+        if action_type == 'report':
+            report_id = request.POST.get('report_id')
+            report = get_object_or_404(Report, id=report_id)
+            
+            if action == 'resolve':
+                # Automated content deletion as requested by user
+                target = report.target
+                target_desc = str(target) if target else "Unknown Content"
+                
+                if target:
+                    target.delete() # GenericForeignKey delete
+                    
+                report.status = 'resolved'
+                report.resolved_by = request.user
+                report.save()
+                
+                create_system_log(request, 'REPORT_RESOLVED', details=f"Signalement {report_id} résolu. Contenu supprimé : {target_desc}")
+                messages.success(request, f"Signalement résolu. Le contenu a été supprimé.")
+                
+            elif action == 'dismiss':
+                report.status = 'dismissed'
+                report.resolved_by = request.user
+                report.save()
+                
+                create_system_log(request, 'REPORT_DISMISSED', details=f"Signalement {report_id} rejeté par {request.user.nickname}")
+                messages.info(request, "Signalement ignoré.")
+                
+        elif action_type == 'review':
+            review_id = request.POST.get('review_id')
+            review = get_object_or_404(Review, id=review_id)
+            
+            if action == 'delete':
+                review_desc = f"Avis de {review.user.nickname} sur {review.series.title}"
+                review.delete()
+                
+                create_system_log(request, 'REVIEW_DELETE', details=f"Avis supprimé par modération : {review_desc}")
+                messages.success(request, "L'avis a été supprimé définitivement.")
+                
+        return redirect('administration:dashboard')
 
 
 # --- Content Management (Series) ---

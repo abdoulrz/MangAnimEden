@@ -118,15 +118,25 @@ class User(AbstractUser):
     def add_xp(self, amount):
         """
         Ajoute de l'XP et met à jour le niveau si nécessaire.
+        Utilise select_for_update() pour éviter les conflits de concurrence.
         """
-        self.xp += amount
-        new_level = self.calculate_level()
+        from django.db import transaction
         
-        if new_level > self.level:
-            self.level = new_level
-            # Ici on pourrait ajouter une notification de "Level Up"
+        with transaction.atomic():
+            # Lock the user row for the duration of the transaction
+            user = User.objects.select_for_update().get(pk=self.pk)
+            user.xp += amount
+            new_level = user.calculate_level()
             
-        self.save()
+            if new_level > user.level:
+                user.level = new_level
+                # Ici on pourrait ajouter une notification de "Level Up"
+                
+            user.save()
+            
+            # Update local instance to reflect DB changes
+            self.xp = user.xp
+            self.level = user.level
 
     def get_level_progress(self):
         """

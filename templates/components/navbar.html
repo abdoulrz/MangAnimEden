@@ -57,23 +57,22 @@
             <script>
                 document.addEventListener('DOMContentLoaded', function () {
                     const themeBtn = document.getElementById('theme-toggle');
-                    const body = document.body;
+                    const root = document.documentElement;
 
                     // Check saved theme
                     const savedTheme = localStorage.getItem('theme');
                     if (savedTheme === 'light') {
-                        body.classList.add('light-mode');
+                        root.classList.add('light-mode');
                         if (themeBtn) themeBtn.textContent = '☀️';
                     } else {
-                        // Default is dark mode, ensure no light-mode class
-                        body.classList.remove('light-mode');
+                        root.classList.remove('light-mode');
                         if (themeBtn) themeBtn.textContent = '🌙';
                     }
 
                     if (themeBtn) {
                         themeBtn.addEventListener('click', () => {
-                            body.classList.toggle('light-mode');
-                            const isLight = body.classList.contains('light-mode');
+                            root.classList.toggle('light-mode');
+                            const isLight = root.classList.contains('light-mode');
                             themeBtn.textContent = isLight ? '☀️' : '🌙';
                             localStorage.setItem('theme', isLight ? 'light' : 'dark');
                         });

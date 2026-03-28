@@ -12,13 +12,17 @@ const MangaReader = (function () {
     };
 
     // État local
+    let _savedMode = localStorage.getItem('reader_mode');
+    let _initialMode = _savedMode === 'webtoon' ? 'vertical' : (_savedMode || 'vertical');
+    let _initialGapless = localStorage.getItem('reader_gapless') === 'true' || (_savedMode === 'webtoon');
+
     let state = {
         currentPage: 1, // 1-based index
         totalPages: 0,
         chapterId: null,
-        readingMode: localStorage.getItem('reader_mode') || 'vertical', // 'vertical', 'webtoon', 'paged'
+        readingMode: _initialMode, // 'vertical', 'paged'
         direction: localStorage.getItem('reader_direction') || 'ltr', // 'ltr', 'rtl' (manga)
-        gapless: localStorage.getItem('reader_gapless') === 'true',
+        gapless: _initialGapless,
         zoomLevel: 1.0,
         isMenuOpen: false,
         isRestoringScroll: true, // Block progress tracking during init
@@ -43,13 +47,13 @@ const MangaReader = (function () {
 
     const _applySettings = () => {
         // Reset classes
-        elements.container.classList.remove('mode-vertical', 'mode-webtoon', 'mode-paged', 'gapless');
+        elements.container.classList.remove('mode-vertical', 'mode-paged', 'gapless');
 
         // Apply Mode
         elements.container.classList.add(`mode-${state.readingMode}`);
 
-        // Apply Gapless
-        if (state.gapless && state.readingMode === 'webtoon') {
+        // Apply Gapless (now works for all vertical/scroll modes)
+        if (state.gapless && state.readingMode === 'vertical') {
             elements.container.classList.add('gapless');
         }
 
@@ -350,6 +354,7 @@ const MangaReader = (function () {
         _initEventListeners();
         _applySettings();
         _initLazyLoading();
+        _initStickyNext();
 
         // Restore Scroll Position
         if (state.readingMode !== 'paged' && state.currentPage > 1) {
@@ -375,6 +380,47 @@ const MangaReader = (function () {
         }
 
         console.log(`MangaReader initialized. Mode: ${state.readingMode}, Total Pages: ${state.totalPages}, Current Page: ${state.currentPage}`);
+    };
+
+    const _initStickyNext = () => {
+        const sticky = document.getElementById('sticky-next');
+        const endFunnel = document.getElementById('end-funnel');
+        if (!sticky || !endFunnel) return;
+
+        // Intersection Observer to hide sticky when actual end funnel is visible
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    sticky.classList.add('hidden');
+                } else {
+                    // Re-check scroll position
+                    _handleScrollForSticky();
+                }
+            });
+        }, { threshold: 0.1 });
+
+        observer.observe(endFunnel);
+
+        const _handleScrollForSticky = () => {
+            if (state.readingMode === 'paged') {
+                sticky.classList.add('hidden');
+                return;
+            }
+
+            const scrollPercent = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight;
+            
+            // Show if scrolled more than 60% and funnel not visible
+            const isNearEnd = scrollPercent > 0.6;
+            const isFunnelVisible = endFunnel.getBoundingClientRect().top < window.innerHeight;
+
+            if (isNearEnd && !isFunnelVisible) {
+                sticky.classList.remove('hidden');
+            } else {
+                sticky.classList.add('hidden');
+            }
+        };
+
+        window.addEventListener('scroll', _handleScrollForSticky, { passive: true });
     };
 
     return {

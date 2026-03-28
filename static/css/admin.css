@@ -23,10 +23,10 @@
 }
 
 .admin-sidebar {
-    background: rgba(30, 30, 30, 0.6);
+    background: var(--glass-panel-bg);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     padding: 24px;
     height: fit-content;
@@ -35,10 +35,10 @@
 }
 
 .admin-content {
-    background: rgba(30, 30, 30, 0.4);
+    background: var(--glass-panel-bg);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-xl);
     padding: 40px;
 }
@@ -59,8 +59,7 @@
     align-items: center;
     gap: 12px;
     padding: 14px 16px;
-    color: #cbd5e1;
-    /* Light slate, brighter than text-secondary */
+    color: var(--color-text-secondary);
     text-decoration: none;
     border-radius: var(--radius-lg);
     margin-bottom: 6px;
@@ -76,7 +75,7 @@
 
 .admin-nav-item.active {
     background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.15) 100%);
-    color: #fff;
+    color: var(--color-text-primary);
     font-weight: 600;
     border: 1px solid rgba(139, 92, 246, 0.2);
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.1);
@@ -93,10 +92,14 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    /* Center align items vertically */
     margin-bottom: 40px;
     padding-bottom: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.admin-header p {
+    color: var(--color-text-secondary) !important;
+    opacity: 0.9;
 }
 
 .admin-search-form {
@@ -109,11 +112,11 @@
 }
 
 .admin-search-form input {
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-input);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
     padding: 8px 16px;
-    color: #fff;
+    color: var(--color-text-primary);
     outline: none;
     min-width: 280px;
     transition: all 0.3s ease;
@@ -138,7 +141,7 @@
 .admin-page-title {
     font-size: 2em;
     font-weight: 800;
-    background: linear-gradient(to right, #fff, #a1a1aa);
+    background: linear-gradient(to right, var(--color-text-primary), var(--color-text-secondary));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -165,10 +168,10 @@
 }
 
 .metric-card {
-    background: linear-gradient(145deg, rgba(30, 30, 30, 0.8) 0%, rgba(20, 20, 20, 0.9) 100%);
+    background: var(--color-bg-elevated);
     padding: 28px;
     border-radius: var(--radius-xl);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--color-border);
     position: relative;
     overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -217,7 +220,7 @@
     font-weight: 800;
     margin: 5px 0 15px 0;
     line-height: 1;
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .metric-value.primary {
@@ -285,8 +288,8 @@
     text-transform: uppercase;
     letter-spacing: 1px;
     padding: 20px 30px;
-    background: rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: var(--color-bg-input);
+    border-bottom: 1px solid var(--color-border);
     font-weight: 600;
 }
 
@@ -590,7 +593,7 @@
     font-size: 1.1em;
     font-weight: 700;
     margin-bottom: 8px;
-    color: #fff;
+    color: var(--color-text-primary);
 }
 
 .series-actions {

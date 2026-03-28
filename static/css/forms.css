@@ -4,7 +4,8 @@
     margin-bottom: var(--space-lg);
 }
 
-.form-label {
+.form-label, 
+.form-group label {
     display: block;
     margin-bottom: var(--space-xs);
     color: var(--color-text-primary);
@@ -15,23 +16,23 @@
 .form-control {
     width: 100%;
     padding: 12px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--color-input-bg);
+    border: 1px solid var(--color-input-border);
     border-radius: var(--radius-md);
-    color: white;
+    color: var(--color-text-primary);
     font-size: 1rem;
     transition: all 0.2s ease;
 }
 
 .form-control:focus {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: var(--color-primary);
+    background: var(--color-input-focus-bg);
+    border-color: var(--color-purple-primary);
     outline: none;
-    box-shadow: 0 0 0 3px rgba(var(--color-primary-rgb), 0.2);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
 }
 
 .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--color-input-placeholder);
 }
 
 textarea.form-control {
@@ -89,7 +90,7 @@ textarea.form-control {
 
 /* Button Styles */
 .btn-primary {
-    background: var(--gradient-primary);
+    background: var(--gradient-purple-pink);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -101,7 +102,7 @@ textarea.form-control {
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(var(--color-primary-rgb), 0.4);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
 }
 
 .btn-outline-light {

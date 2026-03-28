@@ -10,6 +10,7 @@ urlpatterns = [
     # User Management
     path('users/', views.UserManagementView.as_view(), name='user_list'),
     path('users/action/', views.UserActionView.as_view(), name='user_action'),
+    path('content/moderation/', views.ContentModerationView.as_view(), name='content_moderation'),
     
     # Content Management - Series
     path('content/series/', views.AdminSeriesListView.as_view(), name='series_list'),

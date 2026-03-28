@@ -1,83 +1,387 @@
 {% extends "administration/base_admin.html" %}
+{% load humanize %}
 
 {% block admin_content %}
 <div class="admin-header">
-    <h1 class="admin-page-title">Tableau de Bord</h1>
+    <div>
+        <h1 class="admin-page-title">Tableau de Bord</h1>
+        <p class="text-muted">Bienvenue, {{ request.user.nickname }}. Voici l'état actuel de la plateforme.</p>
+    </div>
     <div class="admin-user-info">
-        Connecté en tant que {{ request.user.nickname }}
-        {% if request.user.role_admin %}<span class="badge badge-admin">Admin</span>{% endif %}
+        <i class="fas fa-user-shield"></i>
+        {% if request.user.role_admin %}Admin Accès{% else %}Modérateur Accès{% endif %}
     </div>
 </div>
 
 <!-- Metrics Cards -->
 <div class="metrics-grid">
     <div class="metric-card">
-        <h3 class="metric-title">Total Utilisateurs</h3>
+        <h3 class="metric-title">Utilisateurs</h3>
         <p class="metric-value primary">{{ total_users }}</p>
-        <small class="metric-subtitle">+{{ new_users_today }} aujourd'hui</small>
+        <small class="metric-subtitle"><i class="fas fa-user-plus"></i> +{{ new_users_today }} aujourd'hui</small>
     </div>
 
     <div class="metric-card">
-        <h3 class="metric-title">Séries</h3>
+        <h3 class="metric-title">Mangas & Chapitres</h3>
         <p class="metric-value accent">{{ total_series }}</p>
-        <small>{{ total_chapters }} chapitres</small>
+        <small class="metric-subtitle secondary">{{ total_chapters }} chapitres actifs</small>
     </div>
 
     <div class="metric-card">
-        <h3 class="metric-title">Groupes</h3>
+        <h3 class="metric-title">Communauté</h3>
         <p class="metric-value secondary">{{ total_groups }}</p>
+        <small class="metric-subtitle info">{{ total_events }} événements</small>
     </div>
 
     <div class="metric-card">
-        <h3 class="metric-title">Événements</h3>
-        <p class="metric-value warn">{{ total_events }}</p>
+        <h3 class="metric-title">Signalements</h3>
+        <p class="metric-value {% if pending_reports_count > 0 %}warn{% else %}success{% endif %}">{{ pending_reports_count }}</p>
+        <small class="metric-subtitle {% if pending_reports_count > 0 %}danger{% else %}success{% endif %}">
+            {% if pending_reports_count > 0 %}Action requise{% else %}Tout est en règle{% endif %}
+        </small>
     </div>
 </div>
 
-<!-- Recent Activity Log -->
-<div class="section-logs">
-    <h2>Activité Récente (Admin & Modération)</h2>
-    <div class="table-responsive">
-        <table class="admin-table">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Auteur</th>
-                    <th>Action</th>
-                    <th>Cible</th>
-                    <th>Détails</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for log in recent_logs %}
-                <tr>
-                    <td>{{ log.created_at|date:"d M H:i" }}</td>
-                    <td>
-                        <a href="{% url 'administration:user_list' %}?q={{ log.actor.nickname }}">
-                            {{ log.actor.nickname }}
-                        </a>
-                    </td>
-                    <td>
-                        <span class="log-action-badge">{{ log.get_action_display }}</span>
-                    </td>
-                    <td>
-                        {% if log.target_user %}
-                        {{ log.target_user.nickname }}
-                        {% else %}
-                        -
-                        {% endif %}
-                    </td>
-                    <td class="text-muted">
-                        {{ log.details|truncatechars:50 }}
-                    </td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="text-center text-muted">Aucune activité récente.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+<!-- Premium Tabs System -->
+<div class="admin-tabs-container">
+    <div class="admin-tabs-header">
+        <button class="tab-trigger active" data-tab="reports">
+            <i class="fas fa-exclamation-triangle"></i> Signalements
+            {% if pending_reports_count > 0 %}
+            <span class="tab-badge">{{ pending_reports_count }}</span>
+            {% endif %}
+        </button>
+        <button class="tab-trigger" data-tab="reviews">
+            <i class="fas fa-comments"></i> Modération Avis
+        </button>
+        <button class="tab-trigger" data-tab="logs">
+            <i class="fas fa-history"></i> Logs Système
+        </button>
+    </div>
+
+    <div class="admin-tabs-content">
+        <!-- Reports Tab -->
+        <div class="tab-pane active" id="reports">
+            <div class="pane-header">
+                <h2>File d'attente des signalements</h2>
+                <p>Contenus signalés par la communauté nécessitant une analyse.</p>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Lanceur d'alerte</th>
+                            <th>Cible & Type</th>
+                            <th>Raison & Description</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for report in pending_reports %}
+                        <tr>
+                            <td>
+                                <div class="user-cell">
+                                    <span class="avatar-placeholder-small">{{ report.reporter.nickname|first|upper }}</span>
+                                    <span>{{ report.reporter.nickname }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-outline">{{ report.target_type.model|upper }}</span>
+                                <div class="text-xs text-muted mt-1">ID: {{ report.target_id }}</div>
+                            </td>
+                            <td>
+                                <span class="text-bold">{{ report.get_reason_display }}</span>
+                                {% if report.description %}
+                                <p class="text-xs text-muted italic mt-1">"{{ report.description|truncatechars:100 }}"</p>
+                                {% endif %}
+                            </td>
+                            <td>{{ report.created_at|date:"d/m H:i" }}</td>
+                            <td>
+                                <div class="action-buttons-group">
+                                    <form action="{% url 'administration:content_moderation' %}" method="POST" class="inline-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action_type" value="report">
+                                        <input type="hidden" name="report_id" value="{{ report.id }}">
+                                        <input type="hidden" name="action" value="resolve">
+                                        <button type="submit" class="btn-icon success" title="Résoudre (Supprime le contenu)">
+                                            <i class="fas fa-check"></i>
+                                        </button>
+                                    </form>
+                                    <form action="{% url 'administration:content_moderation' %}" method="POST" class="inline-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action_type" value="report">
+                                        <input type="hidden" name="report_id" value="{{ report.id }}">
+                                        <input type="hidden" name="action" value="dismiss">
+                                        <button type="submit" class="btn-icon warning" title="Rejeter le signalement">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-muted">
+                                <i class="fas fa-check-circle fa-2x mb-2 text-success"></i><br>
+                                Aucun signalement en attente.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reviews Tab -->
+        <div class="tab-pane" id="reviews">
+            <div class="pane-header">
+                <h2>Dernières Critiques</h2>
+                <p>Modérez les derniers avis publiés par les utilisateurs.</p>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Auteur</th>
+                            <th>Manga</th>
+                            <th>Note</th>
+                            <th>Commentaire</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for review in recent_reviews %}
+                        <tr>
+                            <td>{{ review.user.nickname }}</td>
+                            <td><strong>{{ review.series.title }}</strong></td>
+                            <td>
+                                <div class="stars-mod">
+                                    {% for i in "12345" %}
+                                        <i class="fas fa-star {% if forloop.counter <= review.rating %}text-warning{% else %}text-muted{% endif %}"></i>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td class="text-sm">"{{ review.content|truncatechars:80 }}"</td>
+                            <td>{{ review.created_at|date:"d/m" }}</td>
+                            <td>
+                                <div class="action-buttons-group">
+                                    <form action="{% url 'administration:content_moderation' %}" method="POST" onsubmit="return confirm('Supprimer cet avis définitivement ?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action_type" value="review">
+                                        <input type="hidden" name="review_id" value="{{ review.id }}">
+                                        <input type="hidden" name="action" value="delete">
+                                        <button type="submit" class="btn-icon delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Logs Tab -->
+        <div class="tab-pane" id="logs">
+            <div class="pane-header">
+                <h2>Activité du Système</h2>
+                <p>Historique des actions administratives et de modération.</p>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Auteur</th>
+                            <th>Action</th>
+                            <th>Cible</th>
+                            <th>Détails</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in recent_logs %}
+                        <tr>
+                            <td>{{ log.created_at|date:"d M H:i" }}</td>
+                            <td>
+                                <span class="badge badge-outline">{{ log.actor.nickname }}</span>
+                            </td>
+                            <td>
+                                <span class="log-action-badge">{{ log.get_action_display }}</span>
+                            </td>
+                            <td>
+                                {% if log.target_user %}
+                                <span class="text-info">{{ log.target_user.nickname }}</span>
+                                {% else %}
+                                <span class="text-muted">Système</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-xs italic">
+                                {{ log.details|truncatechars:60 }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">Aucune activité récente.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
-{% endblock %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const triggers = document.querySelectorAll('.tab-trigger');
+        const panes = document.querySelectorAll('.tab-pane');
+
+        triggers.forEach(trigger => {
+            trigger.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // Reset
+                triggers.forEach(t => t.classList.remove('active'));
+                panes.forEach(p => p.classList.remove('active'));
+                
+                // Activate
+                this.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+
+                // Persist in URL if needed (optional)
+            });
+        });
+    });
+</script>
+
+<style>
+    /* Premium Design Overrides & Extensions */
+    .admin-tabs-container {
+        margin-top: 30px;
+        background: var(--color-bg-elevated);
+        border-radius: var(--radius-xl);
+        border: 1px solid var(--color-border);
+        overflow: hidden;
+    }
+
+    .admin-tabs-header {
+        display: flex;
+        background: var(--color-bg-input);
+        border-bottom: 1px solid var(--color-border);
+        padding: 0 10px;
+    }
+
+    .tab-trigger {
+        background: none;
+        border: none;
+        color: var(--color-text-secondary);
+        padding: 18px 25px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        transition: all 0.3s ease;
+        opacity: 0.7;
+    }
+
+    .tab-trigger:hover {
+        opacity: 1;
+        color: var(--color-text-primary);
+    }
+
+    .tab-trigger.active {
+        opacity: 1;
+        color: var(--color-purple-primary);
+    }
+
+    .tab-trigger.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: linear-gradient(to right, var(--color-purple-primary), var(--color-pink-primary));
+    }
+
+    .admin-page-title {
+        font-size: 2em;
+        font-weight: 800;
+        background: linear-gradient(to right, var(--color-text-primary), var(--color-text-secondary));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.5px;
+    }
+
+    .tab-badge {
+        background: var(--color-pink-primary);
+        color: var(--color-bg-body);
+        font-size: 0.7em;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-weight: 800;
+        box-shadow: 0 2px 8px rgba(236, 72, 153, 0.4);
+    }
+
+    .admin-tabs-content {
+        padding: 30px;
+    }
+
+    .tab-pane {
+        display: none;
+        animation: fadeIn 0.4s ease;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .pane-header {
+        margin-bottom: 25px;
+    }
+
+    .pane-header h2 {
+        font-size: 1.5em;
+        margin-bottom: 5px;
+    }
+
+    .action-buttons-group {
+        display: flex;
+        gap: 10px;
+    }
+
+    .badge-outline {
+        border: 1px solid var(--color-border);
+        background: var(--color-bg-input);
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75em;
+    }
+
+    .text-warning { color: #f59e0b; }
+    .text-success { color: #10b981; }
+    .text-info { color: #3b82f6; }
+    .text-bold { font-weight: 700; }
+    .text-xs { font-size: 0.75em; }
+    .text-sm { font-size: 0.85em; }
+
+    .metric-value.warn { color: #f59e0b; }
+    .metric-subtitle.danger { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+    .metric-subtitle.info { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
+</style>
+{% endblock %}

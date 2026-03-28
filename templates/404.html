@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Page Introuvable - MangaAnimEden{% endblock %}
+
+{% block extra_css %}
+<style>
+    .error-container {
+        min-height: calc(100vh - 200px); /* Adjust for navbar/footer */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: var(--space-xl);
+        position: relative;
+        overflow: hidden;
+    }
+
+    /* Abstract Background Elements */
+    .error-bg-blob {
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        background: var(--gradient-purple-pink);
+        filter: blur(100px);
+        opacity: 0.15;
+        z-index: 0;
+        border-radius: 50%;
+        animation: blobFloat 10s infinite alternate;
+    }
+
+    .blob-1 { top: 10%; left: 10%; }
+    .blob-2 { bottom: 10%; right: 10%; animation-delay: -5s; }
+
+    @keyframes blobFloat {
+        from { transform: translate(0, 0) scale(1); }
+        to { transform: translate(50px, 50px) scale(1.2); }
+    }
+
+    .error-card {
+        position: relative;
+        z-index: 1;
+        background: var(--glass-panel-bg);
+        -webkit-backdrop-filter: blur(var(--glass-blur));
+        backdrop-filter: blur(var(--glass-blur));
+        border: 1px solid var(--glass-border);
+        border-radius: 30px;
+        padding: var(--space-3xl) var(--space-2xl);
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        animation: cardFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes cardFadeIn {
+        from { opacity: 0; transform: translateY(20px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .error-code {
+        font-size: 8rem;
+        font-weight: 900;
+        margin-bottom: var(--space-sm);
+        line-height: 1;
+        letter-spacing: -4px;
+        background: var(--gradient-purple-pink);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 15px rgba(139, 92, 246, 0.3));
+    }
+
+    .error-message {
+        font-size: var(--font-size-2xl);
+        font-weight: 700;
+        margin-bottom: var(--space-md);
+        color: var(--color-text-primary);
+    }
+
+    .error-description {
+        color: var(--color-text-secondary);
+        font-size: var(--font-size-lg);
+        margin-bottom: var(--space-2xl);
+        max-width: 400px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .error-actions {
+        display: flex;
+        gap: var(--space-md);
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    @media (max-width: 768px) {
+        .error-code { font-size: 6rem; }
+        .error-card { padding: var(--space-2xl) var(--space-lg); }
+        .error-actions .btn { width: 100%; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="error-container">
+    <div class="error-bg-blob blob-1"></div>
+    <div class="error-bg-blob blob-2"></div>
+
+    <div class="error-card">
+        <div class="error-code">404</div>
+        <h1 class="error-message">Portail Inexistant</h1>
+        <p class="error-description">
+            Désolé, cette page semble s'être volatilisée dans une autre dimension. 
+        </p>
+
+        <div class="error-actions">
+            <a href="{% url 'home' %}" class="btn btn-primary">
+                <i class="fas fa-home"></i> Retour à l'accueil
+            </a>
+            <a href="{% url 'catalog:index' %}" class="btn btn-secondary">
+                <i class="fas fa-search"></i> Explorer le catalogue
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

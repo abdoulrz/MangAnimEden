@@ -4,9 +4,9 @@
  */
 
 :root {
-    --reader-bg: #1a1a1a;
-    --reader-text: #e0e0e0;
-    --accent-color: #a78bfa;
+    --reader-bg: var(--color-bg-primary);
+    --reader-text: var(--color-text-primary);
+    --accent-color: var(--color-purple-primary, #a78bfa);
 }
 
 html,
@@ -17,6 +17,15 @@ body {
     position: relative;
     overscroll-behavior-x: none;
     touch-action: pan-y;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+.reader-container::-webkit-scrollbar {
+    display: none;
 }
 
 .reader-container,
@@ -38,36 +47,30 @@ body {
     /* Block all horizontal container overflow */
 }
 
-/* --- READING MODES --- */
+/* Vertical Scroll Mode (En Continu) */
+.reader-container.mode-vertical {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
 
-/* Vertical / Webtoon Mode */
 .reader-container.mode-vertical .reader-page {
     margin-bottom: var(--space-md);
     width: 100%;
-    max-width: 100%;
+    max-width: 800px; /* Standard reading width */
     height: auto;
     display: block;
     object-fit: contain;
     margin-left: auto;
     margin-right: auto;
+    transition: margin 0.2s ease;
 }
 
-.reader-container.mode-webtoon .reader-page {
-    margin-bottom: 0;
-    border-radius: 0;
-    max-width: 800px;
-    width: 100%;
-    /* Force Full Width */
-    height: auto;
-    display: block;
-    object-fit: contain;
-    margin-left: auto;
-    margin-right: auto;
-}
-
+/* Gapless Override (Phase 3.4.5 UX Polish) */
 .reader-container.gapless .reader-page {
-    margin-bottom: 0;
-    border-radius: 0;
+    margin-bottom: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
 }
 
 /* Paged Mode (Horizontal) */
@@ -526,5 +529,278 @@ body {
     .dir-btn {
         padding: 12px;
         font-size: 14px;
+    }
+}
+
+/* --- READER END FUNNEL (Phase 3.4) --- */
+.reader-end-funnel {
+    width: 100%;
+    max-width: 800px;
+    margin: 60px auto;
+    padding: 40px;
+    background: var(--glass-panel-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    text-align: center;
+    box-shadow: var(--glass-shadow);
+}
+
+.next-chapter-hero {
+    margin-bottom: 50px;
+}
+
+.next-label {
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    color: var(--accent-color);
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.next-title {
+    font-size: 2.2rem;
+    font-weight: 900;
+    margin-bottom: 30px;
+    color: var(--color-text-primary);
+}
+
+.btn-next-chapter {
+    display: inline-flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 40px;
+    background: linear-gradient(135deg, #a78bfa 0%, #8b5cf6 100%);
+    color: white;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 1.1rem;
+    border-radius: 50px;
+    box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-next-chapter:hover {
+    transform: scale(1.05) translateY(-5px);
+    box-shadow: 0 15px 35px rgba(139, 92, 246, 0.6);
+}
+
+.pulse {
+    animation: btnPulse 2s infinite;
+}
+
+@keyframes btnPulse {
+    0% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+    70% { box-shadow: 0 0 0 20px rgba(139, 92, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+/* Recommendations Grid */
+.recommendations-section {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 40px;
+}
+
+.section-title {
+    font-size: 1.2rem;
+    margin-bottom: 25px;
+    color: var(--color-text-secondary);
+}
+
+.rec-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.rec-card {
+    text-decoration: none;
+    transition: transform 0.3s;
+}
+
+.rec-card:hover {
+    transform: translateY(-8px);
+}
+
+.rec-cover {
+    aspect-ratio: 2/3;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.rec-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.rec-title {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rec-meta {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+}
+
+/* Sticky Next Nav */
+.sticky-next-nav {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.sticky-next-nav.hidden {
+    bottom: -100px;
+    opacity: 0;
+}
+
+.sticky-content {
+    background: rgba(30, 30, 40, 0.9);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    padding: 8px 8px 8px 24px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    pointer-events: auto;
+}
+
+.sticky-info {
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #fff;
+    letter-spacing: 1px;
+}
+
+.btn-sticky-next {
+    background: var(--accent-color);
+    color: #fff;
+    text-decoration: none;
+    padding: 10px 25px;
+    border-radius: 50px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform 0.2s;
+}
+
+.btn-sticky-next:hover {
+    transform: scale(1.05);
+}
+
+/* Mobile Adjustments for End Funnel */
+@media (max-width: 768px) {
+    .reader-end-funnel {
+        padding: 30px 15px;
+        margin: 40px 10px;
+        border-radius: 15px;
+    }
+
+    .next-title { font-size: 1.6rem; }
+
+    .rec-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .btn-next-chapter {
+        padding: 15px 25px;
+        font-size: 1rem;
+    }
+
+    .sticky-next-nav {
+        width: 90%;
+        max-width: 350px;
+    }
+}
+
+/* Bottom Nav improvements */
+.bottom-nav {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 20px;
+    border-radius: 12px;
+    align-items: center;
+    max-width: 800px;
+    margin: 20px auto;
+}
+
+.chapter-selector-container {
+    flex-grow: 1;
+    max-width: 200px;
+    margin: 0 15px;
+}
+
+.chapter-dropdown {
+    width: 100%;
+    padding: 10px;
+    background: rgba(30, 30, 35, 0.8);
+    color: #fff !important;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Option B: Responsive Navigation Labels (Phase 3.4.4 UX Polish) */
+@media (max-width: 480px) {
+    .nav-label {
+        display: none !important;
+    }
+    
+    .nav-btn {
+        padding: 10px 12px;
+        min-width: 44px;
+        justify-content: center;
+    }
+    
+    .bottom-nav {
+        padding: 10px;
+        gap: 8px;
+    }
+    
+    .chapter-selector-container {
+        flex-grow: 1;
+        min-width: 80px;
+        margin: 0 5px;
+    }
+}
+
+/* Specific fix for ultra-small screens like iPhone SE (320px) */
+@media (max-width: 360px) {
+    .bottom-nav {
+        padding: 5px;
+        gap: 3px;
+    }
+    
+    .nav-btn {
+        padding: 10px 8px;
+        min-width: 40px;
+        font-size: 1.2rem; /* Icons only */
+    }
+    
+    .chapter-selector-container {
+        margin: 0;
+        max-width: 140px;
+    }
+    
+    .chapter-dropdown {
+        padding: 8px 4px;
+        font-size: 0.85rem;
     }
 }
