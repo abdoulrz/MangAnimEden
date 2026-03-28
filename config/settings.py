@@ -13,18 +13,22 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from decouple import config, Csv
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
+try:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
 
-# Sentry SDK Initialization (Phase 3.5.1)
-SENTRY_DSN = config('SENTRY_DSN', default='')
-if SENTRY_DSN:
-    sentry_sdk.init(
-        dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
-        traces_sample_rate=1.0,
-        send_default_pii=True
-    )
+    # Sentry SDK Initialization (Phase 3.5.1)
+    SENTRY_DSN = config('SENTRY_DSN', default='')
+    if SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[DjangoIntegration()],
+            traces_sample_rate=1.0,
+            send_default_pii=True
+        )
+except ModuleNotFoundError:
+    # Sentry not installed yet, skipping initialization
+    pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
