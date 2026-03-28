@@ -78,7 +78,13 @@
                 {% for rec in recommendations %}
                 <a href="{% url 'catalog:detail' rec.id %}" class="rec-card">
                     <div class="rec-cover">
-                        <img src="{{ rec.cover.url }}" alt="{{ rec.title }}">
+                        {% if rec.cover %}
+                            <img src="{{ rec.cover.url }}" alt="{{ rec.title }}">
+                        {% else %}
+                            <div class="placeholder-cover" style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: var(--color-bg-secondary); color: var(--color-text-muted);">
+                                <i class="fas fa-image fa-2x"></i>
+                            </div>
+                        {% endif %}
                     </div>
                     <div class="rec-info">
                         <span class="rec-title">{{ rec.title }}</span>
