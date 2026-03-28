@@ -603,7 +603,9 @@ body::-webkit-scrollbar,
 .section-title {
     font-size: 1.2rem;
     margin-bottom: 25px;
-    color: var(--color-text-secondary);
+    color: var(--color-text-primary);
+    text-align: center;
+    font-weight: 700;
 }
 
 .rec-grid {
@@ -710,13 +712,16 @@ body::-webkit-scrollbar,
         padding: 30px 15px;
         margin: 40px 10px;
         border-radius: 15px;
+        width: calc(100% - 20px);
+        box-sizing: border-box;
     }
 
     .next-title { font-size: 1.6rem; }
 
     .rec-grid {
         grid-template-columns: repeat(2, 1fr);
-        gap: 15px;
+        gap: 12px;
+        width: 100%;
     }
 
     .btn-next-chapter {
