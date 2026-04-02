@@ -41,7 +41,7 @@ if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
     
-    # --- Debug Error Page Routes (Phase 3.5.2 Verification) ---
+    # --- Debug Error Page Routes & Sentry Verification ---
     urlpatterns += [
         path('test-404/', TemplateView.as_view(template_name='404.html')),
         path('test-500/', TemplateView.as_view(template_name='500.html')),
