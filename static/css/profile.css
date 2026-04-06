@@ -187,7 +187,12 @@
     text-align: center;
 }
 
-
+.profile-avatar-premium-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 1rem;
+}
 
 .profile-avatar-ring {
     width: 110px;
@@ -222,20 +227,45 @@
     margin-top: 0.5rem;
     background: linear-gradient(135deg, #8b5cf6, #22d3ee);
     color: white;
-    /* Badge text can stay white against gradient */
     padding: 0.35rem 0.9rem;
     border-radius: 20px;
     font-size: 0.85rem;
     font-weight: 600;
     box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    width: max-content;
+    align-self: center;
 }
 
 
 
 .profile-username {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
     font-size: 2rem;
     font-weight: 700;
     color: var(--glass-text-primary);
+    margin-bottom: 0.25rem;
+}
+
+.message-friend-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(139, 92, 246, 0.15);
+    color: #8b5cf6;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+
+.message-friend-btn:hover {
+    background: rgba(139, 92, 246, 0.3);
+    transform: scale(1.1);
 }
 
 

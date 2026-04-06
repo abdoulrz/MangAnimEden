@@ -33,12 +33,21 @@
                     </div>
                     {% endif %}
                 </div>
-                <div class="level-badge">Lvl {{ profile_user.level }}</div>
+                <div class="level-badge">{{ profile_user.get_rank_display_name }} • Lvl {{ profile_user.level }}</div>
             </div>
 
             <!-- User Info -->
             <div class="profile-identity">
-                <h1 class="profile-username">{{ profile_user.nickname }}</h1>
+                <h1 class="profile-username">
+                    {{ profile_user.nickname }}
+                    {% if is_friend %}
+                    <a href="{% url 'social:forum_home' %}?dm_id={{ profile_user.id }}" class="message-friend-btn" title="Envoyer un message">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </a>
+                    {% endif %}
+                </h1>
                 <p class="profile-role">
                     {% if profile_user.role_moderator %}Modérateur{% else %}Membre Explorateur{% endif %}
                 </p>

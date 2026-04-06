@@ -272,7 +272,7 @@
                     <h3>Avis de la communauté ({{ series.review_count }})</h3>
                     {% if series.reviews.all %}
                     {% for review in series.reviews.all %}
-                    <div class="review-card">
+                    <div class="review-card" {% if user.is_authenticated and review.user == request.user %}id="my-review-card"{% endif %}>
                         <div class="review-card-header">
                             <div class="review-user-info">
                                 {% if review.user.avatar %}
@@ -439,6 +439,46 @@
                     btn.innerText = 'Mettre à jour l\'avis';
                     document.getElementById('average-rating-display').innerText = data.average_rating;
                     document.querySelector('.reviews-feed h3').innerText = `Avis de la communauté (${data.review_count})`;
+                    
+                    if (data.review) {
+                        const emptyState = document.querySelector('.reviews-feed .empty-state-dark');
+                        if (emptyState) emptyState.remove();
+
+                        const r = data.review;
+                        const avatarHtml = r.avatar 
+                            ? `<img src="${r.avatar}" alt="avatar" class="review-avatar-img">`
+                            : `<div class="review-avatar-fallback">${r.nickname.charAt(0).toUpperCase()}</div>`;
+                        
+                        const reviewHtml = `
+                            <div class="review-card" id="my-review-card">
+                                <div class="review-card-header">
+                                    <div class="review-user-info">
+                                        ${avatarHtml}
+                                        <div class="review-user-meta">
+                                            <strong>${r.nickname}</strong>
+                                            <span>${r.date}</span>
+                                        </div>
+                                    </div>
+                                    <div class="review-rating-badge">
+                                        <svg class="icon icon-sm" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                        </svg>
+                                        <strong>${r.rating}</strong>
+                                    </div>
+                                </div>
+                                ${r.content ? `<p class="review-body">${r.content.replace(/\\n/g, '<br>')}</p>` : ''}
+                            </div>
+                        `;
+
+                        const existingCard = document.getElementById('my-review-card');
+                        if (existingCard) {
+                            existingCard.outerHTML = reviewHtml;
+                        } else {
+                            const h3 = document.querySelector('.reviews-feed h3');
+                            h3.insertAdjacentHTML('afterend', reviewHtml);
+                        }
+                    }
+                    
                 } else {
                     showReviewStatus(data.error || 'Erreur lors de l\'envoi.', 'error');
                     btn.innerText = originalText;

@@ -151,7 +151,14 @@ def submit_review(request, series_id):
             'success': True, 
             'message': 'Avis enregistré avec succès!',
             'average_rating': series.average_rating,
-            'review_count': series.review_count
+            'review_count': series.review_count,
+            'review': {
+                'nickname': request.user.nickname,
+                'avatar': request.user.avatar.url if request.user.avatar else '',
+                'rating': rating,
+                'content': content,
+                'date': review.updated_at.strftime('%d %b %Y')
+            }
         })
     except ValueError:
          return JsonResponse({'success': False, 'error': 'Données invalides.'})

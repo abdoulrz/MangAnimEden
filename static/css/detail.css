@@ -594,12 +594,20 @@
 }
 
 @media (max-width: 600px) {
+    .detail-tabs-container {
+        padding: 0 var(--space-md);
+    }
+    
     .detail-tabs {
         flex-direction: column;
+        min-width: 0;
+        width: 100%;
+        border-radius: var(--radius-lg);
     }
 
     .tab-link {
         justify-content: center;
+        border-radius: var(--radius-md);
     }
 
     .detail-cover {

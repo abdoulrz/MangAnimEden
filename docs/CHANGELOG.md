@@ -15,6 +15,34 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.4.2] - 2026-04-06 ([Phase 3 Completion & Pre-Launch Polish])
+
+### Added
+- **Admin Dashboard Extensions** : CRUD complet pour le système de Gamification (Badges) inclus dans l'interface de modération métier.
+- **Pre-Launch Polish (Custom Error Pages)** : Intégration de pages d'erreur `404 Not Found` et `500 Server Error` construites sur le Design System (Glassmorphism), adoucissant l'expérience lors d'une défaillance ou tentative d'accès non autorisé au panel Admin.
+
+### Changed
+- **Database Intégrité & Atomicity** : Déploiement de `select_for_update()` sur toutes les opérations critiques (ex: Attribution d'XP `add_xp`) pour stopper définitivement les pertes de données causées par les recharges multiples ou requêtes asynchrones en concurrence.
+
+### Fixed
+- **Backend Performance (N+1 queries)** : Correction massive des goulets d'étranglement ORM sur les vues majeures (`catalog` et `home`). Injection de `prefetch_related` et `Count()` dans les queries limitant l'accès BDD d'une moyenne de plus de 60 appels par page à seulement 3 requêtes combinées.
+
+---
+
+## [2.4.1] - 2026-03-29 ([Light Mode Polish & Sentry Integration])
+
+### Added
+- **Infrastructure Monitoring (Phase 3.5.2)** :
+  - Déploiement officiel du SDK `sentry-sdk[django]` pour le monitoring en temps réel des erreurs 500 en production.
+  - Configuration sécurisée via variables d'environnement (`SENTRY_DSN`) avec fallback silencieux si non installé.
+
+### Fixed
+- **Reader UI (Light Mode Polish)** :
+  - **Mobile Horizontal Overflow** : Résolution critique du dépassement horizontal sur le "Reader Funnel". Remplacement strict de `100vw` par `100%` pour garantir le confinement du contenu sur tous bords.
+  - **Recommendation Engine Stability** : Ajout d'une condition défensive dans la boucle de recommandation de chapitre (`chap.html`) pour empêcher les crash 500 (`ValueError`) lorsqu'une série parente manque de couverture (fallback textuel).
+
+---
+
 ## [2.4.0] - 2026-03-18 ([Forum UX Refinement & Icon Excellence])
 
 ### Added

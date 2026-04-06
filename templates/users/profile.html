@@ -51,7 +51,7 @@
                         </div>
                         {% endif %}
                     </div>
-                    <div class="level-badge">Lvl {{ user.level }}</div>
+                    <div class="level-badge">{{ user.get_rank_display_name }} • Lvl {{ user.level }}</div>
                 </div>
 
                 <!-- User Info -->
@@ -60,13 +60,7 @@
                         {{ user.nickname|default:user.username }}
                     </h1>
                     <div class="profile-rank-badge-row">
-                        {% with rank=user.get_rank_info %}
-                        <span class="rank-badge-detailed rank-{{ rank.title|slugify }}" title="{{ rank.title }}">
-                            {{ rank.emoji }} {{ rank.title }}
-                        </span>
-                        {% endwith %}
-
-                        {% if user.is_staff %}
+                        <!-- Rank is now displayed in the level badge under the avatar -->                        {% if user.is_staff %}
                         <span class="staff-tag">STAFF</span>
                         {% endif %}
 

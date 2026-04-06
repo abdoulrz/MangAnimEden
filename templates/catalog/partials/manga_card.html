@@ -1,0 +1,26 @@
+<div class="col">
+    <a href="{% url 'catalog:detail' series.id %}" class="manga-card">
+        <div class="manga-cover">
+            {% if series.cover %}
+            <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="manga-image">
+            {% else %}
+            <div class="manga-image placeholder"></div>
+            {% endif %}
+            <div class="manga-badges">
+                <span class="badge-status">{{ series.get_status_display|default:"En cours" }}</span>
+                <span class="badge-type">{{ series.get_type_display|default:series.type }}</span>
+            </div>
+            <div class="badge-rating"><span>★</span> {{ series.average_rating|default:"0.0" }}</div>
+        </div>
+        <div class="manga-info">
+            <h3 class="manga-title">{{ series.title }}</h3>
+            <p class="manga-meta">
+                {% for genre in series.genres.all %}
+                {{ genre.name }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                Action, Aventure
+                {% endfor %}
+            </p>
+        </div>
+    </a>
+</div>
