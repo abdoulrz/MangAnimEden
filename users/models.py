@@ -45,6 +45,7 @@ class User(AbstractUser):
     # Gamification
     level = models.PositiveIntegerField(default=1)
     xp = models.PositiveIntegerField(default=100)
+    prestige_level = models.PositiveIntegerField(default=0, verbose_name="Niveau de Prestige")
 
     # Online Status & Preferences (Phase 1 Expansion)
     last_seen = models.DateTimeField(null=True, blank=True)
@@ -58,6 +59,9 @@ class User(AbstractUser):
 
     # Subscription & Access (New)
     has_nsfw_access = models.BooleanField(default=False, verbose_name="Accès 18+")
+    is_premium = models.BooleanField(default=False, verbose_name="Est Premium")
+    premium_expires_at = models.DateTimeField(null=True, blank=True, verbose_name="Expiration Premium")
+    age_verified = models.BooleanField(default=False, verbose_name="Âge Vérifié")
     SUBSCRIPTION_CHOICES = [
         ('free', 'Membre Gratuit'),
         ('premium', 'Abonné Premium'),
@@ -181,7 +185,10 @@ class User(AbstractUser):
         Replaces old Admin/Mod/Member labels site-wide.
         """
         rank = self.get_rank_info()
-        return f"{rank['emoji']} {rank['title']}"
+        base_name = f"{rank['emoji']} {rank['title']}"
+        if self.prestige_level > 0:
+            return f"Monarque L-{self.prestige_level} | {base_name}"
+        return base_name
 
     @property
     def is_profile_complete(self):
@@ -358,3 +365,43 @@ class UserBadge(models.Model):
     class Meta:
         unique_together = ('user', 'badge')
 
+class UserWallet(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='wallet')
+    credits_balance = models.PositiveIntegerField(default=0, verbose_name="Solde de Crédits")
+    auto_use_credits = models.BooleanField(default=False, verbose_name="Utilisation auto des crédits")
+    
+    def __str__(self):
+        return f"Wallet de {self.user.nickname} - {self.credits_balance} Crédits"
+
+class Transaction(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'En attente'),
+        ('SUCCESS', 'Réussi'),
+        ('FAILED', 'Échoué'),
+    ]
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transactions')
+    amount_in_fiat = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="Montant (Fiat)")
+    currency = models.CharField(max_length=10, default="XOF", verbose_name="Devise")
+    gateway_used = models.CharField(max_length=50, verbose_name="Passerelle de paiement")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING', verbose_name="Statut")
+    credits_awarded = models.PositiveIntegerField(verbose_name="Crédits Accordés")
+    webhook_payload = models.JSONField(null=True, blank=True, verbose_name="Payload Webhook")
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.nickname} - {self.amount_in_fiat} {self.currency} ({self.status})"
+
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=User)
+def create_user_wallet(sender, instance, created, **kwargs):
+    if created:
+        UserWallet.objects.create(user=instance)
+
+@receiver(post_save, sender=User)
+def save_user_wallet(sender, instance, **kwargs):
+    try:
+        instance.wallet.save()
+    except UserWallet.DoesNotExist:
+        pass

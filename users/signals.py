@@ -43,7 +43,8 @@ def award_xp_on_read(sender, instance, created, **kwargs):
     
     # On n'attribue l'XP que si 'completed' est True ET qu'il ne l'était pas avant
     if instance.completed and (created or not was_completed):
-        instance.user.add_xp(5)
+        xp_gain = 4 if instance.user.level >= 50 else 5
+        instance.user.add_xp(xp_gain)
         BadgeService.check_badges(instance.user, 'CHAPTERS_READ')
 
 

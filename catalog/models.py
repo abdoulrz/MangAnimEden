@@ -61,6 +61,7 @@ class Series(models.Model):
     # Métadonnées
     type = models.CharField(max_length=20, choices=TYPE_CHOICES, default='manga', verbose_name="Type")
     genres = models.ManyToManyField(Genre, blank=True, verbose_name="Genres", related_name='series')
+    nsfw = models.BooleanField(default=False, verbose_name="Contenu 18+ (NSFW)")
     author = models.CharField(max_length=200, blank=True, verbose_name="Auteur")
     artist = models.CharField(max_length=200, blank=True, verbose_name="Artiste")
     status = models.CharField(
@@ -130,6 +131,7 @@ class Chapter(models.Model):
     )
     title = models.CharField(max_length=200, blank=True, verbose_name="Titre")
     source_file = models.FileField(upload_to='scans/', blank=True, null=True, verbose_name="Fichier Source")
+    is_premium = models.BooleanField(default=False, verbose_name="Chapitre Premium")
     
     created_at = models.DateTimeField(auto_now_add=True)
     @property

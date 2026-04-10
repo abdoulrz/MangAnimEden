@@ -237,3 +237,42 @@ def public_profile_view(request, user_id):
     
     return render(request, 'users/public_profile.html', context)
 
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+
+@login_required
+@require_POST
+def prestige_reset_view(request):
+    """
+    Phase 5: Prestige System.
+    Reset user level if level >= 100, incrementing prestige_level.
+    """
+    if request.user.level >= 100:
+        from django.db import transaction as db_transaction
+        with db_transaction.atomic():
+            user = User.objects.select_for_update().get(id=request.user.id)
+            if user.level >= 100: # Double check after lock
+                user.xp = 100 # Reset XP to level 1 equivalent
+                user.level = 1
+                user.prestige_level += 1
+                user.save()
+                
+                return JsonResponse({'success': True, 'new_prestige': user.prestige_level, 'message': 'Prestige débloqué !'})
+    return JsonResponse({'success': False, 'message': 'Niveau insuffisant (100 requis).'}, status=403)
+
+@login_required
+@require_POST
+def toggle_auto_use_credits(request):
+    """
+    Phase 5: Toggle auto_use_credits for user wallet
+    """
+    import json
+    try:
+        data = json.loads(request.body)
+        auto_use = data.get('auto_use_credits', False)
+        wallet = request.user.wallet
+        wallet.auto_use_credits = bool(auto_use)
+        wallet.save(update_fields=['auto_use_credits'])
+        return JsonResponse({'success': True, 'auto_use_credits': wallet.auto_use_credits})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)

@@ -22,6 +22,42 @@ def chap_view(request, chapter_id=None):
             'STATIC_VERSION': settings.STATIC_VERSION
         })
     
+    # Phase 5: Gating Logic & Monetization
+    # We define premium as: chapter flag is true, OR chapter number > 50
+    is_chapter_premium = chapter.is_premium or float(chapter.number) > 50
+    # Overrides for users with active Otaku Premium membership or admins
+    if request.user.is_authenticated:
+        if getattr(request.user, 'is_premium', False) or request.user.is_staff or request.user.is_superuser:
+            is_chapter_premium = False
+
+    if is_chapter_premium:
+        if not request.user.is_authenticated:
+            return render(request, 'reader/paywall.html', {'chapter': chapter, 'STATIC_VERSION': settings.STATIC_VERSION})
+        
+        from reader.models import UnlockedChapter
+        from users.models import UserWallet
+        from django.db import transaction as db_transaction
+        
+        has_unlocked = UnlockedChapter.objects.filter(user=request.user, chapter=chapter).exists()
+        
+        if not has_unlocked:
+            wallet = getattr(request.user, 'wallet', None)
+            chapter_price = 20 # Static cost for a chapter
+                
+            if wallet and wallet.auto_use_credits and wallet.credits_balance >= chapter_price:
+                # Auto-deduct safely
+                with db_transaction.atomic():
+                    wallet_locked = UserWallet.objects.select_for_update().get(id=wallet.id)
+                    if wallet_locked.credits_balance >= chapter_price:
+                        wallet_locked.credits_balance -= chapter_price
+                        wallet_locked.save()
+                        UnlockedChapter.objects.create(user=request.user, chapter=chapter)
+                    else:
+                        return render(request, 'reader/paywall.html', {'chapter': chapter, 'STATIC_VERSION': settings.STATIC_VERSION, 'wallet': wallet})
+            else:
+                # Ask user to buy or use credits manually
+                return render(request, 'reader/paywall.html', {'chapter': chapter, 'STATIC_VERSION': settings.STATIC_VERSION, 'wallet': wallet})
+
     # Get pages if image-based
     pages = chapter.pages.all().order_by('page_number')
     first_page = pages.first() if pages.exists() else None

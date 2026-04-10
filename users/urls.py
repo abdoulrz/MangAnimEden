@@ -10,5 +10,6 @@ urlpatterns = [
     # path('admin-panel/', views.admin_dashboard, name='admin_dashboard'), # Moved to administration app
     path('domaine/', views.domaine_view, name='domaine'),
     path('user/<int:user_id>/', views.public_profile_view, name='public_profile'),  # Phase 2.5.2
+    path('prestige/', views.prestige_reset_view, name='prestige_reset'),
+    path('wallet/toggle-credits/', views.toggle_auto_use_credits, name='toggle_auto_credits'),
 ]
-

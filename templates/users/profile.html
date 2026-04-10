@@ -237,8 +237,8 @@
             </div>
         </div>
 
-        <!-- Mobile Profile Navigation (Visible only on mobile) -->
-        <div class="mobile-profile-nav glass-panel">
+        <!-- Mobile Profile Navigation (Visible only on mobile/tablet) -->
+        <div class="mobile-profile-nav glass-panel custom-scrollbar">
             <a href="?mode=favoris" class="block-item" id="mobile-nav-favoris">
                 <span class="block-icon">❤️</span>
                 <span class="block-title">Favoris</span>
@@ -255,6 +255,10 @@
                 <span class="block-icon">🕰️</span>
                 <span class="block-title">Historique</span>
             </a>
+            <a href="?mode=wallet" class="block-item" id="mobile-nav-wallet">
+                <span class="block-icon">💳</span>
+                <span class="block-title">Portefeuille</span>
+            </a>
         </div>
 
         <div class="otaku-card-banner" id="open-otaku-card">
@@ -269,7 +273,7 @@
 
         <!-- Dynamic Domaine Content (Replacing Quick Access) -->
         <div id="domaine-content-area"
-            class="domaine-dynamic-content glass-panel custom-scrollbar profile-content-area">
+            class="domaine-dynamic-content glass-panel custom-scrollbar profile-content-area" style="max-height: 800px; overflow-y: auto;">
 
             <!-- Default / Empty State (Optional) -->
             <div id="content-overview" class="content-block">
@@ -397,7 +401,40 @@
                 </div>
             </div>
 
-            <!-- Badges Content Removed (Moved to Toggle Panel) -->
+            <!-- Wallet Block -->
+            <div id="content-wallet" class="content-block content-hidden">
+                <h2 class="panel-title">💳 Mon Portefeuille</h2>
+                <div class="stats-dashboard mb-4">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%); color: white;">
+                        <div class="stat-value">{{ user.wallet.credits_balance|default:0 }}</div>
+                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">Crédits Disponibles</div>
+                    </div>
+                </div>
+                
+                <div class="profile-card profile-card-premium mb-4">
+                    <div class="card-body p-4" style="color: white;">
+                        <h4>Préférences de lecture</h4>
+                        <div class="d-flex align-items-center justify-content-between mt-3">
+                            <span style="color: rgba(255,255,255,0.8);">Utiliser automatiquement mes crédits pour débloquer les chapitres premium.</span>
+                            <div class="form-check form-switch" style="font-size: 1.5rem;">
+                                <input class="form-check-input" type="checkbox" role="switch" id="autoCreditsSwitch" style="cursor: pointer;" {% if user.wallet.auto_use_credits %}checked{% endif %}>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="profile-card profile-card-premium">
+                    <div class="card-body p-4" style="color: white;">
+                        <h4>Acheter des crédits</h4>
+                        <p style="color: rgba(255,255,255,0.6);">Utilisez vos crédits pour débloquer des chapitres premium ou des contenus exclusifs (1 FCFA = 1 Crédit).</p>
+                        <div class="d-flex flex-wrap gap-3 mt-3">
+                            <button class="btn btn-outline-primary" disabled><i class="fas fa-wallet"></i> FedaPay (CFA) - Bientôt</button>
+                            <button class="btn btn-outline-info" disabled><i class="fab fa-stripe-s"></i> Stripe (Intl) - Bientôt</button>
+                            <button class="btn btn-outline-warning" disabled><i class="fab fa-bitcoin"></i> Crypto - Bientôt</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
         </div>
 
@@ -680,6 +717,33 @@
                     otakuOverlay.addEventListener('click', e => { if (e.target === otakuOverlay) otakuOverlay.classList.remove('active'); });
                     document.addEventListener('keydown', e => { if (e.key === 'Escape' && otakuOverlay.classList.contains('active')) otakuOverlay.classList.remove('active'); });
                 }
+
+                // ========== WALLET AUTO-USE TOGGLE ==========
+                const autoCreditsSwitch = document.getElementById('autoCreditsSwitch');
+                if (autoCreditsSwitch) {
+                    autoCreditsSwitch.addEventListener('change', function() {
+                        const isChecked = this.checked;
+                        fetch("{% url 'users:toggle_auto_credits' %}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({ auto_use_credits: isChecked })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.success) {
+                                alert("Erreur lors de l'enregistrement de la préférence.");
+                                autoCreditsSwitch.checked = !isChecked; // Revert
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Erreur:', err);
+                            autoCreditsSwitch.checked = !isChecked; // Revert
+                        });
+                    });
+                }
             });
 
             // Helper function for CSRF (keep outside)
@@ -728,6 +792,12 @@
                 <span class="block-icon">📚</span>
                 <span class="block-title">Historique</span>
             </a>
+
+            <!-- Portefeuille -->
+            <a href="{% url 'users:domaine' %}?mode=wallet" class="block-item" id="nav-item-wallet">
+                <span class="block-icon">💳</span>
+                <span class="block-title">Portefeuille</span>
+            </a>
         </div>
     </div>
 
@@ -738,7 +808,7 @@
 <div class="otaku-card-overlay" id="otaku-card-overlay">
     <div class="otaku-card-container">
         {% with rank=user.get_rank_info %}
-        <div class="otaku-id-card glass-premium rank-theme-{{ rank.slug }}">
+        <div class="otaku-id-card glass-premium rank-theme-{{ rank.slug }} {% if user.is_premium %}premium-active{% endif %}">
             <button class="close-card-btn" id="close-otaku-card">&times;</button>
 
             <!-- Rank Seal (Anchored to top-right of the whole card) -->

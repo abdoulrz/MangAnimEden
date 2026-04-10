@@ -15,6 +15,14 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ---
 
+## [2.4.3] - 2026-04-09 ([Prestige Grind & Roadmap Regrouping])
+
+### Changed
+- **Gamification (XP Balancing)** : Ajustement de la courbe de progression en réduisant l'XP perçu par chapitre lu de 5 à 4 une fois le niveau 50 atteint (Grind de Prestige).
+- **Roadmap** : Nettoyage administratif. Suppression des Groupements Thématiques du catalogue, validation des Quotas de Stockage, et séparation claire du Dispatcher de Notifications (In-App terminé, Email restant).
+
+---
+
 ## [2.4.2] - 2026-04-06 ([Phase 3 Completion & Pre-Launch Polish])
 
 ### Added

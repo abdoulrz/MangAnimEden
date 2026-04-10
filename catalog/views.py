@@ -23,6 +23,12 @@ def catalog_index(request):
         real_chapters_count=Count('chapters') # Using a different name to avoid conflict with denormalized field if needed, but let's just use it to override or supplement
     ).all()
 
+    # Phase 5: Gating NSFW Content (Admins bypass)
+    is_admin = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    is_age_verified = request.user.is_authenticated and getattr(request.user, 'age_verified', False)
+    if not (is_admin or is_age_verified):
+        series_list = series_list.filter(nsfw=False)
+
     # Filtering
     if query:
         from django.db.models import Q
@@ -180,7 +186,15 @@ def search_api(request):
         Q(title__icontains=query) |
         Q(type__icontains=query) |
         Q(genres__name__icontains=query)
-    ).distinct()[:8]
+    ).distinct()
+
+    # Phase 5: Gating NSFW Content (Admins bypass)
+    is_admin = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    is_age_verified = request.user.is_authenticated and getattr(request.user, 'age_verified', False)
+    if not (is_admin or is_age_verified):
+        results = results.filter(nsfw=False)
+        
+    results = results[:8]
 
     data = []
     for s in results:

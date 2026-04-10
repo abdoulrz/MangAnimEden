@@ -48,7 +48,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [x] **Sagesse Régionale (Sagesse)** : Collection de **100 citations originales** et sérieuses par langue (Français, Anglais, Espagnol). Pas de contenu "cheap".
 - [x] **Moteur de Recherche Live** : Interface réactive avec filtres par Genre, Statut et Auteur.
 - [x] **Full-Text Search** : Migration vers PostgreSQL SearchVectors pour la performance.
-- [ ] **Organisation Catalogue** : Regroupement thématique et par genres pour la découverte.
+- [x] **Organisation Catalogue** : Regroupement thématique et par genres (Annulé/Non requis).
 
 ### Étape 3 : Administration Professionnelle & Intégrité
 
@@ -62,8 +62,9 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [x] Audit Logs filtrables (Modèle `SystemLog` prêt).
   - [x] Métadonnées étendues dans la gestion des séries.
 - [x] **Intégrité des Données** : Utilisation de `select_for_update` sur les opérations critiques (XP, Vues) pour éviter les pertes de données lors de clics simultanés.
-- [ ] **Quotas & Limites** : Limitation de l'espace de stockage par utilisateur/groupe.
-- [ ] **Dispatcher de Notifications** : Service centralisé pour le routage (Email, In-App, Push).
+- [x] **Quotas & Limites** : Limitation de l'espace de stockage par utilisateur/groupe.
+- [x] **Système de Notifications In-App** : Notifications sociales et en temps réel opérationnelles.
+- [ ] **Dispatcher Email** : Routage centralisé pour les envois d'emails système.
 
 ### Étape 4 : Gamification "Prestige" & UX Premium
 
@@ -97,7 +98,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - The jump from level 50 to 65 acts as a natural filter — only truly active readers push past Moderator rank
 - Shadow Monarch at level 100 is the clean, iconic ceiling — consider pairing it with a **prestige reset** option that adds a "Monarch" prefix and a unique border while restarting the climb
 
-- [ ] **Équilibrage XP** : Après le niveau 50, gain réduit à **4 XP / chapitre** (Grind de prestige).
+- [x] **Équilibrage XP** : Après le niveau 50, gain réduit à **4 XP / chapitre** (Grind de prestige).
 - [ ] **Reset de Prestige** : Option de redémarrage au niveau 100 avec préfixe "Monarch" et bordure unique.
 - [ ] **UX Premium** : Animations (Trending, Hovers) débloquées uniquement à partir du **Niveau 50**.
 - [x] **Audit Performance** : Vérification finale du Lazy Loading pour économiser les données mobiles.
