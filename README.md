@@ -109,37 +109,17 @@ MangaAnimEden/
 
 ---
 
-## 🎨 Philosophie du Projet
+## 🎨 Identité & Design System
 
-Ce projet suit une approche **Spec-Driven** et **DRY** inspirée de:
+Le projet suit une esthétique **moderne et immersive** (Dark Mode Only) basée sur le Glassmorphism.
 
-- *The Pragmatic Programmer* (Tracer Bullets, DRY, Broken Windows)
-- *The Checklist Manifesto* (Checklists qualité)
-- *Mastering AI Spec-Writing* (Documentation structurée)
+### 🖋️ Typographie (Single Source of Truth)
+- **Interface (UI)** : `'Inter', sans-serif` - Utilisée pour toute l'interface utilisateur, la navigation et les contrôles.
+- **Contenu & Lecture** : `'Merriweather', serif` - Utilisée pour les textes longs et les descriptions pour un confort de lecture optimal.
 
-**Single Source of Truth:**
+Pour plus de détails, consultez le **[DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md)**.
 
-- Design Tokens → `static/css/tokens.css`
-- Documentation technique → `docs/`
-- Dette technique → `DEBT.md`
-
----
-
-## 🔮 Prochaines Étapes
-
-Voir le fichier de tâches pour la roadmap détaillée. Les prochaines fonctionnalités incluent:
-
-1. Navigation entre pages/chapitres
-2. Système d'authentification complet (login/register UI)
-3. Catalogue de mangas avec recherche
-4. Système de communauté (groupes, discussions)
-5. Gamification (XP, niveaux, badges)
-
----
-
-## 📝 Contribuer
-
-Ce projet suit des checklists strictes avant chaque commit. Voir `docs/03_METHODOLOGY_AND_CHECKLISTS.md` pour les phases de développement.
+## 🏗️ Philosophie du Projet
 
 ---
 

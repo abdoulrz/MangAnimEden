@@ -113,6 +113,19 @@
                     {{ form.genres }}
                 </div>
             </div>
+
+            <div class="form-group span-2 admin-toggle-row">
+                <label class="admin-toggle-label" for="id_nsfw">
+                    <span class="admin-toggle-box">
+                        {{ form.nsfw }}
+                        <span class="admin-toggle-slider"></span>
+                    </span>
+                    <span class="admin-toggle-text">
+                        <strong>Contenu 18+ (NSFW)</strong>
+                        <small>Cette série contient du contenu réservé aux adultes</small>
+                    </span>
+                </label>
+            </div>
         </div>
 
         <div class="form-actions">

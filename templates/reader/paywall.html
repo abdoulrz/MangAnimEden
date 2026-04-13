@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Chapitre Premium — {{ chapter.series.title }} {% endblock %}
+
+{% block extra_css %}
+<style>
+    .paywall-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 80vh;
+        padding: 2rem 1rem;
+    }
+
+    .paywall-card {
+        position: relative;
+        background: linear-gradient(145deg, #111827, #0f172a);
+        border: 1px solid rgba(139, 92, 246, 0.25);
+        border-radius: 20px;
+        padding: 3.5rem 2rem 2.5rem;
+        max-width: 500px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.08);
+    }
+
+    .paywall-lock-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+        filter: drop-shadow(0 0 12px rgba(139, 92, 246, 0.5));
+    }
+
+    .paywall-series {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #8b5cf6;
+        margin-bottom: 0.3rem;
+    }
+
+    .paywall-title {
+        font-size: 1.45rem;
+        font-weight: 800;
+        color: #f1f5f9;
+        margin-bottom: 1.5rem;
+        line-height: 1.3;
+    }
+
+    /* Credit info box */
+    .paywall-info-box {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+
+    .paywall-info-item {
+        flex: 1;
+        text-align: center;
+    }
+
+    .paywall-info-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 0.3rem;
+    }
+
+    .paywall-info-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: #f1c40f;
+    }
+
+    .orb-icon {
+        color: #f1c40f;
+        filter: drop-shadow(0 0 8px rgba(241, 196, 15, 0.4));
+        font-weight: 400;
+        margin-left: 2px;
+    }
+
+    .paywall-info-value.price {
+        color: #8b5cf6;
+    }
+
+    .paywall-divider {
+        width: 1px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Insufficient warning */
+    .paywall-warning {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.25);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+        color: #fca5a5;
+        margin-bottom: 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    /* Action buttons */
+    .paywall-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .btn-unlock {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, #7c3aed, #8b5cf6);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        padding: 0.9rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+        text-decoration: none;
+        width: 100%;
+    }
+
+    .btn-unlock:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+        color: #fff;
+    }
+
+    .btn-unlock:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    .btn-wallet {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, rgba(241,196,15,0.15), rgba(230,126,34,0.1));
+        border: 1px solid rgba(241, 196, 15, 0.35);
+        color: #f1c40f;
+        border-radius: 12px;
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .btn-wallet:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(241, 196, 15, 0.2);
+        color: #f1c40f;
+        text-decoration: none;
+    }
+
+    .paywall-top-nav {
+        position: absolute;
+        top: 1.25rem;
+        left: 1.25rem;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: #64748b;
+        font-size: 0.8rem;
+        text-decoration: none;
+        padding: 0.4rem 0.6rem;
+        border-radius: 8px;
+        transition: color 0.2s, background 0.2s;
+    }
+
+    .btn-back:hover {
+        color: #94a3b8;
+        background: rgba(255,255,255,0.05);
+        text-decoration: none;
+    }
+
+    /* Spinner */
+    .unlock-spinner {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .unlock-feedback {
+        font-size: 0.82rem;
+        margin-top: 0.5rem;
+        display: none;
+    }
+
+    .unlock-feedback.error  { color: #fca5a5; }
+    .unlock-feedback.success { color: #86efac; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="paywall-container">
+    <div class="paywall-card">
+        <div class="paywall-top-nav">
+            <a href="javascript:history.back()" class="btn-back">← Retour</a>
+        </div>
+        <span class="paywall-lock-icon">🔒</span>
+        <p class="paywall-series">{{ chapter.series.title }}</p>
+        <h1 class="paywall-title">
+            Chapitre {{ chapter.number|floatformat }}{% if chapter.title and 'Chapitre' not in chapter.title and 'Chapter' not in chapter.title %} — {{ chapter.title }}{% endif %}
+        </h1>
+
+        <div class="paywall-info-box">
+            <div class="paywall-info-item">
+                <div class="paywall-info-label">Votre solde</div>
+                <div class="paywall-info-value" id="pw-balance">
+                    {% if wallet %}{{ wallet.credits_balance }}{% else %}0{% endif %} <span class="orb-icon">◎</span>
+                </div>
+            </div>
+            <div class="paywall-divider"></div>
+            <div class="paywall-info-item">
+                <div class="paywall-info-label">Prix du chapitre</div>
+                <div class="paywall-info-value price">20 <span class="orb-icon">◎</span></div>
+            </div>
+        </div>
+
+        {% if wallet and wallet.credits_balance < 20 %}
+        <div class="paywall-warning">
+            <i class="fas fa-exclamation-triangle"></i>
+            Orbes insuffisants — il vous manque des orbes pour débloquer ce chapitre.
+        </div>
+        {% endif %}
+
+        <div class="paywall-actions">
+            {% if wallet and wallet.credits_balance >= 20 %}
+            <button id="btn-unlock" class="btn-unlock" data-url="{% url 'reader:unlock_chapter' chapter.series.slug chapter.number %}">
+                <span class="unlock-spinner" id="unlock-spinner"></span>
+                <i class="fas fa-unlock" id="unlock-icon"></i>
+                <span id="unlock-label">Débloquer · 20 ◎</span>
+            </button>
+            {% endif %}
+
+            <a href="{% url 'users:profile' %}?mode=wallet" class="btn-wallet">
+                <i class="fas fa-coins"></i>
+                Recharger mon portefeuille
+            </a>
+
+
+        </div>
+
+        <div class="unlock-feedback error" id="unlock-error"></div>
+        <div class="unlock-feedback success" id="unlock-success"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+    const btn = document.getElementById('btn-unlock');
+    if (!btn) return;
+
+    const spinner  = document.getElementById('unlock-spinner');
+    const icon     = document.getElementById('unlock-icon');
+    const label    = document.getElementById('unlock-label');
+    const errBox   = document.getElementById('unlock-error');
+    const okBox    = document.getElementById('unlock-success');
+    const balance  = document.getElementById('pw-balance');
+
+    btn.addEventListener('click', async () => {
+        btn.disabled = true;
+        spinner.style.display = 'block';
+        icon.style.display    = 'none';
+        label.textContent     = 'Traitement…';
+        errBox.style.display  = 'none';
+        okBox.style.display   = 'none';
+
+        try {
+            const resp = await fetch(btn.dataset.url, {
+                method: 'POST',
+                headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+            });
+            const data = await resp.json();
+
+            if (data.success) {
+                okBox.textContent    = '✓ Chapitre débloqué ! Redirection…';
+                okBox.style.display  = 'block';
+                if (data.new_balance !== undefined) {
+                    balance.innerHTML = `${data.new_balance} <span class="orb-icon">◎</span>`;
+                }
+                setTimeout(() => { window.location.href = data.redirect; }, 900);
+            } else {
+                errBox.textContent   = data.error || 'Une erreur est survenue.';
+                errBox.style.display = 'block';
+                btn.disabled  = false;
+                spinner.style.display = 'none';
+                icon.style.display    = '';
+                label.textContent     = 'Débloquer · 20 ◎';
+            }
+        } catch (e) {
+            errBox.textContent   = 'Erreur réseau. Veuillez réessayer.';
+            errBox.style.display = 'block';
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            icon.style.display    = '';
+            label.textContent     = 'Débloquer · 20 ◎';
+        }
+    });
+})();
+</script>
+{% endblock %}

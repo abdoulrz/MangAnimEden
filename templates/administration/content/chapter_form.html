@@ -5,8 +5,7 @@
     <div class="breadcrumb">
         <a href="{% url 'administration:series_list' %}" class="breadcrumb-link">Séries</a>
         <span class="breadcrumb-separator">/</span>
-        <a href="{% url 'administration:chapter_list' current_series.id %}" class="breadcrumb-link">{{
-            current_series.title }}</a>
+        <a href="{% url 'administration:chapter_list' current_series.id %}" class="breadcrumb-link">{{ current_series.title }}</a>
         <span class="breadcrumb-separator">/</span>
         <span class="breadcrumb-current">{% if object %}Modifier{% else %}Nouveau{% endif %} Chapitre</span>
     </div>
@@ -31,6 +30,19 @@
                 <label for="id_title">📝 Titre (Optionnel)</label>
                 {{ form.title }}
                 <div class="field-error" id="error-title"></div>
+            </div>
+
+            <div class="form-group span-2 admin-toggle-row">
+                <label class="admin-toggle-label" for="id_is_premium">
+                    <span class="admin-toggle-box">
+                        {{ form.is_premium }}
+                        <span class="admin-toggle-slider"></span>
+                    </span>
+                    <span class="admin-toggle-text">
+                        <strong>Chapitre Premium</strong>
+                        <small>Accès payant — 20 Orbes requis</small>
+                    </span>
+                </label>
             </div>
 
             <div class="form-group span-2">

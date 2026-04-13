@@ -107,9 +107,12 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 *Objectif : Viabilité économique et préparation à la mise en production.*
 
-- [ ] **Monétisation Locale** :
-  - [ ] Système : 50 chapitres gratuits, puis **1000 CFA pour 50 chapitres**.
-  - [ ] Intégration micro-paiements (Mobile Money).
+- [/] **Monétisation Locale** :
+  - [x] **Identité Visuelle** : Rebrand complet de "Crédits" vers **"Orbes" (◎)**.
+  - [x] **Moteur de Débit** : Logique de déblocage (Manuel & Automatique) testée et validée (Fictif).
+  - [x] **Logic Portefeuille** : Intégration dans le profil avec accès direct au rechargement.
+  - [ ] **Passerelle de Paiement** : Configuration finale et tests en production (NOWPayments/FedaPay).
+  - [ ] **Modèle Economique** : Validation finale des tarifs (ex: 20 ◎ / chapitre).
 - [ ] **Publicité & Ads** :
   - [ ] **Ads Vidéo** : Une publicité obligatoire toutes les 10 minutes de lecture.
   - [ ] **UX Publicitaire** : Boutons de fermeture (X) clairs et accessibles.

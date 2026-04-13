@@ -379,7 +379,7 @@
                         <h3 class="series-title">{{ series.title }}</h3>
                         {% for progress in progress_list %}
                         <div class="history-item">
-                            <a href="{% url 'reader:chap_chapter' progress.chapter.id %}" class="d-flex align-items-center gap-3 p-3 w-100">
+                            <a href="{% url 'reader:chap_chapter' progress.chapter.series.slug progress.chapter.number %}" class="d-flex align-items-center gap-3 p-3 w-100">
                                 {% if series.cover %}
                                 <img src="{{ series.cover.url }}" alt="{{ series.title }}" class="history-cover flex-shrink-0">
                                 {% else %}
@@ -404,37 +404,79 @@
             <!-- Wallet Block -->
             <div id="content-wallet" class="content-block content-hidden">
                 <h2 class="panel-title">💳 Mon Portefeuille</h2>
-                <div class="stats-dashboard mb-4">
-                    <div class="stat-card" style="background: linear-gradient(135deg, #f1c40f 0%, #e67e22 100%); color: white;">
-                        <div class="stat-value">{{ user.wallet.credits_balance|default:0 }}</div>
-                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">Crédits Disponibles</div>
+                <!-- Wallet Overview Card -->
+                <div class="wallet-overview-card mb-4">
+                    <p class="woc-label">Orbes disponibles</p>
+                    <div class="woc-amount-pill">
+                        {{ user.wallet.credits_balance|default:0 }} <span class="orb-icon">◎</span>
                     </div>
-                </div>
-                
-                <div class="profile-card profile-card-premium mb-4">
-                    <div class="card-body p-4" style="color: white;">
-                        <h4>Préférences de lecture</h4>
-                        <div class="d-flex align-items-center justify-content-between mt-3">
-                            <span style="color: rgba(255,255,255,0.8);">Utiliser automatiquement mes crédits pour débloquer les chapitres premium.</span>
-                            <div class="form-check form-switch" style="font-size: 1.5rem;">
-                                <input class="form-check-input" type="checkbox" role="switch" id="autoCreditsSwitch" style="cursor: pointer;" {% if user.wallet.auto_use_credits %}checked{% endif %}>
-                            </div>
-                        </div>
+                    <div class="woc-auto-row">
+                        <label class="woc-toggle-wrap" for="autoCreditsSwitch">
+                            <span class="woc-auto-text">Utilisation automatique</span>
+                            <span class="woc-toggle-box">
+                                <input class="woc-toggle-input" type="checkbox" id="autoCreditsSwitch" role="switch" {% if user.wallet.auto_use_credits %}checked{% endif %}>
+                                <span class="woc-toggle-slider"></span>
+                            </span>
+                        </label>
                     </div>
                 </div>
 
-                <div class="profile-card profile-card-premium">
-                    <div class="card-body p-4" style="color: white;">
-                        <h4>Acheter des crédits</h4>
-                        <p style="color: rgba(255,255,255,0.6);">Utilisez vos crédits pour débloquer des chapitres premium ou des contenus exclusifs (1 FCFA = 1 Crédit).</p>
-                        <div class="d-flex flex-wrap gap-3 mt-3">
-                            <button class="btn btn-outline-primary" disabled><i class="fas fa-wallet"></i> FedaPay (CFA) - Bientôt</button>
-                            <button class="btn btn-outline-info" disabled><i class="fab fa-stripe-s"></i> Stripe (Intl) - Bientôt</button>
-                            <button class="btn btn-outline-warning" disabled><i class="fab fa-bitcoin"></i> Crypto - Bientôt</button>
+                <!-- Credit Purchase Widget -->
+                <div class="credit-purchase-widget">
+                    <h4 class="cpu-title">Acquérir des Orbes</h4>
+                    <p class="cpu-subtitle"><span style="white-space: nowrap;">1 ◎</span> = 1 FCFA · <span style="white-space: nowrap;">1 chapitre premium</span> = <span style="white-space: nowrap;">20 ◎</span></p>
+
+                    <!-- Credit Stepper -->
+                    <div class="cpu-stepper-row">
+                        <button class="cpu-step-btn" id="cpu-minus" aria-label="Diminuer">&#8722;</button>
+                        <div class="cpu-display">
+                            <span class="cpu-value" id="cpu-value">1 000</span>
+                            <span class="cpu-label">Orbes</span>
                         </div>
+                        <button class="cpu-step-btn" id="cpu-plus" aria-label="Augmenter">+</button>
                     </div>
+                    <p class="cpu-step-hint">Paliers de 100 &bull; min 1 000 &bull; max 10&nbsp;000</p>
+
+                    <!-- Method Selector -->
+                    <p class="cpu-method-label">Choisir un mode de paiement</p>
+                    <div class="cpu-methods" id="cpu-methods">
+                        <button class="cpu-method active" data-provider="fedapay" id="method-fedapay">
+                            <span class="cpu-method-icon">🟡</span>
+                            <span class="cpu-method-name">Mobile Money</span>
+                            <span class="cpu-method-sub">FedaPay &bull; XOF</span>
+                        </button>
+                        <button class="cpu-method cpu-method--soon" disabled>
+                            <span class="cpu-method-icon">💳</span>
+                            <span class="cpu-method-name">Carte Bancaire</span>
+                            <span class="cpu-method-sub">Bientôt</span>
+                        </button>
+                        <button class="cpu-method cpu-method--soon" disabled>
+                            <span class="cpu-method-icon">₿</span>
+                            <span class="cpu-method-name">Crypto</span>
+                            <span class="cpu-method-sub">Bientôt</span>
+                        </button>
+                    </div>
+
+                    <!-- Total & CTA -->
+                    <div class="cpu-cta-row">
+                        <button class="cpu-pay-btn" id="cpu-pay-btn">
+                            Procéder au paiement • <span id="cpu-btn-label">1 000 FCFA</span>
+                        </button>
+                    </div>
+
+                    <!-- Spinner -->
+                    <div id="payment-spinner" style="display:none; text-align:center; padding: 0.5rem 0;">
+                        <div class="spinner-border spinner-border-sm text-warning" role="status"></div>
+                        <span style="color: rgba(255,255,255,0.7); margin-left: 0.5rem; font-size: 0.85rem;">Redirection...</span>
+                    </div>
+
+                    <p class="cpu-secure-note">
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Paiement sécurisé
+                    </p>
                 </div>
-            </div>
+
+            </div><!-- /content-wallet -->
 
         </div>
 
@@ -744,6 +786,97 @@
                         });
                     });
                 }
+
+                // ========== CREDIT PURCHASE WIDGET ==========
+                (function() {
+                    const STEP = 100, MIN = 1000, MAX = 10000;
+
+                    // Rate table: provider -> { currency, rate (FCFA per credit) }
+                    const RATES = {
+                        fedapay: { currency: 'FCFA', rate: 1 }
+                        // stripe: { currency: 'EUR', rate: 0.0015 }  ← future
+                    };
+
+                    let credits = 1000;  // default (= 1 000 FCFA minimum)
+                    let provider = 'fedapay';
+
+                    const valEl    = document.getElementById('cpu-value');
+                    const priceEl  = document.getElementById('cpu-price');
+                    const currEl   = document.getElementById('cpu-currency');
+                    const btnLabel = document.getElementById('cpu-btn-label');
+                    const payBtn   = document.getElementById('cpu-pay-btn');
+                    const spinner  = document.getElementById('payment-spinner');
+
+                    function formatNum(n) {
+                        return n.toLocaleString('fr-FR');
+                    }
+
+                    function calcPrice(c, p) {
+                        const r = RATES[p];
+                        if (!r) return { amount: c, currency: 'FCFA' };
+                        const raw = Math.round(c * r.rate);
+                        return { amount: raw, currency: r.currency };
+                    }
+
+                    function updateUI() {
+                        const { amount, currency } = calcPrice(credits, provider);
+                        valEl.textContent   = formatNum(credits);
+                        btnLabel.textContent = formatNum(amount) + ' ' + currency;
+                    }
+
+                    // Stepper
+                    document.getElementById('cpu-minus').addEventListener('click', function() {
+                        if (credits - STEP >= MIN) { credits -= STEP; updateUI(); }
+                    });
+                    document.getElementById('cpu-plus').addEventListener('click', function() {
+                        if (credits + STEP <= MAX) { credits += STEP; updateUI(); }
+                    });
+
+                    // Method selection
+                    document.querySelectorAll('.cpu-method:not([disabled])').forEach(function(btn) {
+                        btn.addEventListener('click', function() {
+                            document.querySelectorAll('.cpu-method').forEach(b => b.classList.remove('active'));
+                            this.classList.add('active');
+                            provider = this.dataset.provider;
+                            updateUI();
+                        });
+                    });
+
+                    // Pay button
+                    payBtn.addEventListener('click', function() {
+                        const { amount } = calcPrice(credits, provider);
+                        payBtn.disabled = true;
+                        if (spinner) spinner.style.display = 'block';
+
+                        fetch("{% url 'users:initiate_payment' %}", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            body: JSON.stringify({ amount: amount, provider: provider })
+                        })
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.success && data.payment_url) {
+                                window.location.href = data.payment_url;
+                            } else {
+                                alert(data.error || 'Erreur lors du lancement du paiement.');
+                                payBtn.disabled = false;
+                                if (spinner) spinner.style.display = 'none';
+                            }
+                        })
+                        .catch(err => {
+                            console.error('Erreur paiement:', err);
+                            alert('Erreur réseau. Veuillez réessayer.');
+                            payBtn.disabled = false;
+                            if (spinner) spinner.style.display = 'none';
+                        });
+                    });
+
+                    updateUI();
+                })();
+
             });
 
             // Helper function for CSRF (keep outside)

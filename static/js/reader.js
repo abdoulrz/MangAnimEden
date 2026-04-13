@@ -354,7 +354,6 @@ const MangaReader = (function () {
         _initEventListeners();
         _applySettings();
         _initLazyLoading();
-        _initStickyNext();
 
         // Restore Scroll Position
         if (state.readingMode !== 'paged' && state.currentPage > 1) {
@@ -382,46 +381,6 @@ const MangaReader = (function () {
         console.log(`MangaReader initialized. Mode: ${state.readingMode}, Total Pages: ${state.totalPages}, Current Page: ${state.currentPage}`);
     };
 
-    const _initStickyNext = () => {
-        const sticky = document.getElementById('sticky-next');
-        const endFunnel = document.getElementById('end-funnel');
-        if (!sticky || !endFunnel) return;
-
-        // Intersection Observer to hide sticky when actual end funnel is visible
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    sticky.classList.add('hidden');
-                } else {
-                    // Re-check scroll position
-                    _handleScrollForSticky();
-                }
-            });
-        }, { threshold: 0.1 });
-
-        observer.observe(endFunnel);
-
-        const _handleScrollForSticky = () => {
-            if (state.readingMode === 'paged') {
-                sticky.classList.add('hidden');
-                return;
-            }
-
-            const scrollPercent = (window.scrollY + window.innerHeight) / document.documentElement.scrollHeight;
-            
-            // Show if scrolled more than 60% and funnel not visible
-            const isNearEnd = scrollPercent > 0.6;
-            const isFunnelVisible = endFunnel.getBoundingClientRect().top < window.innerHeight;
-
-            if (isNearEnd && !isFunnelVisible) {
-                sticky.classList.remove('hidden');
-            } else {
-                sticky.classList.add('hidden');
-            }
-        };
-
-        window.addEventListener('scroll', _handleScrollForSticky, { passive: true });
-    };
 
     return {
         init: init

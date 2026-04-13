@@ -284,11 +284,22 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # Versioning for cache busting 
-STATIC_VERSION = '2.10.55'
+STATIC_VERSION = '2.10.69'
 
 # Admin bootstrap via secret passphrase on registration
 ADMIN_BOOTSTRAP_PASSPHRASE = config('ADMIN_BOOTSTRAP_PASSPHRASE', default='Nefe')
 ADMIN_BOOTSTRAP_MAX = 5  # Max number of admin accounts that can be created this way
+
+# ==================== PAYMENT GATEWAY CONFIGURATION ====================
+# FedaPay (CFA / Afrique de l'Ouest)
+FEDAPAY_SECRET_KEY = config('FEDAPAY_SECRET_KEY', default='')
+FEDAPAY_WEBHOOK_SECRET = config('FEDAPAY_WEBHOOK_SECRET', default='')
+FEDAPAY_ENV = config('FEDAPAY_ENV', default='sandbox')  # 'sandbox' ou 'live'
+FEDAPAY_CALLBACK_URL = config('FEDAPAY_CALLBACK_URL', default='http://localhost:8000/users/payment/callback/')
+
+# Stripe (International - USD/EUR)
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
 
 # --- Celery Configuration ---
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')

@@ -8,10 +8,34 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 
 ### To Be Implemented
 
-- Phase 3.6 : Support Client (Formulaire de Contact)
-- Phase 3.7 : Monétisation & Publicité
-- Phase 4 : UX Polish & Design System Unification
-- Phase 5 : SEO, Performance & Lancement
+- Phase 5.1 : Intégration réelle des passerelles (Paiement Mobile Money)
+- Phase 5.2 : Système de Publicité & Ads Vidéo
+- Phase 5.3 : SEO, Performance & Lancement
+
+---
+
+## [2.5.0] - 2026-04-13 ([Orbe Monetization & Reader UX Refinement])
+
+### Added
+- **Monétisation "Orbes" (◎)** : Rebranding complet du système de crédits. Utilisation du symbole ◎ pour une identité visuelle premium et thématique.
+- **Audit Logging** : Intégration de journaux serveurs pour tracer les déblocages de chapitres (Manuels et Automatiques) afin d'assurer la traçabilité des transactions.
+- **Accès Direct Portefeuille** : Ajout d'un lien direct vers la recharge d'Orbes depuis la navbar du profil.
+
+### Changed
+- **Reader UX (Flow)** : 
+    - Réorganisation de la fin de chapitre : la navigation (Suivant/Précédent) précède désormais les recommandations pour un meilleur flux utilisateur.
+    - Suppression de la barre flottante "Sticky" (jugée intrusive) au profit d'un bouton de fin de chapitre statique et imposant.
+- **Harmonisation UI** : 
+    - Standardisation de l'affichage des prix (ex: "20 ◎" au lieu de "20 Orbes").
+    - Amélioration visuelle du bouton de paiement (Glassmorphism + Iconographie Orbe).
+    - Teasing simplifié : "1 chapitre premium = 20 ◎".
+
+### Fixed
+- **Monetization Logic** : 
+    - Correction du bug où les Orbes n'étaient pas débités en mode automatique.
+    - Résolution de la détection de l'état "Premium" pour les chapitres de test.
+- **Backend Stability** : Correction d'une erreur `NameError` sur le logger dans `reader/views.py`.
+- **UI Persistence** : Correction du comportement du toggle "Utilisation automatique" dans le portefeuille utilisateur.
 
 ---
 

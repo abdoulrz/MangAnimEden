@@ -7,6 +7,10 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from catalog.models import Series
 from collections import defaultdict
+import json
+import logging
+
+logger = logging.getLogger(__name__)
 User = get_user_model()
 
 @login_required
@@ -276,3 +280,101 @@ def toggle_auto_use_credits(request):
         return JsonResponse({'success': True, 'auto_use_credits': wallet.auto_use_credits})
     except Exception as e:
         return JsonResponse({'success': False, 'error': str(e)}, status=400)
+
+
+@login_required
+@require_POST
+def initiate_payment(request):
+    """
+    Phase 5: Lance un flux de paiement via FedaPay.
+    Reçoit: { amount: int (FCFA), provider: str }
+    Retourne: { success: bool, payment_url: str }
+    """
+    from core.payments.factory import PaymentGatewayFactory
+    from .models import Transaction, UserWallet
+
+    try:
+        data = json.loads(request.body)
+        amount = int(data.get('amount', 1000))  # En FCFA
+        provider = data.get('provider', 'fedapay').lower()
+
+        # Garde-fou: montants raisonnables (1 000 à 10 000 FCFA — aligné sur UI)
+        if not (1000 <= amount <= 10000):
+            return JsonResponse({'success': False, 'error': 'Montant invalide (1 000–10 000 FCFA).'}, status=400)
+
+        gateway = PaymentGatewayFactory.get_gateway(provider)
+
+        wallet, _ = UserWallet.objects.get_or_create(user=request.user)
+
+        # Créer la Transaction PENDING avant la redirection vers FedaPay
+        txn = Transaction.objects.create(
+            user=request.user,
+            amount_in_fiat=amount,
+            currency='XOF',
+            gateway_used=provider,
+            status='PENDING',
+            credits_awarded=amount,  # 1 FCFA = 1 Crédit
+        )
+
+        callback_url = request.build_absolute_uri(
+            f'/users/payment/callback/?txn={txn.id}'
+        )
+
+        payment_url = gateway.create_payment(
+            request.user,
+            amount,
+            currency='XOF',
+            callback_url=callback_url,
+            transaction_id=txn.id,
+        )
+
+        logger.info(f"Paiement initié: user={request.user.nickname}, txn={txn.id}, amount={amount} XOF")
+        return JsonResponse({'success': True, 'payment_url': payment_url})
+
+    except ValueError as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=400)
+    except Exception as e:
+        logger.exception(f"Erreur initiate_payment: {e}")
+        return JsonResponse({'success': False, 'error': 'Erreur interne.'}, status=500)
+
+
+@login_required
+def payment_callback(request):
+    """
+    Page de retour après paiement FedaPay (succès ou annulation côté utilisateur).
+    La créditation RÉELLE se fait via le webhook, PAS ici.
+    FedaPay redirige ici que le paiement soit approuvé, décliné ou annulé.
+    """
+    from django.contrib import messages
+    from .models import Transaction
+
+    txn_id = request.GET.get('txn')
+
+    if not txn_id:
+        # L'utilisateur a annulé sans aller sur FedaPay
+        messages.warning(request, "Paiement annulé.")
+        return redirect('users:domaine')
+
+    try:
+        txn = Transaction.objects.get(id=txn_id, user=request.user)
+
+        if txn.status == 'SUCCESS':
+            messages.success(
+                request,
+                f"✅ {txn.credits_awarded} crédits ajoutés à votre portefeuille !"
+            )
+        elif txn.status == 'FAILED':
+            messages.error(
+                request,
+                "❌ Paiement refusé ou annulé. Aucun montant n'a été débité."
+            )
+        else:
+            # PENDING : webhook pas encore reçu (normal, peut arriver en quelques secondes)
+            messages.info(
+                request,
+                "⏳ Paiement en cours de vérification. Vos crédits apparaîtront dans quelques instants."
+            )
+    except Transaction.DoesNotExist:
+        messages.warning(request, "Transaction introuvable.")
+
+    return redirect('users:domaine')

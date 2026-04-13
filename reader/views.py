@@ -1,20 +1,49 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.conf import settings
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.http import JsonResponse
+from django.urls import reverse
 from catalog.models import Chapter, Page
+import logging
+
+logger = logging.getLogger(__name__)
 
 
-def chap_view(request, chapter_id=None):
+def _get_chapter(series_slug, chapter_number):
+    """Resolve a chapter from its series slug and number."""
+    return get_object_or_404(
+        Chapter.objects.select_related('series'),
+        series__slug=series_slug,
+        number=chapter_number,
+    )
+
+
+def chap_legacy_redirect(request, chapter_id):
+    """Permanent redirect from /reader/chap/<id>/ to the clean slug URL."""
+    chapter = get_object_or_404(Chapter.objects.select_related('series'), id=chapter_id)
+    return redirect(
+        'reader:chap_chapter',
+        series_slug=chapter.series.slug,
+        chapter_number=str(chapter.number),
+        permanent=True,
+    )
+
+
+def chap_view(request, series_slug=None, chapter_number=None):
     """
-    Vue de démonstration du lecteur de manga.
-    Peut afficher un chapitre spécifique ou le premier disponible.
+    Vue du lecteur de manga.
+    Accepte un slug de série + numéro de chapitre, ou aucun paramètre.
     """
-    if chapter_id:
-        chapter = get_object_or_404(Chapter.objects.select_related('series'), id=chapter_id)
+    if series_slug and chapter_number:
+        chapter = _get_chapter(series_slug, chapter_number)
     else:
         # Récupère le premier chapitre disponible
         chapter = Chapter.objects.select_related('series').first()
         if chapter:
-            return redirect('reader:chap_chapter', chapter_id=chapter.id)
+            return redirect('reader:chap_chapter',
+                            series_slug=chapter.series.slug,
+                            chapter_number=str(chapter.number))
 
     if not chapter:
         return render(request, 'reader/chap.html', {
@@ -52,6 +81,7 @@ def chap_view(request, chapter_id=None):
                         wallet_locked.credits_balance -= chapter_price
                         wallet_locked.save()
                         UnlockedChapter.objects.create(user=request.user, chapter=chapter)
+                        logger.info(f"Auto-débit: user={request.user.nickname}, chapter={chapter.id}, price={chapter_price} Orbes")
                     else:
                         return render(request, 'reader/paywall.html', {'chapter': chapter, 'STATIC_VERSION': settings.STATIC_VERSION, 'wallet': wallet})
             else:
@@ -130,3 +160,60 @@ def chap_view(request, chapter_id=None):
     }
     
     return render(request, 'reader/chap.html', context)
+
+# ─── Phase 5: Manual Chapter Unlock ───────────────────────────────────────────
+
+CHAPTER_PRICE = 20  # crédits par chapitre premium
+
+
+@login_required
+@require_POST
+def unlock_chapter(request, series_slug, chapter_number):
+    """
+    Débloque manuellement un chapitre premium en déduisant CHAPTER_PRICE crédits.
+    Idempotent : si déjà débloqué, renvoie success=True sans re-déduire.
+
+    POST /reader/unlock/<series_slug>/<chapter_number>/
+    Retourne: { success: bool, redirect?: str, error?: str, balance?: int }
+    """
+    from reader.models import UnlockedChapter
+    from users.models import UserWallet
+    from django.db import transaction as db_transaction
+
+    chapter = _get_chapter(series_slug, chapter_number)
+    redirect_url = reverse('reader:chap_chapter',
+                           kwargs={'series_slug': series_slug, 'chapter_number': chapter_number})
+
+    # Idempotent: already unlocked → no charge
+    if UnlockedChapter.objects.filter(user=request.user, chapter=chapter).exists():
+        return JsonResponse({
+            'success': True,
+            'already_unlocked': True,
+            'redirect': redirect_url,
+        })
+
+    wallet = getattr(request.user, 'wallet', None)
+    if not wallet:
+        return JsonResponse({'success': False, 'error': 'Portefeuille introuvable.'}, status=400)
+
+    with db_transaction.atomic():
+        wallet_locked = UserWallet.objects.select_for_update().get(id=wallet.id)
+
+        if wallet_locked.credits_balance < CHAPTER_PRICE:
+            return JsonResponse({
+                'success': False,
+                'error': f'Crédits insuffisants. Il vous faut {CHAPTER_PRICE} crédits.',
+                'balance': wallet_locked.credits_balance,
+                'required': CHAPTER_PRICE,
+            }, status=402)
+
+        wallet_locked.credits_balance -= CHAPTER_PRICE
+        wallet_locked.save(update_fields=['credits_balance'])
+        UnlockedChapter.objects.create(user=request.user, chapter=chapter)
+        logger.info(f"Déblocage manuel: user={request.user.nickname}, chapter={chapter.id}, price={CHAPTER_PRICE} Orbes")
+
+    return JsonResponse({
+        'success': True,
+        'redirect': redirect_url,
+        'new_balance': wallet_locked.credits_balance,
+    })

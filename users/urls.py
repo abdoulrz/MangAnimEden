@@ -12,4 +12,6 @@ urlpatterns = [
     path('user/<int:user_id>/', views.public_profile_view, name='public_profile'),  # Phase 2.5.2
     path('prestige/', views.prestige_reset_view, name='prestige_reset'),
     path('wallet/toggle-credits/', views.toggle_auto_use_credits, name='toggle_auto_credits'),
+    path('payment/initiate/', views.initiate_payment, name='initiate_payment'),
+    path('payment/callback/', views.payment_callback, name='payment_callback'),
 ]

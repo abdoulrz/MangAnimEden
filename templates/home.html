@@ -32,7 +32,7 @@
                         <span class="hero-chapter-sm">Chapitre {{ continue_reading.number }}</span>
                     </div>
                 </div>
-                <a href="{% url 'reader:chap_chapter' continue_reading.id %}" class="btn-hero-compact">
+                <a href="{% url 'reader:chap_chapter' continue_reading.series.slug continue_reading.number %}" class="btn-hero-compact">
                     Continuer <span class="arr">→</span>
                 </a>
             </div>

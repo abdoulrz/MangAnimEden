@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView # Added here
 from core.views import home_view, login_view, register_view, logout_view
+from core.payments.webhooks import webhook_receiver
 
 urlpatterns = [
     path('', home_view, name='home'),
@@ -34,6 +35,8 @@ urlpatterns = [
     path('users/', include('users.urls')),
     path('forum/', include('social.urls')),
     path('admin-panel/', include('administration.urls')),
+    # Phase 5: Payment Webhooks (csrf_exempt handled inside the view)
+    path('payments/webhook/<str:provider>/', webhook_receiver, name='payment_webhook'),
 ]
 
 # Serve media files in development

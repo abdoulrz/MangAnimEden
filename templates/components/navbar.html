@@ -107,7 +107,7 @@
                         A propos
                     </a>
 
-                    {% if user.is_staff or user.role_admin or user.role_moderator %}
+                    {% if user.is_staff or user.role_admin %}
                     <a href="{% url 'administration:dashboard' %}" class="dropdown-item d-flex align-items-center gap-2">
                         <span class="dropdown-icon">⚡</span>
                         Tableau de bord

@@ -13,7 +13,7 @@
     <div class="reader-info">
         <h1 class="reader-title">{{ chapter.series.title }}</h1>
         <p class="reader-subtitle">
-            Chapter {{ chapter.number|stringformat:".1f" }}
+            Chapitre {{ chapter.number|floatformat }}
             {% if chapter.title and "Chapter" not in chapter.title and "Chapitre" not in chapter.title %}
             - {{ chapter.title }}
             {% endif %}
@@ -28,13 +28,13 @@
     <!-- Navigation Top -->
     <div class="chapter-nav">
         {% if prev_chapter %}
-        <a href="{% url 'reader:chap_chapter' prev_chapter.id %}" class="nav-btn">← Précédent</a>
+        <a href="{% url 'reader:chap_chapter' prev_chapter.series.slug prev_chapter.number %}" class="nav-btn">← Précédent</a>
         {% else %}
         <span class="nav-btn disabled">← Précédent</span>
         {% endif %}
 
         {% if next_chapter %}
-        <a href="{% url 'reader:chap_chapter' next_chapter.id %}" class="nav-btn">Suivant →</a>
+        <a href="{% url 'reader:chap_chapter' next_chapter.series.slug next_chapter.number %}" class="nav-btn">Suivant →</a>
         {% else %}
         <span class="nav-btn disabled">Suivant →</span>
         {% endif %}
@@ -56,8 +56,8 @@
         {% if next_chapter %}
         <div class="next-chapter-hero">
             <div class="next-label">PROCHAIN CHAPITRE</div>
-            <h2 class="next-title">Chapitre {{ next_chapter.number|stringformat:".1f" }}</h2>
-            <a href="{% url 'reader:chap_chapter' next_chapter.id %}" class="btn-next-chapter pulse">
+            <h2 class="next-title">Chapitre {{ next_chapter.number|floatformat }}</h2>
+            <a href="{% url 'reader:chap_chapter' next_chapter.series.slug next_chapter.number %}" class="btn-next-chapter pulse">
                 Lire le Chapitre Suivant <i class="fas fa-chevron-right"></i>
             </a>
         </div>
@@ -70,6 +70,39 @@
             </a>
         </div>
         {% endif %}
+
+        <!-- Bottom Navigation (Nav before recommendations for logical flow) -->
+        <div class="chapter-nav bottom-nav d-flex justify-content-between align-items-center">
+            {% if prev_chapter %}
+            <a href="{% url 'reader:chap_chapter' prev_chapter.series.slug prev_chapter.number %}" class="nav-btn d-inline-flex align-items-center gap-2">
+                <i class="fas fa-chevron-left"></i> <span class="nav-label">Précédent</span>
+            </a>
+            {% else %}
+            <span class="nav-btn disabled d-inline-flex align-items-center gap-2">
+                <i class="fas fa-chevron-left"></i> <span class="nav-label">Précédent</span>
+            </span>
+            {% endif %}
+
+            <div class="chapter-selector-container">
+                <select class="chapter-dropdown" onchange="window.location.href=this.value" title="Choisir un chapitre">
+                    {% for ch in chapter.series.chapters.all|dictsort:"number" %}
+                    <option value="{% url 'reader:chap_chapter' ch.series.slug ch.number %}" {% if ch.id == chapter.id %}selected{% endif %}>
+                        Ch. {{ ch.number|floatformat }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if next_chapter %}
+            <a href="{% url 'reader:chap_chapter' next_chapter.series.slug next_chapter.number %}" class="nav-btn d-inline-flex align-items-center gap-2">
+                <span class="nav-label">Suivant</span> <i class="fas fa-chevron-right"></i>
+            </a>
+            {% else %}
+            <span class="nav-btn disabled d-inline-flex align-items-center gap-2">
+                <span class="nav-label">Suivant</span> <i class="fas fa-chevron-right"></i>
+            </span>
+            {% endif %}
+        </div>
 
         {% if recommendations %}
         <div class="recommendations-section">
@@ -99,38 +132,6 @@
         {% endif %}
     </div>
 
-        <div class="chapter-nav bottom-nav d-flex justify-content-between align-items-center">
-            {% if prev_chapter %}
-            <a href="{% url 'reader:chap_chapter' prev_chapter.id %}" class="nav-btn d-inline-flex align-items-center gap-2">
-                <i class="fas fa-chevron-left"></i> <span class="nav-label">Précédent</span>
-            </a>
-            {% else %}
-            <span class="nav-btn disabled d-inline-flex align-items-center gap-2">
-                <i class="fas fa-chevron-left"></i> <span class="nav-label">Précédent</span>
-            </span>
-            {% endif %}
-
-            <div class="chapter-selector-container">
-                <select class="chapter-dropdown" onchange="window.location.href=this.value" title="Choisir un chapitre">
-                    {% for ch in chapter.series.chapters.all|dictsort:"number" %}
-                    <option value="{% url 'reader:chap_chapter' ch.id %}" {% if ch.id == chapter.id %}selected{% endif %}>
-                        Ch. {{ ch.number|stringformat:".1f" }}
-                    </option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            {% if next_chapter %}
-            <a href="{% url 'reader:chap_chapter' next_chapter.id %}" class="nav-btn d-inline-flex align-items-center gap-2">
-                <span class="nav-label">Suivant</span> <i class="fas fa-chevron-right"></i>
-            </a>
-            {% else %}
-            <span class="nav-btn disabled d-inline-flex align-items-center gap-2">
-                <span class="nav-label">Suivant</span> <i class="fas fa-chevron-right"></i>
-            </span>
-            {% endif %}
-        </div>
-
     {% else %}
     <div class="reader-empty">
         <div class="reader-empty-icon">📚</div>
@@ -139,22 +140,6 @@
     {% endif %}
 
 </div>
-
-<!-- Sticky Bottom Navigation (Mobile & Desktops) -->
-{% if next_chapter %}
-<div class="sticky-next-nav hidden" id="sticky-next">
-    <div class="sticky-content">
-        <span class="sticky-info">Ch. {{ next_chapter.number|stringformat:".1f" }}</span>
-        <a href="{% url 'reader:chap_chapter' next_chapter.id %}" class="btn-sticky-next">
-            Suivant <i class="fas fa-arrow-right"></i>
-        </a>
-    </div>
-</div>
-{% endif %}
-
-<!-- Scroll To Top Button -->
-
-
 
 <!-- Reader Controls & Settings -->
 <div class="reader-controls-layer">

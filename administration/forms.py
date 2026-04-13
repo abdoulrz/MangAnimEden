@@ -3,16 +3,18 @@ from catalog.models import Chapter
 class ChapterForm(forms.ModelForm):
     class Meta:
         model = Chapter
-        fields = ['series', 'number', 'title', 'source_file']
+        fields = ['series', 'number', 'title', 'source_file', 'is_premium']
         widgets = {
             'number': forms.NumberInput(attrs={'class': 'form-input', 'placeholder': 'Ex: 10.5'}),
             'title': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Titre du chapitre (optionnel)'}),
             'series': forms.HiddenInput(),
+            'is_premium': forms.CheckboxInput(attrs={'class': 'admin-toggle-input', 'id': 'id_is_premium'}),
         }
         labels = {
             'source_file': 'FICHIER',
             'number': 'NUMÉRO DU CHAPITRE',
             'title': 'TITRE (OPTIONNEL)',
+            'is_premium': 'Chapitre Premium',
         }
 
 from catalog.models import Series
@@ -24,7 +26,7 @@ class SeriesForm(forms.ModelForm):
 
     class Meta:
         model = Series
-        fields = ['title', 'slug', 'description', 'cover', 'type', 'genres', 'author', 'artist', 'status', 'release_date']
+        fields = ['title', 'slug', 'description', 'cover', 'type', 'genres', 'author', 'artist', 'status', 'release_date', 'nsfw']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Titre de la série'}),
             'slug': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Slug (auto-généré si vide)'}),
@@ -35,6 +37,10 @@ class SeriesForm(forms.ModelForm):
             'status': forms.Select(attrs={'class': 'form-control'}),
             'release_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'genres': forms.CheckboxSelectMultiple(),
+            'nsfw': forms.CheckboxInput(attrs={'class': 'admin-toggle-input', 'id': 'id_nsfw'}),
+        }
+        labels = {
+            'nsfw': 'Contenu 18+ (NSFW)',
         }
 
 from users.models import Badge

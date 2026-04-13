@@ -1133,39 +1133,35 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Dark Mode Text Adjustments (on Light Background) */
+/* Dark mode (default): white text on dark animated background */
 .domaine-dynamic-content .section-title,
 .domaine-dynamic-content h2,
 .domaine-dynamic-content h3,
 .domaine-dynamic-content p,
 .domaine-dynamic-content .profile-welcome-text {
-    color: #1e293b;
-    /* Dark Slate for contrast on Light Image */
-    text-shadow: 0 0 2px rgba(255, 255, 255, 0.5);
-    font-weight: 600;
-    /* Increased weight for legibility */
+    color: var(--glass-text-primary);
+    /* White in dark mode (#FFFFFF), dark in light mode (#000000) */
+    /* text-shadow removed — was causing the blurry halo effect */
 }
 
-/* Light Mode Overrides -> Dark Image (tori_domaine.png) */
+/* Light mode: dark text on light panel, strong shadow on dark background image */
+.light-mode .domaine-dynamic-content .section-title,
+.light-mode .domaine-dynamic-content h2,
+.light-mode .domaine-dynamic-content h3,
+.light-mode .domaine-dynamic-content p,
+.light-mode .domaine-dynamic-content .profile-welcome-text {
+    color: #1e293b;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+}
+
 @media (prefers-color-scheme: light) {
     .light-mode .domaine-dynamic-content {
         background: url('../images/backgrounds/tori_domaine.png') no-repeat center center;
         background-size: cover;
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
-
-    /* Light Mode Text Adjustments (on Dark Background) */
-    .light-mode .domaine-dynamic-content .section-title,
-    .light-mode .domaine-dynamic-content h2,
-    .light-mode .domaine-dynamic-content h3,
-    .light-mode .domaine-dynamic-content p,
-    .light-mode .domaine-dynamic-content .profile-welcome-text {
-        color: #f8fafc;
-        /* White for contrast on Dark Image */
-        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
-        /* Strong drop shadow */
-    }
 }
+
 
 .profile-content-area {
     overflow-y: auto;
@@ -2453,4 +2449,439 @@
     .light-mode .status-dot {
         border-color: white;
     }
+}
+/* ============================================================
+   PAYMENT GATEWAY BLOCKS (FedaPay, future providers)
+   ============================================================ */
+.payment-gateway-block {
+    background: linear-gradient(145deg, #111827 0%, #0f172a 100%);
+    border: 1px solid rgba(255, 193, 7, 0.25);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 1rem;
+}
+
+/* -- Header -- */
+.gateway-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.85rem 1.1rem;
+    background: rgba(241, 196, 15, 0.1);
+    border-bottom: 1px solid rgba(255, 193, 7, 0.15);
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.gateway-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.gateway-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #f1c40f, #e67e22);
+    border-radius: 7px;
+    color: white;
+    flex-shrink: 0;
+}
+.gateway-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #f1c40f;
+    letter-spacing: 0.02em;
+}
+.gateway-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    background: rgba(241, 196, 15, 0.15);
+    color: rgba(241, 196, 15, 0.9);
+    border: 1px solid rgba(241, 196, 15, 0.3);
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.gateway-region {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+.gateway-region svg { color: #2ecc71; }
+
+/* -- Scrollable track -- */
+.pack-scroll-track {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.2rem 1.1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.pack-scroll-track::-webkit-scrollbar { display: none; }
+
+/* -- Individual pack card -- */
+.pack-card {
+    flex: 0 0 auto;
+    width: 130px;
+    background: linear-gradient(145deg, #1e2a3a, #162030);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 1rem 0.75rem 0.9rem;
+    text-align: center;
+    cursor: pointer;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    position: relative;
+    color: white;
+}
+.pack-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(241, 196, 15, 0.5);
+    box-shadow: 0 6px 24px rgba(241, 196, 15, 0.14);
+}
+.pack-card:active { transform: scale(0.97); }
+
+.pack-card--popular {
+    border-color: rgba(241, 196, 15, 0.45);
+    background: linear-gradient(145deg, #2a2210, #1e1808);
+}
+.pack-card--best {
+    border-color: rgba(156, 39, 176, 0.45);
+    background: linear-gradient(145deg, #1e1030, #160c24);
+}
+
+/* Popular badge */
+.pack-popular-label {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 2px 10px;
+    background: linear-gradient(90deg, #f1c40f, #e67e22);
+    color: #1a1a2e;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+/* Card content */
+.pack-icon     { font-size: 1.5rem; margin-bottom: 0.4rem; line-height: 1; }
+.pack-amount   { font-size: 1.35rem; font-weight: 800; color: #ffffff; line-height: 1; }
+.pack-unit     { font-size: 0.68rem; color: rgba(255,255,255,0.7); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 0.5rem; }
+.pack-credits  { font-size: 0.72rem; color: #f1c40f; font-weight: 600; margin-bottom: 0.55rem; }
+.pack-cta      { font-size: 0.72rem; color: rgba(255,255,255,0.55); transition: color 0.15s; }
+.pack-card:hover .pack-cta { color: #f1c40f; }
+
+/* -- Footer -- */
+.gateway-footer {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0.6rem 1.1rem;
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.4);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* ============================================================
+   CREDIT PURCHASE WIDGET (.credit-purchase-widget)
+   ============================================================ */
+.credit-purchase-widget {
+    background: linear-gradient(145deg, #111827, #0f172a);
+    border: 1px solid rgba(255, 193, 7, 0.2);
+    border-radius: 18px;
+    padding: 1.75rem 1.5rem;
+    max-width: 520px;
+    margin: 1rem auto 0;
+}
+
+.cpu-title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin-bottom: 0.35rem;
+    text-align: center;
+}
+.cpu-subtitle {
+    font-size: 0.78rem;
+    color: #94a3b8;
+    text-align: center;
+    margin-bottom: 1.4rem;
+}
+
+/* -- Stepper -- */
+.cpu-stepper-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 0.4rem;
+}
+.cpu-step-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+    flex-shrink: 0;
+}
+.cpu-step-btn:hover {
+    background: rgba(241,196,15,0.15);
+    border-color: rgba(241,196,15,0.4);
+}
+.cpu-display {
+    text-align: center;
+    min-width: 120px;
+}
+.cpu-value {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #ffffff;
+    letter-spacing: -0.01em;
+    line-height: 1;
+}
+.cpu-label {
+    display: block;
+    font-size: 0.65rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 0.25rem;
+}
+.cpu-step-hint {
+    text-align: center;
+    font-size: 0.72rem;
+    color: #94a3b8;
+    margin-bottom: 1.4rem;
+}
+
+/* -- Method Label -- */
+.cpu-method-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin: 1.5rem 0 0.75rem;
+    text-align: center;
+}
+
+/* -- Methods grid -- */
+.cpu-methods {
+    display: flex;
+    gap: 0.6rem;
+    margin-bottom: 1.4rem;
+    flex-wrap: wrap;
+}
+.cpu-method {
+    flex: 1;
+    min-width: 90px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.7rem 0.5rem;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    color: white;
+}
+.cpu-method.active {
+    border-color: rgba(241,196,15,0.55);
+    background: rgba(241,196,15,0.1);
+}
+.cpu-method:not([disabled]):hover {
+    border-color: rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.08);
+}
+.cpu-method--soon {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+.cpu-method-icon { font-size: 1.3rem; line-height: 1; }
+.cpu-method-name { font-size: 0.72rem; font-weight: 600; color: #ffffff; }
+.cpu-method-sub  { font-size: 0.65rem; color: #94a3b8; }
+
+/* -- CTA Row -- */
+.cpu-cta-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+.cpu-pay-btn {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    background: linear-gradient(90deg, #f1c40f, #e67e22);
+    border: none;
+    border-radius: 14px;
+    color: #111;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+}
+.cpu-pay-btn:hover  { opacity: 0.92; transform: translateY(-1px); }
+.cpu-pay-btn:active { transform: scale(0.98); }
+.cpu-pay-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+/* -- Secure note -- */
+.cpu-secure-note {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.7rem;
+    color: #64748b;
+    margin-top: 0.8rem;
+    justify-content: center;
+}
+
+/* Light mode override: widget always has a dark background — preserve its own text colors */
+.light-mode .credit-purchase-widget p,
+.light-mode .credit-purchase-widget .cpu-label {
+    color: #94a3b8;
+    text-shadow: none;
+}
+.light-mode .credit-purchase-widget .cpu-secure-note {
+    color: #64748b;
+    text-shadow: none;
+}
+
+/* ============================================================
+   WALLET OVERVIEW CARD (.wallet-overview-card)
+   ============================================================ */
+.wallet-overview-card {
+    background: linear-gradient(145deg, #111827, #0f172a);
+    border: 1px solid rgba(241, 196, 15, 0.25);
+    border-radius: 18px;
+    padding: 1.5rem 1.25rem;
+    max-width: 520px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+/* Label */
+.woc-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: rgba(241, 196, 15, 0.7);
+    margin-bottom: 0.6rem;
+}
+
+/* Amount pill */
+.woc-amount-pill {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(241,196,15,0.15), rgba(230,126,34,0.1));
+    border: 1px solid rgba(241,196,15,0.35);
+    border-radius: 50px;
+    padding: 0.45rem 2.2rem;
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: #f1c40f;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 1.1rem;
+    box-shadow: 0 0 24px rgba(241,196,15,0.1);
+}
+
+/* Toggle row */
+.woc-auto-row {
+    display: flex;
+    justify-content: center;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 1rem;
+}
+
+.woc-toggle-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Custom toggle */
+.woc-toggle-box {
+    position: relative;
+    width: 42px;
+    height: 24px;
+    flex-shrink: 0;
+}
+.woc-toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+.woc-toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.12);
+    border-radius: 50px;
+    border: 1px solid rgba(255,255,255,0.15);
+    transition: background 0.2s, border-color 0.2s;
+}
+.woc-toggle-slider::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.2s;
+}
+.woc-toggle-input:checked + .woc-toggle-slider {
+    background: linear-gradient(90deg, #f1c40f, #e67e22);
+    border-color: transparent;
+}
+.woc-toggle-input:checked + .woc-toggle-slider::after {
+    transform: translateX(18px);
+}
+
+.woc-auto-text {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+/* Light mode: keep woc-label gold on dark widget background */
+.light-mode .wallet-overview-card .woc-label {
+    color: rgba(241, 196, 15, 0.85);
+    text-shadow: none;
+}
+
+/* ============================================================
+   ORBES IDENTITY (◎)
+   ============================================================ */
+.orb-icon {
+    color: #f1c40f;
+    filter: drop-shadow(0 0 6px rgba(241, 196, 15, 0.3));
+    font-weight: 400;
+    margin-left: 2px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.woc-amount-pill .orb-icon {
+    font-size: 0.8em;
+    margin-top: -8px;
 }
