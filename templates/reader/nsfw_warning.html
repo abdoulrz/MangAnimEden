@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contenu Interdit - MangAnimEDen{% endblock %}
+
+{% block extra_css %}
+<style>
+    .nsfw-page {
+        min-height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    .nsfw-card {
+        max-width: 600px;
+        width: 100%;
+        background: rgba(15, 15, 20, 0.7);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 40px;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .nsfw-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #ef4444, #991b1b);
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 24px;
+        font-size: 32px;
+        font-weight: bold;
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+    }
+    .nsfw-title {
+        font-size: 28px;
+        color: #fff;
+        margin-bottom: 16px;
+        background: linear-gradient(to right, #fff, #9ca3af);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .nsfw-text {
+        color: #9ca3af;
+        line-height: 1.6;
+        margin-bottom: 32px;
+    }
+    .nsfw-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .btn-nsfw {
+        padding: 14px 24px;
+        border-radius: 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #7c3aed, #db2777);
+        color: white;
+        border: none;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(124, 58, 237, 0.4);
+    }
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        color: #fff;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    .nsfw-footer {
+        margin-top: 24px;
+        font-size: 14px;
+        color: #6b7280;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="nsfw-page">
+    <div class="nsfw-card">
+        <div class="nsfw-icon">18+</div>
+        <h1 class="nsfw-title">Contenu Restreint</h1>
+        <p class="nsfw-text">
+            Ce contenu est classé <strong>NSFW (18+)</strong>. Pour y accéder, nous devons vérifier votre majorité conformément à nos conditions de sécurité.
+        </p>
+
+        <div class="nsfw-actions">
+            {% if not user.is_authenticated %}
+                <a href="{% url 'account_login' %}?next={{ request.path }}" class="btn-nsfw btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                    Se connecter pour vérifier l'âge
+                </a>
+            {% elif not user.birth_date %}
+                <a href="{% url 'users:edit_profile' %}" class="btn-nsfw btn-primary">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                    Renseigner ma date de naissance
+                </a>
+            {% endif %}
+            
+            <a href="{% url 'catalog:index' %}" class="btn-nsfw btn-secondary">
+                Retourner au catalogue
+            </a>
+        </div>
+
+        <div class="nsfw-footer">
+            En continuant, vous attestez être majeur et acceptez de visionner du contenu pour adultes.
+        </div>
+    </div>
+</div>
+{% endblock %}

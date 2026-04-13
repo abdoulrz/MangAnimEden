@@ -23,10 +23,10 @@ def catalog_index(request):
         real_chapters_count=Count('chapters') # Using a different name to avoid conflict with denormalized field if needed, but let's just use it to override or supplement
     ).all()
 
-    # Phase 5: Gating NSFW Content (Admins bypass)
+    # Phase 5: Gating NSFW Content (Biological Age Logic)
     is_admin = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
-    is_age_verified = request.user.is_authenticated and getattr(request.user, 'age_verified', False)
-    if not (is_admin or is_age_verified):
+    is_major = request.user.is_authenticated and request.user.birth_date and request.user.is_major
+    if not (is_admin or is_major):
         series_list = series_list.filter(nsfw=False)
 
     # Filtering
@@ -77,6 +77,16 @@ def manga_detail(request, series_id):
     Fetches the series and its chapters.
     """
     series = get_object_or_404(Series, pk=series_id)
+    
+    # Phase 5: Gating NSFW Content (Biological Age Logic)
+    if series.nsfw:
+        is_admin = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+        if not is_admin:
+            if not request.user.is_authenticated or not request.user.birth_date:
+                return render(request, 'reader/nsfw_warning.html', {'STATIC_VERSION': settings.STATIC_VERSION})
+            if not request.user.is_major:
+                return render(request, 'reader/nsfw_denied.html', {'STATIC_VERSION': settings.STATIC_VERSION})
+
     # Increment views atomatically
     from django.db.models import F
     series.views_count = F('views_count') + 1
@@ -188,10 +198,10 @@ def search_api(request):
         Q(genres__name__icontains=query)
     ).distinct()
 
-    # Phase 5: Gating NSFW Content (Admins bypass)
+    # Phase 5: Gating NSFW Content (Biological Age Logic)
     is_admin = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
-    is_age_verified = request.user.is_authenticated and getattr(request.user, 'age_verified', False)
-    if not (is_admin or is_age_verified):
+    is_major = request.user.is_authenticated and request.user.birth_date and request.user.is_major
+    if not (is_admin or is_major):
         results = results.filter(nsfw=False)
         
     results = results[:8]

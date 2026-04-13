@@ -145,6 +145,8 @@ def edit_profile_view(request):
         form = UserUpdateForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
+            from django.contrib import messages
+            messages.success(request, "Votre profil a été mis à jour avec succès !")
             return redirect('users:profile')
     else:
         form = UserUpdateForm(instance=request.user)

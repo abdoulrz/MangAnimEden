@@ -49,6 +49,12 @@
                 class="admin-nav-item {% if active_tab == 'badges' %}active{% endif %}">
                 <i class="fas fa-trophy"></i> Badges
             </a>
+
+            <div class="admin-nav-header">Finances</div>
+            <a href="{% url 'administration:transaction_list' %}"
+                class="admin-nav-item {% if active_tab == 'finance' %}active{% endif %}">
+                <i class="fas fa-wallet"></i> Transactions
+            </a>
         </aside>
 
         <!-- Main Content Area -->

@@ -279,12 +279,13 @@ SESSION_COOKIE_SECURE = not DEBUG  # True in prod (HTTPS), False in dev (HTTP)
 CSRF_COOKIE_SECURE = not DEBUG
 
 # Extra Security Headers
+SECURE_SSL_REDIRECT = not DEBUG  # Force HTTPS in Prod
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 # Versioning for cache busting 
-STATIC_VERSION = '2.10.69'
+STATIC_VERSION = '2.10.70'
 
 # Admin bootstrap via secret passphrase on registration
 ADMIN_BOOTSTRAP_PASSPHRASE = config('ADMIN_BOOTSTRAP_PASSPHRASE', default='Nefe')

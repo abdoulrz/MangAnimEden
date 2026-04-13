@@ -62,6 +62,22 @@ class User(AbstractUser):
     is_premium = models.BooleanField(default=False, verbose_name="Est Premium")
     premium_expires_at = models.DateTimeField(null=True, blank=True, verbose_name="Expiration Premium")
     age_verified = models.BooleanField(default=False, verbose_name="Âge Vérifié")
+    birth_date = models.DateField(null=True, blank=True, verbose_name="Date de naissance")
+
+    @property
+    def is_major(self):
+        """
+        Détermine si l'utilisateur est majeur (18+).
+        Basé sur la date de naissance renseignée dans le profil.
+        """
+        if not self.birth_date:
+            return False
+        from django.utils import timezone
+        today = timezone.now().date()
+        # Calcul précis de l'âge
+        age = today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
+        return age >= 18
+
     SUBSCRIPTION_CHOICES = [
         ('free', 'Membre Gratuit'),
         ('premium', 'Abonné Premium'),

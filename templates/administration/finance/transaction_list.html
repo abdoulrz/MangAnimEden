@@ -1,0 +1,104 @@
+{% extends "administration/base_admin.html" %}
+
+{% block admin_content %}
+<div class="admin-header">
+    <h1 class="admin-page-title">Gestion des Finances</h1>
+    <div class="admin-summary">
+        <span class="badge badge-info">{{ transactions.count }} transactions récentes</span>
+        
+        {% if transactions %}
+            <form method="POST" action="{% url 'administration:bulk_approve_transactions' %}" class="inline-form" style="margin-left: 15px;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary" onclick="return confirm('Approuver toutes les transactions en attente ?')">
+                    🚀 Tout Approuver
+                </button>
+            </form>
+        {% endif %}
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="admin-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Utilisateur</th>
+                <th>Montant</th>
+                <th>Crédits</th>
+                <th>Passerelle</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for txn in transactions %}
+            <tr>
+                <td>{{ txn.created_at|date:"d/m/Y H:i" }}</td>
+                <td>
+                    <div class="user-cell">
+                        {% if txn.user.avatar %}
+                        <img src="{{ txn.user.avatar.url }}" alt="avatar" class="avatar-small">
+                        {% else %}
+                        <div class="avatar-placeholder-small">{{ txn.user.nickname|first|upper }}</div>
+                        {% endif %}
+                        <span class="username">{{ txn.user.nickname }}</span>
+                    </div>
+                </td>
+                <td>{{ txn.amount_in_fiat }} {{ txn.currency }}</td>
+                <td><strong>+{{ txn.credits_awarded }}</strong> Orbes</td>
+                <td><span class="provider-tag">{{ txn.gateway_used|upper }}</span></td>
+                <td>
+                    {% if txn.status == 'SUCCESS' %}
+                        <span class="status-badge active">Succès</span>
+                    {% elif txn.status == 'FAILED' %}
+                        <span class="status-badge banned">Échec</span>
+                    {% else %}
+                        <span class="status-badge warning">En attente</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        {% if txn.status == 'PENDING' %}
+                        <form method="POST" action="{% url 'administration:approve_transaction' txn.id %}" class="inline-form">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-small btn-success" onclick="return confirm('Voulez-vous vraiment approuver et créditer manuellement cette transaction ?')">
+                                ✅ Approuver
+                            </button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted small">Aucune action</span>
+                    {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" class="empty-state">Aucune transaction trouvée.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="pagination">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+        <a href="?page=1">&laquo; début</a>
+        <a href="?page={{ page_obj.previous_page_number }}">précédent</a>
+        {% endif %}
+
+        <span class="current">
+            Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}">suivant</a>
+        <a href="?page={{ page_obj.paginator.num_pages }}">fin &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+{% endif %}
+
+{% endblock %}

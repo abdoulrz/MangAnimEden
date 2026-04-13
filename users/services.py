@@ -41,3 +41,48 @@ class BadgeService:
                 newly_awarded.append(badge)
                 
         return newly_awarded
+
+from django.db import transaction as db_transaction
+from .models import Transaction, UserWallet
+import logging
+
+logger = logging.getLogger(__name__)
+
+class PaymentService:
+    @staticmethod
+    def process_transaction_success(transaction_id, webhook_payload=None):
+        """
+        Process a successful transaction: update status and credit user wallet.
+        Thread-safe and atomic to prevent double-crediting.
+        """
+        try:
+            with db_transaction.atomic():
+                # Lock the transaction row to prevent parallel processing
+                txn = Transaction.objects.select_for_update().get(
+                    id=transaction_id, 
+                    status='PENDING'
+                )
+                
+                # Mark as success
+                txn.status = 'SUCCESS'
+                if webhook_payload:
+                    txn.webhook_payload = webhook_payload
+                txn.save(update_fields=['status', 'webhook_payload'])
+                
+                # Credit the wallet
+                wallet, _ = UserWallet.objects.select_for_update().get_or_create(user=txn.user)
+                wallet.credits_balance += txn.credits_awarded
+                wallet.save(update_fields=['credits_balance'])
+                
+                logger.info(
+                    f"PaymentService: ✅ Transaction #{transaction_id} approved. "
+                    f"User: {txn.user.nickname}, Credits: +{txn.credits_awarded}"
+                )
+                return True, txn
+                
+        except Transaction.DoesNotExist:
+            logger.warning(f"PaymentService: Transaction #{transaction_id} not found or already processed.")
+            return False, "Transaction introuvable ou déjà traitée."
+        except Exception as e:
+            logger.exception(f"PaymentService: Error processing transaction #{transaction_id}: {e}")
+            return False, str(e)

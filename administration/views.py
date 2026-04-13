@@ -14,7 +14,8 @@ from .decorators import requires_admin, requires_moderator, log_admin_action, cr
 from administration.models import SystemLog, Report # Added Report
 from catalog.models import Series, Chapter, Genre, Review # Added Review
 from social.models import Message, Group, Event # Added Message
-from users.models import Badge
+from users.models import Badge, Transaction
+from users.services import PaymentService
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -844,3 +845,54 @@ class AdminResyncMetadataView(View):
         create_system_log(request, 'METADATA_RESYNC', details=f"Synchronisation de la métadonnées pour {count} séries.")
         messages.success(request, f"Métadonnées synchronisées pour {count} séries.")
         return redirect('administration:series_list')
+
+# --- Finance Management (Phase 5) ---
+@method_decorator(requires_moderator, name='dispatch')
+class AdminTransactionListView(ListView):
+    model = Transaction
+    template_name = 'administration/finance/transaction_list.html'
+    context_object_name = 'transactions'
+    paginate_by = 30
+    ordering = ['-created_at']
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['active_tab'] = 'finance'
+        return context
+
+@method_decorator(requires_admin, name='dispatch')
+class AdminTransactionApproveView(View):
+    def post(self, request, txn_id):
+        success, result = PaymentService.process_transaction_success(txn_id)
+        if success:
+            messages.success(request, f"Transaction #{txn_id} approuvée et créditée avec succès !")
+            create_system_log(request, 'TRANSACTION_MANUAL_APPROVE', details=f"Transaction #{txn_id} approuvée manuellement par {request.user.nickname}")
+        else:
+            messages.error(request, f"Erreur lors de l'approbation : {result}")
+        
+        return redirect('administration:transaction_list')
+
+@method_decorator(requires_admin, name='dispatch')
+class AdminTransactionBulkApproveView(View):
+    def post(self, request):
+        pending_txns = Transaction.objects.filter(status='PENDING')
+        count = pending_txns.count()
+        
+        if count == 0:
+            messages.info(request, "Aucune transaction en attente à approuver.")
+            return redirect('administration:transaction_list')
+            
+        success_count = 0
+        for txn in pending_txns:
+            success, _ = PaymentService.process_transaction_success(txn.id)
+            if success:
+                success_count += 1
+                
+        if success_count > 0:
+            messages.success(request, f"{success_count} transactions ont été approuvées et créditées.")
+            create_system_log(request, 'TRANSACTION_BULK_APPROVE', details=f"{success_count} transactions approuvées en masse par {request.user.nickname}")
+        
+        if success_count < count:
+            messages.warning(request, f"{count - success_count} transactions n'ont pas pu être traitées.")
+            
+        return redirect('administration:transaction_list')

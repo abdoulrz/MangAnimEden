@@ -86,35 +86,16 @@ def webhook_receiver(request, provider):
         logger.warning(f"Webhook {provider}: impossible de résoudre django_transaction_id.")
         return JsonResponse({'status': 'ignored', 'reason': 'no transaction_id'})
 
-    try:
-        from django.db import transaction as db_transaction
+    from users.services import PaymentService
+    success, result = PaymentService.process_transaction_success(django_txn_id, webhook_payload=data)
 
-        with db_transaction.atomic():
-            txn = Transaction.objects.select_for_update().get(
-                id=django_txn_id,
-                status='PENDING'
-            )
-            txn.status = 'SUCCESS'
-            txn.webhook_payload = data
-            txn.save(update_fields=['status', 'webhook_payload'])
-
-            wallet = UserWallet.objects.select_for_update().get(user=txn.user)
-            wallet.credits_balance += txn.credits_awarded
-            wallet.save(update_fields=['credits_balance'])
-
-        logger.info(
-            f"Webhook {provider}: ✅ wallet de {txn.user.nickname} crédité de "
-            f"{txn.credits_awarded} crédits. Nouveau solde: {wallet.credits_balance}"
-        )
+    if success:
         return JsonResponse({'status': 'success'})
-
-    except Transaction.DoesNotExist:
-        logger.warning(f"Webhook {provider}: Transaction #{django_txn_id} inexistante ou déjà traitée.")
-        return JsonResponse({'status': 'already_processed'})
-
-    except Exception as e:
-        logger.exception(f"Webhook {provider}: erreur inattendue – {e}")
-        return JsonResponse({'error': 'Erreur interne'}, status=500)
+    else:
+        # result contient le message d'erreur
+        if "Transaction introuvable" in str(result):
+            return JsonResponse({'status': 'already_processed'})
+        return JsonResponse({'error': str(result)}, status=500)
 
 
 def _extract_django_txn_id(provider, data, fedapay_txn):

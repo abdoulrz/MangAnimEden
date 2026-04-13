@@ -47,7 +47,7 @@ class UserUpdateForm(forms.ModelForm):
     class Meta:
         model = User
         fields = [
-            'nickname', 'avatar', 'bio',
+            'nickname', 'avatar', 'birth_date', 'bio',
             'is_dnd_mode',
             'pref_notif_likes', 'pref_notif_replies', 'pref_notif_friends', 'pref_notif_messages',
             'social_facebook', 'social_twitter', 'social_instagram', 'social_youtube', 'social_linkedin',
@@ -56,6 +56,7 @@ class UserUpdateForm(forms.ModelForm):
         widgets = {
             'nickname': forms.TextInput(attrs={'class': 'input profile-input', 'placeholder': 'Votre pseudo'}),
             'avatar': forms.FileInput(attrs={'class': 'file-input-hidden'}),
+            'birth_date': forms.DateInput(format='%Y-%m-%d', attrs={'class': 'input profile-input', 'type': 'date'}),
             'bio': forms.Textarea(attrs={'class': 'input profile-textarea', 'placeholder': 'Parlez-nous de vous...', 'rows': 4}),
             'location_country': forms.TextInput(attrs={'class': 'input profile-input', 'placeholder': 'Votre pays'}),
             'location_city': forms.TextInput(attrs={'class': 'input profile-input', 'placeholder': 'Votre ville'}),

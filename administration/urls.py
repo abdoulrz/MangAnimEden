@@ -55,4 +55,9 @@ urlpatterns = [
     
     # Tools & Maintenance
     path('tools/resync-metadata/', views.AdminResyncMetadataView.as_view(), name='resync_metadata'),
+
+    # Finance Management
+    path('finance/transactions/', views.AdminTransactionListView.as_view(), name='transaction_list'),
+    path('finance/transactions/bulk-approve/', views.AdminTransactionBulkApproveView.as_view(), name='bulk_approve_transactions'),
+    path('finance/transactions/<int:txn_id>/approve/', views.AdminTransactionApproveView.as_view(), name='approve_transaction'),
 ]

@@ -51,6 +51,15 @@ def chap_view(request, series_slug=None, chapter_number=None):
             'STATIC_VERSION': settings.STATIC_VERSION
         })
     
+    # Phase 5: Gating NSFW Content (Biological Age Logic)
+    if chapter.series.nsfw:
+        is_admin = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+        if not is_admin:
+            if not request.user.is_authenticated or not request.user.birth_date:
+                return render(request, 'reader/nsfw_warning.html', {'STATIC_VERSION': settings.STATIC_VERSION})
+            if not request.user.is_major:
+                return render(request, 'reader/nsfw_denied.html', {'STATIC_VERSION': settings.STATIC_VERSION})
+    
     # Phase 5: Gating Logic & Monetization
     # We define premium as: chapter flag is true, OR chapter number > 50
     is_chapter_premium = chapter.is_premium or float(chapter.number) > 50
