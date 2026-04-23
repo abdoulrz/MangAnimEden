@@ -2885,3 +2885,43 @@
     font-size: 0.8em;
     margin-top: -8px;
 }
+
+/* ============================================================
+   OTAKU PREMIUM GLASSMORPHISM THEME
+   ============================================================ */
+.otaku-premium-theme {
+    background: rgba(255, 215, 0, 0.05) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    backdrop-filter: blur(12px) !important;
+    border: 1px solid rgba(255, 215, 0, 0.4) !important;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.15), inset 0 0 10px rgba(255, 215, 0, 0.05) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle gold shine animation overlay */
+.otaku-premium-theme::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to bottom right,
+        rgba(255,255,255,0) 0%,
+        rgba(255,255,255,0) 40%,
+        rgba(255,215,0,0.1) 50%,
+        rgba(255,255,255,0) 60%,
+        rgba(255,255,255,0) 100%
+    );
+    transform: rotate(30deg);
+    animation: premium-shine 6s infinite linear;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes premium-shine {
+    0% { transform: translate(-30%, -30%) rotate(30deg); }
+    100% { transform: translate(30%, 30%) rotate(30deg); }
+}

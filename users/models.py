@@ -59,10 +59,20 @@ class User(AbstractUser):
 
     # Subscription & Access (New)
     has_nsfw_access = models.BooleanField(default=False, verbose_name="Accès 18+")
-    is_premium = models.BooleanField(default=False, verbose_name="Est Premium")
     premium_expires_at = models.DateTimeField(null=True, blank=True, verbose_name="Expiration Premium")
     age_verified = models.BooleanField(default=False, verbose_name="Âge Vérifié")
     birth_date = models.DateField(null=True, blank=True, verbose_name="Date de naissance")
+
+    @property
+    def is_active_premium(self):
+        """
+        Vérifie si l'utilisateur possède un abonnement Premium actif.
+        Basé sur la date d'expiration.
+        """
+        if self.premium_expires_at:
+            from django.utils import timezone
+            return self.premium_expires_at > timezone.now()
+        return False
 
     @property
     def is_major(self):
@@ -78,13 +88,6 @@ class User(AbstractUser):
         age = today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
         return age >= 18
 
-    SUBSCRIPTION_CHOICES = [
-        ('free', 'Membre Gratuit'),
-        ('premium', 'Abonné Premium'),
-        ('legend', 'Membre Légende'),
-    ]
-    subscription_type = models.CharField(max_length=20, choices=SUBSCRIPTION_CHOICES, default='free')
-    subscription_expires = models.DateTimeField(null=True, blank=True)
 
     # Rank System Metadata (Phase 4 Roadmap)
     RANK_DATA = {
@@ -309,7 +312,10 @@ class User(AbstractUser):
         packs = []
         
         # 1. Type d'Abonnement (Inclus par défaut)
-        packs.append({'name': self.get_subscription_type_display(), 'icon': '📜', 'type': 'membership'})
+        if self.is_active_premium:
+            packs.append({'name': 'Otaku Premium', 'icon': '🌟', 'type': 'membership'})
+        else:
+            packs.append({'name': 'Membre Standard', 'icon': '📜', 'type': 'membership'})
         
         # 2. Accès Adultes (Contenu 18+)
         if self.has_nsfw_access:
@@ -324,14 +330,9 @@ class User(AbstractUser):
             packs.append({'name': f'Early Access (+{days}j)', 'icon': '⚡', 'type': 'perk'})
             
         # 4. Pack AnimWorld (Sera lié au système d'achat futur)
-        # Pour l'instant, on simule l'accès pour les membres Légende ou haut niveau
-        if self.subscription_type == 'legend' or self.level >= 30:
+        # Pour l'instant, on simule l'accès pour les membres Premium ou haut niveau
+        if self.is_active_premium or self.level >= 30:
             packs.append({'name': 'AnimWorld VOD', 'icon': '🎬', 'type': 'content'})
-            
-        # 5. Pack Soutien (Placeholder pour "Contenu acheté")
-        if self.subscription_type != 'free':
-            packs.append({'name': 'Pack Pionnier', 'icon': '💎', 'type': 'bought'})
-            
         return packs[:5]
 
     def has_sent_request_to(self, other_user):

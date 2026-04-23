@@ -28,6 +28,13 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 ## 🚀 Nouveau Planning : Les 5 Étapes de Finalisation
 
+> **📌 ORDRE CHRONOLOGIQUE D'EXÉCUTION (En cours)**
+> Bien que la roadmap soit structurée par thèmes (Étapes 1 à 5), l'exécution technique des chantiers restants se fera dans l'ordre suivant (pour ne pas bloquer le développement en attendant FedaPay) :
+> 1. **Option D (Admin & Modération)** : Finition du système de Modération, Audit Logs, et Dispatcher Email (Étape 3).
+> 2. **Option C (Système Anti-Pub)** : Logique conditionnelle pour injecter ou désactiver les pubs (Étape 5).
+> 3. **Option A (Fast-Pass)** : Accès anticipé aux chapitres de moins de 72h avec compte à rebours (Étape 5).
+> 4. **Option B (Intégration Stripe/Crypto)** : Paiements internationaux alternatifs à FedaPay (Étape 5).
+
 ### Étape 1 : Expansion Sociale & Communauté
 
 *Objectif : Transformer le lecteur passif en membre actif de la communauté.*
@@ -107,19 +114,31 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 *Objectif : Viabilité économique et préparation à la mise en production.*
 
-- [/] **Monétisation Locale** :
+- [/] **Portefeuille & Achat d'Orbes (Payment Gateway)** :
   - [x] **Identité Visuelle** : Rebrand complet de "Crédits" vers **"Orbes" (◎)**.
-  - [x] **Moteur de Débit** : Logique de déblocage (Manuel & Automatique) testée et validée (Fictif).
+  - [x] **Architecture Multi-Passerelle** : Mise en place du Factory Pattern (`PaymentGatewayFactory`).
+  - [x] **Moteur de Débit** : Logique de déblocage (Manuel & Automatique) testée et validée.
   - [x] **Logic Portefeuille** : Intégration dans le profil avec accès direct au rechargement.
-  - [ ] **Passerelle de Paiement** : Configuration finale et tests en production (NOWPayments/FedaPay).
-  - [ ] **Modèle Economique** : Validation finale des tarifs (ex: 20 ◎ / chapitre).
+  - [ ] **FedaPay (Marché Africain / Mobile Money)** : 
+    - *Statut* : **BLOQUÉ (En attente de documents légaux)**. 
+    - *Contexte* : Nécessite une pièce d'identité et un IFU (Identifiant Fiscal Unique) d'un associé basé en Afrique pour valider le compte Live et lever les limites de transactions (RCCM conseillé).
+    - *Prochaine étape* : Insérer les clés `FEDAPAY_LIVE_SECRET` et tester via webhook local (Ngrok).
+  - [ ] **Stripe (Cartes Bancaires Internationales)** :
+    - *Statut* : À faire (Optionnel mais recommandé).
+    - *Contexte* : Bien que FedaPay accepte les cartes en Afrique, les banques européennes/américaines bloquent souvent ces transactions (Anti-fraude). Stripe, basé en Europe (Espagne pour l'admin), offre un taux de succès de 100% pour l'international.
+    - *Prochaine étape* : Créer `core/payments/stripe.py` avec Stripe Checkout Sessions.
+  - [ ] **NOWPayments (Crypto / Sans Frontières)** :
+    - *Statut* : À faire (Optionnel).
+    - *Contexte* : Idéal pour garantir un système de paiement 100% privé, sans KYC lourd côté plateforme de paiement. Accepte BTC, USDT, etc.
+    - *Prochaine étape* : Créer `core/payments/nowpayments.py`.
+- [ ] **Abonnement & Accès : "Otaku Premium"** :
+  - *Contexte* : Compléter le système de micro-transactions (Orbes) avec un modèle d'abonnement récurrent (Mensuel).
+  - [ ] **Modèle de données** : Ajout d'une date d'expiration d'abonnement sur l'utilisateur (`is_premium_until`).
+  - [ ] **Avantages** : Lecture sans publicité, accès anticipé, badges exclusifs "Otaku Premium".
+  - [ ] **UX Premium** : Carte de profil avec effet "Glassmorphism" doré/néon exclusif aux abonnés.
 - [ ] **Publicité & Ads** :
-  - [ ] **Ads Vidéo** : Une publicité obligatoire toutes les 10 minutes de lecture.
+  - [ ] **Ads Vidéo** : Une publicité obligatoire toutes les 10 minutes de lecture (désactivée pour les Otaku Premium).
   - [ ] **UX Publicitaire** : Boutons de fermeture (X) clairs et accessibles.
-- [ ] **Abonnement & Accès (Phase 5 Refinement)** :
-  - [ ] **Status Otaku Premium** : Rangs et badges exclusifs liés à l'abonnement.
-  - [ ] **Accès 18+ (NSFW)** : Gestion sécurisée de l'accès au contenu mature (par abonnement/vérification).
-  - [ ] **Carte Otaku Premium** : Design glassmorphic et animations exclusives pour les abonnés.
 - [ ] **SEO & Meta** : Descriptions dynamiques et Open Graph pour les réseaux sociaux.
 - [ ] **Maintenance Mode** : Splash page activable pendant les mises à jour.
 - [ ] **Passation Client** : Transfert des clés API (Google Cloud), Superuser et manuel d'admin.

@@ -14,4 +14,5 @@ urlpatterns = [
     path('wallet/toggle-credits/', views.toggle_auto_use_credits, name='toggle_auto_credits'),
     path('payment/initiate/', views.initiate_payment, name='initiate_payment'),
     path('payment/callback/', views.payment_callback, name='payment_callback'),
+    path('premium/upgrade/', views.upgrade_premium_with_orbes, name='upgrade_premium'),
 ]

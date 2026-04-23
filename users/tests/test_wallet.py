@@ -282,7 +282,7 @@ class UnlockChapterTest(TestCase):
         self.chapter = Chapter.objects.create(
             series=self.series, number=1, title='Chapitre Test', is_premium=True
         )
-        self.url = f'/reader/unlock/{self.chapter.id}/'
+        self.url = reverse('reader:unlock_chapter', kwargs={'series_slug': self.series.slug, 'chapter_number': self.chapter.number})
 
     def test_manual_unlock_success(self):
         """Assez de credits -> chapitre debloque, credits deduits."""

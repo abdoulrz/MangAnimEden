@@ -380,3 +380,44 @@ def payment_callback(request):
         messages.warning(request, "Transaction introuvable.")
 
     return redirect('users:domaine')
+
+
+@login_required
+@require_POST
+def upgrade_premium_with_orbes(request):
+    """
+    Phase 5: Acheter 30 jours d'Otaku Premium pour 1000 Orbes.
+    """
+    from django.db import transaction as db_transaction
+    from django.utils import timezone
+    from datetime import timedelta
+    from .models import UserWallet
+
+    try:
+        with db_transaction.atomic():
+            # Lock the wallet
+            wallet = UserWallet.objects.select_for_update().get(user=request.user)
+            
+            if wallet.credits_balance >= 1000:
+                wallet.credits_balance -= 1000
+                wallet.save(update_fields=['credits_balance'])
+                
+                user = request.user
+                # Si déjà premium, on ajoute 30 jours à l'expiration actuelle
+                current_expiry = user.premium_expires_at if user.is_active_premium else timezone.now()
+                user.premium_expires_at = current_expiry + timedelta(days=30)
+                user.save(update_fields=['premium_expires_at'])
+                
+                return JsonResponse({
+                    'success': True, 
+                    'message': 'Bienvenue dans le cercle Otaku Premium !',
+                    'new_balance': wallet.credits_balance
+                })
+            else:
+                return JsonResponse({
+                    'success': False, 
+                    'error': 'Orbes insuffisants. 1000 Orbes requis.'
+                }, status=400)
+    except Exception as e:
+        logger.exception(f"Erreur upgrade_premium_with_orbes: {e}")
+        return JsonResponse({'success': False, 'error': 'Erreur interne.'}, status=500)

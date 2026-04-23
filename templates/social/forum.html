@@ -374,7 +374,7 @@
                          data-sender="{{ message.sender.nickname|default:message.sender.username }}">
                         <div class="message-bubble">
                             <div class="message-info">
-                                <span class="sender-name">{{ message.sender.nickname|default:message.sender.username }}</span>
+                                <span class="sender-name" {% if message.sender.is_active_premium %}style="color: #FFD700; text-shadow: 0 0 5px rgba(255,215,0,0.4);"{% endif %}>{{ message.sender.nickname|default:message.sender.username }}</span>
                                 <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
                             </div>
 
@@ -485,7 +485,7 @@
                         <div class="message-bubble">
                             <div class="message-info">
                                 <a href="{% url 'users:public_profile' message.sender.id %}"
-                                    class="sender-name forum-sender-link">{{ message.sender.nickname }}</a>
+                                    class="sender-name forum-sender-link" {% if message.sender.is_active_premium %}style="color: #FFD700; text-shadow: 0 0 5px rgba(255,215,0,0.4); border-bottom: 1px dotted #FFD700;"{% endif %}>{{ message.sender.nickname }}</a>
                                 <span class="timestamp">{{ message.timestamp|date:"H:i" }}</span>
 
                                 {% if active_group.owner == user and message.sender != user %}

@@ -33,8 +33,7 @@
                     </div>
                     {% endif %}
                 </div>
-                <div class="level-badge">{{ profile_user.get_rank_display_name }} • Lvl {{ profile_user.level }}</div>
-            </div>
+
 
             <!-- User Info -->
             <div class="profile-identity">
@@ -48,6 +47,7 @@
                     </a>
                     {% endif %}
                 </h1>
+                <div class="level-badge mb-2">{{ profile_user.get_rank_display_name }} • Lvl {{ profile_user.level }}</div>
                 <p class="profile-role">
                     {% if profile_user.role_moderator %}Modérateur{% else %}Membre Explorateur{% endif %}
                 </p>

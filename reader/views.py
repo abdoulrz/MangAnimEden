@@ -65,8 +65,14 @@ def chap_view(request, series_slug=None, chapter_number=None):
     is_chapter_premium = chapter.is_premium or float(chapter.number) > 50
     # Overrides for users with active Otaku Premium membership or admins
     if request.user.is_authenticated:
-        if getattr(request.user, 'is_premium', False) or request.user.is_staff or request.user.is_superuser:
+        if getattr(request.user, 'is_active_premium', False) or request.user.is_staff or request.user.is_superuser:
             is_chapter_premium = False
+
+    # --- TEMPORARY PAYWALL BYPASS ---
+    # Disabled while payment gateways are not yet live in production.
+    # TODO: Remove this bypass once FedaPay/Stripe are fully operational.
+    is_chapter_premium = False
+    # --------------------------------
 
     if is_chapter_premium:
         if not request.user.is_authenticated:
