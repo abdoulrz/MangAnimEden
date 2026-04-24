@@ -47,7 +47,7 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='*', cast=Csv())
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://*.web.app,https://*.firebaseapp.com,https://*.run.app,https://*.a.run.app,https://*.pythonanywhere.com,https://*.onrender.com,https://manganimeden.net,https://www.manganimeden.net,http://localhost:8000,http://127.0.0.1:8000', cast=Csv())
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='https://*.web.app,https://*.firebaseapp.com,https://*.run.app,https://*.a.run.app,https://*.pythonanywhere.com,https://*.onrender.com,https://manganimeden.net,https://www.manganimeden.net,http://manganimeden.net,http://www.manganimeden.net,http://localhost:8000,http://127.0.0.1:8000', cast=Csv())
 
 # Static files version for cache busting
 # EMAIL CONFIGURATION

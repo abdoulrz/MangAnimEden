@@ -48,6 +48,8 @@
     padding: 15px 20px;
     background: #1a1d24;
     border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 10px;
 }
 .ad-sponsor-label {
     color: var(--text-muted);
@@ -82,12 +84,13 @@
     transform: scale(1.05);
 }
 .ad-video-player {
-    aspect-ratio: 16 / 9;
+    min-height: 350px;
     background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
+    padding: 20px;
 }
 .ad-video-placeholder {
     text-align: center;

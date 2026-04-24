@@ -37,6 +37,9 @@ urlpatterns = [
     path('admin-panel/', include('administration.urls')),
     # Phase 5: Payment Webhooks (csrf_exempt handled inside the view)
     path('payments/webhook/<str:provider>/', webhook_receiver, name='payment_webhook'),
+    
+    # Ads Verification
+    path('ads.txt', TemplateView.as_view(template_name='ads.txt', content_type='text/plain')),
 ]
 
 # Serve media files in development

@@ -1,0 +1,4 @@
+# Authorized Digital Sellers
+# Ce fichier sert à prouver à Adsterra (et autres régies) que vous êtes bien le propriétaire du site.
+# Lorsque Adsterra vous fournira votre code d'authentification ads.txt, collez-le ici.
+# Exemple de ligne : google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0
