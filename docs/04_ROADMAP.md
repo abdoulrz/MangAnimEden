@@ -30,7 +30,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 
 > **📌 ORDRE CHRONOLOGIQUE D'EXÉCUTION (En cours)**
 > Bien que la roadmap soit structurée par thèmes (Étapes 1 à 5), l'exécution technique des chantiers restants se fera dans l'ordre suivant (pour ne pas bloquer le développement en attendant FedaPay) :
-> 1. **Option D (Admin & Modération)** : Finition du système de Modération, Audit Logs, et Dispatcher Email (Étape 3).
+> 1. **Option D (Admin & Modération)** : Finition du Dispatcher Email (Étape 3).
 > 2. **Option C (Système Anti-Pub)** : Logique conditionnelle pour injecter ou désactiver les pubs (Étape 5).
 > 3. **Option A (Fast-Pass)** : Accès anticipé aux chapitres de moins de 72h avec compte à rebours (Étape 5).
 > 4. **Option B (Intégration Stripe/Crypto)** : Paiements internationaux alternatifs à FedaPay (Étape 5).
@@ -43,6 +43,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [x] **Indicateur d'État** : Petit point vert sur l'avatar pour les utilisateurs en ligne.
 - [x] **Système de Réponse** : UI "Swipe" et "Long Press" pour répondre à un message avec contexte.
 - [x] **Gestion d'Événements UX** : Affichage des événements en blocs **curateurs** dans le sidebar unifié.
+- [x] **Option C (Anti-Pub Actif)** : Intégrer les scripts de la régie publicitaire (ex: Adsterra) dans le reader. Bloquer/Masquer ces scripts pour les comptes ayant `is_active_premium = True`. Modale de 10 minutes avec timer de blocage implémentée (Smartlink intégré).
 - [x] **Emoji Picker** : Intégration d'un sélecteur d'émojis dans les DMs et les Groupes.
 - [x] **Stories UX** : Design premium normal/hover pour le bouton de création.
 - [x] **Sécurité & Accès** : Gestion des accès NSFW et pack d'abonnement (Champs `User` & backend).
@@ -62,7 +63,7 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 *Objectif : Garantir la sécurité des données et la puissance des outils de modération.*
 
 - [x] **Infrastructure & Monitoring** : Intégration de Sentry pour la capture en temps réel des Crash 500 en production.
-- [ ] **Admin Dash Enhancements** :
+- [x] **Admin Dash Enhancements** :
   - [x] **Gestion Unifiée de la Communauté** : Interface pour modérer Groupes et Événements avec tags curateurs.
   - [x] Interface de gestion des **Signalements** (Modèle `Report` prêt).
   - [x] Modération des **Avis** (Reviews).
@@ -71,7 +72,10 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [x] **Intégrité des Données** : Utilisation de `select_for_update` sur les opérations critiques (XP, Vues) pour éviter les pertes de données lors de clics simultanés.
 - [x] **Quotas & Limites** : Limitation de l'espace de stockage par utilisateur/groupe.
 - [x] **Système de Notifications In-App** : Notifications sociales et en temps réel opérationnelles.
-- [ ] **Dispatcher Email** : Routage centralisé pour les envois d'emails système.
+- [ ] **Dispatcher Email (Option D)** : Routage centralisé pour les envois d'emails système.
+  - [ ] **Architecture Asynchrone** : Câblage via Celery (`task_send_email`) pour éviter de bloquer le thread principal lors des requêtes HTTP (ex: inscription, reset password).
+  - [ ] **Templates HTML Premium** : Création de templates d'emails propres avec le branding MangAnimEden pour (1) Bienvenue, (2) Réinitialisation de mot de passe, (3) Avertissements/Bannissements de modération.
+  - [ ] **Service Refactor** : Finition de `core/services/email_service.py` (qui contient actuellement des méthodes vides comme `send_password_reset_email`).
 
 ### Étape 4 : Gamification "Prestige" & UX Premium
 

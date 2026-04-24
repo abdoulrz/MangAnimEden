@@ -378,7 +378,50 @@ const MangaReader = (function () {
             state.isRestoringScroll = false; // Normal reading
         }
 
+        // Initialize Ad Timer
+        _initAdTimer();
+
         console.log(`MangaReader initialized. Mode: ${state.readingMode}, Total Pages: ${state.totalPages}, Current Page: ${state.currentPage}`);
+    };
+
+    const _initAdTimer = () => {
+        const dataDiv = document.getElementById('reader-data');
+        if (!dataDiv || dataDiv.dataset.isPremium === 'true') return;
+
+        const AD_INTERVAL = 10 * 60 * 1000; // 10 minutes in ms
+        const AD_DURATION = 5; // 5 seconds to skip
+
+        setInterval(() => {
+            const modal = document.getElementById('adVideoModal');
+            const closeBtn = document.getElementById('adCloseBtn');
+            const timerText = document.getElementById('adTimerText');
+            if (!modal || !closeBtn || !timerText) return;
+
+            // Show Modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            closeBtn.disabled = true;
+            let timeLeft = AD_DURATION;
+            timerText.innerHTML = `Fermeture possible dans <strong id="adSeconds">${timeLeft}</strong>s`;
+
+            const countdown = setInterval(() => {
+                timeLeft--;
+                const secondsEl = document.getElementById('adSeconds');
+                if (secondsEl) secondsEl.innerText = timeLeft;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    closeBtn.disabled = false;
+                    timerText.innerHTML = "Vous pouvez ignorer l'annonce";
+                }
+            }, 1000);
+
+            closeBtn.onclick = () => {
+                modal.style.display = 'none';
+                document.body.style.overflow = '';
+            };
+
+        }, AD_INTERVAL);
     };
 
 

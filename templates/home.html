@@ -100,16 +100,20 @@
             </div>
         </section>
 
-        <!-- Top Right: Promo Panel -->
-        <section class="home-block promo-panel">
-            <div class="block-content centered-content">
-                <div class="promo-inner">
-                    <div class="promo-body">
-                        <span class="promo-label">Espace Partenaire</span>
-                    </div>
-                </div>
+        <!-- Top Right: Promo Panel (Ad Space) -->
+        {% if not request.user.is_active_premium %}
+        <section class="home-block promo-panel" style="background: transparent; border: none; padding: 0; box-shadow: none;">
+            {% include 'components/ad_banner.html' %}
+        </section>
+        {% else %}
+        <!-- Espace Premium (Merci) -->
+        <section class="home-block promo-panel otaku-premium-theme" style="display: flex; align-items: center; justify-content: center; text-align: center;">
+            <div class="block-content">
+                <h3 style="color: var(--premium-gold); margin-bottom: 10px;">👑 Navigation Sans Pub</h3>
+                <p style="color: var(--text-secondary); font-size: 0.9rem;">Merci de soutenir MangAnimEDen !</p>
             </div>
         </section>
+        {% endif %}
 
         <!-- Bottom Left: Populaires (3fr) -->
         <section class="home-block popular-block">

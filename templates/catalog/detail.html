@@ -211,6 +211,12 @@
                     </svg>
                 </div>
                 <p class="empty-text">Aucun chapitre disponible</p>
+            {% endif %}
+            
+            <!-- Ad Banner Stratégique (Catalog) -->
+            {% if not request.user.is_active_premium %}
+            <div class="detail-ad-wrapper" style="margin-top: 2rem;">
+                {% include 'components/ad_banner.html' %}
             </div>
             {% endif %}
         </div>

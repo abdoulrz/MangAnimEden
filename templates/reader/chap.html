@@ -51,6 +51,13 @@
     </div>
     {% endif %}
 
+    <!-- Ad Banner Stratégique (Reader) -->
+    {% if not request.user.is_active_premium %}
+    <div class="reader-ad-wrapper" style="margin: 40px auto; max-width: 800px;">
+        {% include 'components/ad_banner.html' %}
+    </div>
+    {% endif %}
+
     <!-- Reader End Funnel (Phase 3.4) -->
     <div class="reader-end-funnel" id="end-funnel">
         {% if next_chapter %}
@@ -84,7 +91,7 @@
             {% endif %}
 
             <div class="chapter-selector-container">
-                <select class="chapter-dropdown" onchange="window.location.href=this.value" title="Choisir un chapitre">
+                <select class="chapter-dropdown" onchange="window.location.href=this.value" onwheel="this.blur()" title="Choisir un chapitre">
                     {% for ch in chapter.series.chapters.all|dictsort:"number" %}
                     <option value="{% url 'reader:chap_chapter' ch.series.slug ch.number %}" {% if ch.id == chapter.id %}selected{% endif %}>
                         Ch. {{ ch.number|floatformat }}
@@ -212,7 +219,13 @@
 
 <div id="reader-data" class="hidden" data-total="{{ chapter.pages.count|default:'1' }}" data-mode="vertical"
     data-chapter-id="{{ chapter.id }}" data-current-page="{{ current_page|default:'1' }}"
-    data-progress-url="{% url 'reader:update_progress' %}"></div>
+    data-progress-url="{% url 'reader:update_progress' %}"
+    data-is-premium="{% if request.user.is_active_premium %}true{% else %}false{% endif %}"></div>
+
+{% if not request.user.is_active_premium %}
+    {% include 'components/ad_video_modal.html' %}
+{% endif %}
+
 {% endblock %}
 {% block extra_js %}
 <script src="{% static 'js/reader.js' %}?v={{ STATIC_VERSION }}"></script>
