@@ -9,24 +9,20 @@
 {% endblock %}
 
 {% block content %}
-<div class="auth-container">
+<div class="auth-container d-flex align-items-center justify-content-center py-5 px-3">
     <div class="auth-wrapper">
-        <div class="auth-header">
-            <h1 class="gradient-text auth-brand">MangAnimEDen</h1>
+        <div class="auth-header text-center mb-5">
+            <h1 class="gradient-text auth-brand mb-2">MangAnimEDen</h1>
         </div>
 
-        <div class="card auth-card">
-            <h2 class="auth-title">{% trans "Social Network Login Failure" %}</h2>
+        <div class="card auth-card p-4 p-sm-5 text-center">
+            <h2 class="auth-title mb-4">{% trans "Social Network Login Failure" %}</h2>
 
-            <div class="auth-errors">
-                <p>{% trans "An error occurred while attempting to login via your social network account." %}</p>
+            <div class="auth-errors p-3 rounded mb-4">
+                <p class="m-0 text-danger">{% trans "An error occurred while attempting to login via your social network account." %}</p>
             </div>
 
-            <div class="auth-divider">
-                <div class="auth-divider-line"></div>
-            </div>
-
-            <a href="{% url 'login' %}" class="btn-primary auth-submit auth-submit-link">
+            <a href="{% url 'login' %}" class="btn-primary auth-submit w-100 py-3 text-decoration-none">
                 {% trans "Back to Login" %}
             </a>
         </div>
