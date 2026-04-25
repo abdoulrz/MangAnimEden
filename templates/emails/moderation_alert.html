@@ -1,0 +1,24 @@
+{% extends 'emails/base_email.html' %}
+
+{% block title %}Avertissement de Modération{% endblock %}
+
+{% block content %}
+<h2 style="color: #ef4444;">Avertissement de Modération (Niveau {{ warning_level }})</h2>
+
+<p>Bonjour {{ user.nickname|default:user.username }},</p>
+
+<p>Nous vous contactons pour vous informer qu'une action de modération a été prise sur votre compte MangAnimEDen.</p>
+
+<div style="background-color: rgba(239, 68, 68, 0.1); border-left: 4px solid #ef4444; padding: 15px; margin: 20px 0; border-radius: 4px;">
+    <p style="margin: 0; color: #ef4444; font-weight: bold;">Motif de l'avertissement :</p>
+    <p style="margin: 5px 0 0 0; color: #fca5a5;">{{ reason }}</p>
+</div>
+
+<p>Nous tenons à maintenir une communauté respectueuse et bienveillante. Veuillez vous assurer de respecter les règles du site lors de vos prochaines interactions.</p>
+
+<p>Si vous accumulez trop d'avertissements, votre compte pourrait subir une suspension temporaire ou définitive.</p>
+
+<div style="text-align: center;">
+    <a href="{{ site_domain }}/forum/rules/" class="btn-primary" style="background: linear-gradient(135deg, #475569 0%, #334155 100%); color: white !important;">Lire le Règlement</a>
+</div>
+{% endblock %}

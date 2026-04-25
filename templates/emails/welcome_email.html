@@ -1,73 +1,17 @@
-<!DOCTYPE html>
-<html lang="fr">
+{% extends 'emails/base_email.html' %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bienvenue sur MangaAnimEden</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-        }
+{% block title %}Bienvenue sur MangAnimEDen !{% endblock %}
 
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            border: 1px solid #eee;
-            border-radius: 10px;
-        }
+{% block content %}
+<h2>Bienvenue dans l'Éden, <span class="highlight">{{ user.nickname|default:user.username }}</span> !</h2>
 
-        .header {
-            background-color: #6C5CE7;
-            color: white;
-            padding: 20px;
-            text-align: center;
-            border-radius: 10px 10px 0 0;
-        }
+<p>Votre inscription est confirmée. Toute l'équipe de MangAnimEDen est ravie de vous compter parmi nos nouveaux membres.</p>
 
-        .content {
-            padding: 20px;
-        }
+<p>Vous avez désormais accès à des milliers de chapitres en haute qualité, à notre forum de discussion, et à un espace communautaire unique pour partager votre passion des Mangas, Manhwas et Webtoons.</p>
 
-        .button {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #6C5CE7;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
+<div style="text-align: center;">
+    <a href="{{ site_domain }}/catalogue/" class="btn-primary">Découvrir le Catalogue</a>
+</div>
 
-        .footer {
-            margin-top: 30px;
-            font-size: 12px;
-            color: #888;
-            text-align: center;
-        }
-    </style>
-</head>
-
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>Bienvenue sur MangaAnimEden !</h1>
-        </div>
-        <div class="content">
-            <p>Bonjour {{ user.nickname|default:user.username }},</p>
-            <p>Nous sommes ravis de vous compter parmi nous ! Votre compte a été créé avec succès.</p>
-            <p>Vous pouvez dès maintenant commencer à lire vos mangas préférés, créer votre liste de lecture et
-                interagir avec la communauté.</p>
-
-            <a href="http://127.0.0.1:8000/catalogue/" class="button">Découvrir le Catalogue</a>
-        </div>
-        <div class="footer">
-            <p>&copy; 2026 MangaAnimEden. Tous droits réservés.</p>
-        </div>
-    </div>
-</body>
-
-</html>
+<p style="margin-top: 30px;">Si vous avez des questions, n'hésitez pas à poser vos questions dans le groupe "Support" du forum. Bon voyage !</p>
+{% endblock %}

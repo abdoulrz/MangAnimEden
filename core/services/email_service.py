@@ -1,37 +1,42 @@
-from django.core.mail import send_mail
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
-from django.conf import settings
+import logging
+from core.tasks import task_send_welcome_email, task_send_password_reset_email, task_send_moderation_alert_email
+
+logger = logging.getLogger(__name__)
 
 class EmailService:
     @staticmethod
     def send_welcome_email(user):
         """
-        Envoie un email de bienvenue à l'utilisateur nouvellement inscrit.
+        Envoie un email de bienvenue à l'utilisateur de manière asynchrone via Celery.
         """
-        subject = "Bienvenue sur MangaAnimEden !"
-        # On pourrait utiliser un template HTML ici
-        html_message = render_to_string('emails/welcome_email.html', {'user': user})
-        plain_message = strip_tags(html_message)
-        
         try:
-            send_mail(
-                subject,
-                plain_message,
-                settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@manganimeden.com',
-                [user.email],
-                html_message=html_message,
-                fail_silently=True,  # Don't crash on email failure
-            )
+            # On passe l'ID et non l'objet User complet car Celery a besoin de sérialiser les données (JSON)
+            task_send_welcome_email.delay(user.id)
             return True
         except Exception as e:
-            # Log error normally
-            print(f"Error sending welcome email: {e}")
+            logger.error(f"Failed to queue welcome email task for user {user.id}: {e}")
             return False
 
     @staticmethod
     def send_password_reset_email(user, reset_url):
         """
-        Envoie un email de réinitialisation de mot de passe.
+        Envoie un email de réinitialisation de mot de passe de manière asynchrone.
         """
-        pass # To be implemented with Django's built-in views or custom logic
+        try:
+            task_send_password_reset_email.delay(user.id, reset_url)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to queue password reset email task for user {user.id}: {e}")
+            return False
+
+    @staticmethod
+    def send_moderation_alert(user, reason, warning_level=1):
+        """
+        Envoie un email d'avertissement de modération de manière asynchrone.
+        """
+        try:
+            task_send_moderation_alert_email.delay(user.id, reason, warning_level)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to queue moderation alert email for user {user.id}: {e}")
+            return False

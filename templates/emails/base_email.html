@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MangAnimEDen{% endblock %}</title>
+    <!-- CSS is inlined because email clients strip external stylesheets -->
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #E4E4E7;
+            background-color: #09090B;
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .email-wrapper {
+            width: 100%;
+            background-color: #09090B;
+            padding: 40px 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #18181B;
+            border: 1px solid #27272A;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .email-header {
+            background: linear-gradient(135deg, #7E22CE 0%, #A855F7 100%);
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .email-header h1 {
+            color: #ffffff;
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .email-body {
+            padding: 40px 30px;
+        }
+        h2 {
+            color: #ffffff;
+            font-size: 20px;
+            margin-top: 0;
+        }
+        p {
+            color: #A1A1AA;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            display: inline-block;
+            background: linear-gradient(135deg, #9333EA 0%, #7E22CE 100%);
+            color: #ffffff !important;
+            text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .email-footer {
+            background-color: #09090B;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #27272A;
+        }
+        .email-footer p {
+            color: #71717A;
+            font-size: 13px;
+            margin: 5px 0;
+        }
+        .highlight {
+            color: #A855F7;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="email-wrapper">
+        <div class="email-container">
+            <!-- Header -->
+            <div class="email-header">
+                <h1>{{ site_name|default:"MangAnimEDen" }}</h1>
+            </div>
+
+            <!-- Body -->
+            <div class="email-body">
+                {% block content %}
+                {% endblock %}
+            </div>
+
+            <!-- Footer -->
+            <div class="email-footer">
+                <p>&copy; {% now "Y" %} {{ site_name|default:"MangAnimEDen" }}. Tous droits réservés.</p>
+                <p>Ceci est un e-mail automatique, merci de ne pas y répondre.</p>
+                <p><a href="{{ site_domain }}" style="color: #A855F7; text-decoration: none;">Visiter le site</a></p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

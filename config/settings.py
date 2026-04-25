@@ -381,3 +381,12 @@ else:
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='MangaAnimEden <noreply@manganimeden.net>')
 # For error reporting to admins
 SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+# EMAIL CONFIGURATION (ZOHO SMTP via .env)
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtppro.zoho.eu')
+EMAIL_PORT = config('EMAIL_PORT', default=465, cast=int)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@manganimeden.net')
