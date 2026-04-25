@@ -258,7 +258,7 @@ ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https' if not DEBUG else 'http'
 SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
 
 # Provider specific settings
-SOCIALACCOUNT_PROVIDERS = {
+'''SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'SCOPE': [
             'profile',
@@ -268,7 +268,19 @@ SOCIALACCOUNT_PROVIDERS = {
             'access_type': 'online',
         }
     }
+}'''
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': config('GOOGLE_CLIENT_ID', default=''),
+            'secret': config('GOOGLE_CLIENT_SECRET', default=''),
+            'key': ''
+        },
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'}
+    }
 }
+
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
