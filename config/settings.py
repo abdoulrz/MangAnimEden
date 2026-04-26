@@ -392,3 +392,5 @@ EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@manganimeden.net')
 
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
+
+ACCOUNT_ADAPTER = 'users.adapter.CustomAccountAdapter'

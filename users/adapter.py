@@ -41,3 +41,24 @@ class CustomSocialAccountAdapter(DefaultSocialAccountAdapter):
         user.nickname = f"{current_nickname}_{random_suffix}"
             
         return user
+
+from allauth.account.adapter import DefaultAccountAdapter
+from core.services.email_service import EmailService
+from django.contrib.auth import get_user_model
+
+class CustomAccountAdapter(DefaultAccountAdapter):
+    def send_mail(self, template_prefix, email, context):
+        User = get_user_model()
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            user = context.get('user')
+            if not user:
+                return super().send_mail(template_prefix, email, context)
+
+        if template_prefix == 'account/email/password_reset_key':
+            reset_url = context.get('password_reset_url')
+            EmailService.send_password_reset_email(user, reset_url)
+            return
+
+        return super().send_mail(template_prefix, email, context)
