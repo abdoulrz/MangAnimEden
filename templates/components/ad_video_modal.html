@@ -10,14 +10,23 @@
         </div>
         
         <div class="ad-video-player">
-            <a href="https://www.profitablecpmratenetwork.com/wkk24v0u4i?key=1d6a79cc7384acdfdfa706c6f5a2a426" target="_blank" class="ad-video-placeholder">
-                <div class="ad-play-icon pulse-icon">🎁</div>
-                <h3>Découvrir notre Sponsor</h3>
-                <p>Cliquez ici pour visiter l'offre et soutenir MangAnimEDen !</p>
+            <!-- Adsterra 300x250 — Publicité réelle -->
+            <div class="ad-modal-inner">
+                <script>
+                    atOptions = {
+                        'key' : '769205d05d91887597976f0114ac0781',
+                        'format' : 'iframe',
+                        'height' : 250,
+                        'width' : 300,
+                        'params' : {}
+                    };
+                </script>
+                <script src="https://www.highperformanceformat.com/769205d05d91887597976f0114ac0781/invoke.js"></script>
+
                 <div class="premium-upsell">
                     <object><a href="{% url 'users:profile' %}" class="premium-link">Fatigué des pubs ? Passez Premium</a></object>
                 </div>
-            </a>
+            </div>
         </div>
     </div>
 </div>
@@ -84,52 +93,19 @@
     transform: scale(1.05);
 }
 .ad-video-player {
-    min-height: 350px;
+    min-height: 300px;
     background: #000;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
     padding: 20px;
 }
-.ad-video-placeholder {
-    text-align: center;
-    color: white;
-    text-decoration: none;
+.ad-modal-inner {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 20px;
     width: 100%;
-    height: 100%;
-    cursor: pointer;
-    transition: transform 0.3s;
-}
-.ad-video-placeholder:hover {
-    transform: scale(1.02);
-}
-.ad-play-icon {
-    font-size: 4rem;
-    color: var(--primary);
-    margin-bottom: 20px;
-    display: inline-block;
-}
-.pulse-icon {
-    animation: pulseIcon 1.5s infinite;
-}
-@keyframes pulseIcon {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-.ad-video-placeholder h3 {
-    font-size: 1.8rem;
-    margin-bottom: 10px;
-}
-.ad-video-placeholder p {
-    font-size: 1.1rem;
-    color: #ccc;
-    margin-bottom: 30px;
 }
 .premium-upsell {
     margin-top: 30px;
