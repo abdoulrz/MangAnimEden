@@ -55,6 +55,18 @@
     </section>
     {% endif %}
 
+    <!-- Global Search Section for Home Page (Mobile Only) -->
+    <div class="catalog-search d-lg-none my-4 px-2">
+        <div class="navbar-search-wrapper mx-auto w-100">
+            <input type="text" id="catalogSearchInput" placeholder="Rechercher un manga..." 
+                class="input catalog-search-input" autocomplete="off">
+            <span class="catalog-search-icon">🔍</span>
+            <div id="catalogSearchResultsPanel" class="search-results-panel glass-panel hidden">
+                <!-- Results injected here -->
+            </div>
+        </div>
+    </div>
+
     <!-- Home Grid Layout -->
     <div class="home-grid">
         <!-- Top Left: Dernières mises à jour (3fr) -->
