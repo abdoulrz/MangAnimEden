@@ -1,19 +1,27 @@
 # MangaAnimEden 📚
 
-Plateforme de lecture de manga/manhwa avec fonctionnalités de réseau social.
+Plateforme de lecture de manga/manhwa/manhua avec fonctionnalités de réseau social, gamification et monétisation.
 
-## 🎯 État Actuel: Tracer Bullet Opérationnel
+**Version actuelle : `v2.6.0`**
 
-Le projet suit les principes du **03_METHODOLOGY_AND_CHECKLISTS.md** avec une approche "Tracer Bullets" - nous avons construit une tranche fine qui traverse tout le système pour valider la chaîne technique complète.
+## 🎯 État Actuel : Production
 
-### ✅ Ce qui fonctionne
+Le projet est en production sur VPS (Contabo, Ubuntu) avec Gunicorn + Nginx + PostgreSQL.
 
-- ✅ Django 5.2 configuré avec apps modulaires (users, catalog, reader, core)
-- ✅ Modèle User personnalisé avec authentification par email
-- ✅ Modèles de données (Series, Chapter, Page, ReadingProgress)
-- ✅ Design System (tokens.css avec palette sombre)
-- ✅ Lecteur de manga avec lazy loading (IntersectionObserver)
-- ✅ Interface admin Django pour gestion de contenu
+### ✅ Fonctionnalités en production
+
+- ✅ Lecteur de manga (lazy loading, reprise de lecture, progression)
+- ✅ Système social complet (DMs, Groupes, Forum, Amis, Émojis)
+- ✅ Gamification (XP, Niveaux, Rangs, Badges)
+- ✅ Monétisation (Orbes ◎, déblocage de chapitres premium)
+- ✅ Authentification (Email + Google OAuth2, Allauth)
+- ✅ **Pipeline Email Asynchrone** (Celery + Redis + Zoho SMTP)
+  - Emails de bienvenue, réinitialisation de mot de passe, alertes de modération
+  - Templates HTML premium avec branding MangAnimEden
+- ✅ **Publicité Adsterra** (Bannière 300x250 + Anti-Adblock)
+- ✅ Notifications in-app temps réel
+- ✅ Système de modération et de signalement
+- ✅ Pages légales (CGU, Vie Privée, DMCA)
 
 ---
 

@@ -72,10 +72,12 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
 - [x] **Intégrité des Données** : Utilisation de `select_for_update` sur les opérations critiques (XP, Vues) pour éviter les pertes de données lors de clics simultanés.
 - [x] **Quotas & Limites** : Limitation de l'espace de stockage par utilisateur/groupe.
 - [x] **Système de Notifications In-App** : Notifications sociales et en temps réel opérationnelles.
-- [ ] **Dispatcher Email (Option D)** : Routage centralisé pour les envois d'emails système.
-  - [ ] **Architecture Asynchrone** : Câblage via Celery (`task_send_email`) pour éviter de bloquer le thread principal lors des requêtes HTTP (ex: inscription, reset password).
-  - [ ] **Templates HTML Premium** : Création de templates d'emails propres avec le branding MangAnimEden pour (1) Bienvenue, (2) Réinitialisation de mot de passe, (3) Avertissements/Bannissements de modération.
-  - [ ] **Service Refactor** : Finition de `core/services/email_service.py` (qui contient actuellement des méthodes vides comme `send_password_reset_email`).
+- [x] **Dispatcher Email (Option D)** : Routage centralisé pour les envois d'emails système.
+  - [x] **Architecture Asynchrone** : Câblage via Celery (`task_send_email`) — envois non-bloquants via Redis. Tâches `task_send_welcome_email`, `task_send_password_reset_email`, `task_send_moderation_alert_email` opérationnelles.
+  - [x] **Templates HTML Premium** : Templates d'emails avec branding MangAnimEden pour (1) Bienvenue, (2) Réinitialisation de mot de passe, (3) Alertes de modération. Design glassmorphism sombre avec base partagée `emails/base_email.html`.
+  - [x] **Service Refactor** : `core/services/email_service.py` délègue tous les envois à Celery via `.delay()`. SMTP Zoho configuré (port 465, SSL). Nom d'expéditeur affiché : `MangAnimEden <mail_zoho@manganimeden.net>`.
+  - [x] **Adaptateur Allauth** : `CustomAccountAdapter` intercepte les emails de réinitialisation d'allauth et les redirige vers notre pipeline asynchrone.
+  - [x] **Templates Auth Premium** : Pages `account/password_reset.html` et `account/password_reset_done.html` entièrement redessinées en français, 0 CSS inline.
 
 ### Étape 4 : Gamification "Prestige" & UX Premium
 
@@ -140,7 +142,9 @@ Ce document trace la route logique pour emmener le projet de son état actuel ju
   - [ ] **Modèle de données** : Ajout d'une date d'expiration d'abonnement sur l'utilisateur (`is_premium_until`).
   - [ ] **Avantages** : Lecture sans publicité, accès anticipé, badges exclusifs "Otaku Premium".
   - [ ] **UX Premium** : Carte de profil avec effet "Glassmorphism" doré/néon exclusif aux abonnés.
-- [ ] **Publicité & Ads** :
+- [/] **Publicité & Ads** :
+  - [x] **Intégration Adsterra** : Bannière 300x250 intégrée dans la sidebar de la home page et la page de détail. Script Anti-Adblock (`constellationexclusion.com`) ajouté dans le `<head>` global.
+  - [x] **Recherche Home (Mobile)** : Barre de recherche ajoutée sur la page d'accueil pour les utilisateurs mobile uniquement (`d-lg-none`).
   - [ ] **Ads Vidéo** : Une publicité obligatoire toutes les 10 minutes de lecture (désactivée pour les Otaku Premium).
   - [ ] **UX Publicitaire** : Boutons de fermeture (X) clairs et accessibles.
 - [ ] **SEO & Meta** : Descriptions dynamiques et Open Graph pour les réseaux sociaux.

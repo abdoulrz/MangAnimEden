@@ -9,8 +9,36 @@ Le format est basé sur [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 ### To Be Implemented
 
 - Phase 5.1 : Intégration réelle des passerelles (Paiement Mobile Money)
-- Phase 5.2 : Système de Publicité & Ads Vidéo
+- Phase 5.2 : Ads Vidéo & UX Publicitaire (Bouton fermeture)
 - Phase 5.3 : SEO, Performance & Lancement
+
+---
+
+## [2.6.0] - 2026-04-26 ([Email Pipeline, Auth Polish & Ads Integration])
+
+### Added
+
+- **Dispatcher Email Asynchrone (Option D — Complet)** :
+  - Architecture Celery/Redis opérationnelle avec 3 tâches dédiées : `task_send_welcome_email`, `task_send_password_reset_email`, `task_send_moderation_alert_email`.
+  - Templates HTML premium créés (`emails/base_email.html` + déclinaisons) avec design glassmorphism sombre et branding MangAnimEden.
+  - `CustomAccountAdapter` (`users/adapter.py`) intercepte les emails d'allauth (reset password) et les redirige vers notre pipeline asynchrone.
+  - Configuration SMTP Zoho Mail (port 465, SSL) via variables `.env`. Nom d'expéditeur configuré : `MangAnimEden <mail_zoho@manganimeden.net>`.
+- **Intégration Publicitaire Adsterra** :
+  - Bannière responsive 300x250 intégrée dans le composant `ad_banner.html` (compatible sidebar, tous écrans).
+  - Script Anti-Adblock (`constellationexclusion.com/...`) ajouté dans le `<head>` global de `base.html` pour récupérer les impressions bloquées.
+- **Barre de recherche Home (Mobile)** : Ajout de la barre de recherche dynamique sur la page d'accueil, visible uniquement sur mobile (`d-lg-none`), liée à l'API catalogue existante.
+
+### Changed
+
+- **Auth UX (Pages Premium)** :
+  - `account/password_reset.html` : Design complet en français, 0 CSS inline, bouton `auth-submit` stylisé.
+  - `account/password_reset_done.html` : Titre "E-mail envoyé", message clair, bouton de retour connexion.
+- **Page "Zone de Danger" (Suppression de compte)** : Conteneur centré avec `d-flex align-items-center justify-content-center min-vh-100`. Bouton "Annuler" transformé en bouton secondaire avec bordure subtile et effet hover.
+
+### Fixed
+
+- **`ad_banner.html`** : Suppression des balises `</div>` en double qui cassaient le layout de toute la page en dessous du composant publicitaire.
+- **Inline CSS** : Suppression de tous les attributs `style="..."` dans les templates `home.html`, `password_reset.html`, et `password_reset_done.html` au profit de classes Bootstrap et CSS.
 
 ---
 
