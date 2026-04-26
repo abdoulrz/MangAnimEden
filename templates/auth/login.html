@@ -48,7 +48,7 @@
                 <div class="mb-4">
                     <div class="d-flex justify-content-between mb-2">
                         <label class="auth-label m-0">Mot de passe</label>
-                        <a href="#" class="auth-link">Oublié ?</a>
+                        <a href="{% url 'account_reset_password' %}" class="auth-link">Oublié ?</a>
                     </div>
                     <div class="auth-input-wrapper">
                         {{ form.password }}
