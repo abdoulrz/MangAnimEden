@@ -16,7 +16,8 @@ class CoreViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home.html')
 
-    def test_home_page_redirect_anonymous(self):
+    def test_home_page_status_code_anonymous(self):
         response = self.client.get(reverse('home'))
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'home.html')
 

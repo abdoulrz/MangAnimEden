@@ -12,18 +12,16 @@
 
             <!-- Navigation Links (Grouped with Brand) -->
             <div class="navbar-menu d-flex gap-4">
-                {% if request.resolver_match.view_name == 'login' or request.resolver_match.view_name == 'register' %}
-                <a href="{% url 'catalog:index' %}" class="nav-link">Catalogue</a>
-                {% else %}
                 {% with url_name=request.resolver_match.view_name %}
                 <a href="{% url 'home' %}"
                     class="nav-link {% if url_name == 'home' or url_name == 'catalog:detail' %}active{% endif %}">Accueil</a>
                 <a href="{% url 'catalog:index' %}"
                     class="nav-link {% if url_name == 'catalog:index' %}active{% endif %}">Catalogue</a>
+                {% if user.is_authenticated %}
                 <a href="{% url 'social:forum_home' %}"
                     class="nav-link {% if 'social:' in url_name %}active{% endif %}">Forum</a>
-                {% endwith %}
                 {% endif %}
+                {% endwith %}
             </div>
         </div>
 
@@ -279,7 +277,6 @@
             {% endif %}
             {% endif %}
 
-            {% if request.resolver_match.view_name != 'login' and request.resolver_match.view_name != 'register' %}
             <!-- Mobile Menu Toggle (Moved to End) -->
             <button class="navbar-toggle" id="mobileMenuToggle" aria-label="Menu">
                 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none"
@@ -289,7 +286,6 @@
                     <line x1="3" y1="18" x2="21" y2="18"></line>
                 </svg>
             </button>
-            {% endif %}
         </div>
     </div>
 </nav>

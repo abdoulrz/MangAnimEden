@@ -6,17 +6,24 @@ from users.forms import CustomUserCreationForm, CustomAuthenticationForm
 from catalog.models import Series, Chapter
 from django.core.cache import cache
 
-@login_required
 def home_view(request):
     """
     Page d'accueil avec sections principales.
-    Accessible seulement aux utilisateurs connectés.
+    Accessible aux utilisateurs connectés et anonymes.
     """
+    # Gating NSFW Content (Biological Age Logic)
+    is_admin = request.user.is_authenticated and (request.user.is_staff or request.user.is_superuser)
+    is_major = request.user.is_authenticated and request.user.birth_date and request.user.is_major
+    
+    series_qs = Series.objects.prefetch_related('genres').all()
+    if not (is_admin or is_major):
+        series_qs = series_qs.filter(nsfw=False)
+
     # Optimized fetch for homepage sections
-    latest_updates = Series.objects.prefetch_related('genres').all().order_by('-updated_at')[:3]
+    latest_updates = series_qs.order_by('-updated_at')[:3]
     
     # Use stable sorting (views/rating) instead of order_by('?') which is extremely slow on large tables
-    popular_series = Series.objects.prefetch_related('genres').all().order_by('-views_count', '-average_rating')[:3]
+    popular_series = series_qs.order_by('-views_count', '-average_rating')[:3]
     
     # Continue Reading & Stats logic
     continue_reading = None
