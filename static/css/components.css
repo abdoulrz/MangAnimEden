@@ -76,7 +76,7 @@
 /* ==================== MICRO-MOBILE (<= 360px) ==================== */
 @media (max-width: 360px) {
     .navbar-brand-text {
-        font-size: 1.1rem !important;
+        display: none !important;
     }
     .navbar-icon-btn {
         width: 34px !important;
@@ -91,6 +91,10 @@
     .navbar-toggle {
         margin-left: 2px !important;
         padding: 4px !important;
+    }
+    .navbar .btn-primary {
+        padding: 6px 12px !important;
+        font-size: 0.85rem !important;
     }
 }
 
