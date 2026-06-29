@@ -16,6 +16,8 @@ from catalog.models import Series, Chapter, Genre, Review # Added Review
 from social.models import Message, Group, Event # Added Message
 from users.models import Badge, Transaction
 from users.services import PaymentService
+from administration.services.popads import fetch_popads_dashboard_data
+from administration.services.adsterra import fetch_adsterra_dashboard_data
 
 User = get_user_model()
 logger = logging.getLogger(__name__)
@@ -45,6 +47,14 @@ class AdminDashboardView(TemplateView):
         # Recent Reviews for moderation
         context['recent_reviews'] = Review.objects.select_related('user', 'series').order_by('-created_at')[:10]
         
+        # PopAds Integration
+        popads_api_key = getattr(settings, 'POPADS_API_KEY', None)
+        context['popads_data'] = fetch_popads_dashboard_data(popads_api_key)
+        
+        # Adsterra Integration
+        adsterra_api_key = getattr(settings, 'ADSTERRA_API_KEY', None)
+        context['adsterra_data'] = fetch_adsterra_dashboard_data(adsterra_api_key)
+
         context['active_tab'] = 'dashboard'
         return context
 

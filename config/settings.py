@@ -390,7 +390,207 @@ EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='MangAnimEden <noreply@manganimeden.net>')
+# Media files (Cloudflare R2 / AWS S3)
+MEDIA_ROOT = BASE_DIR / 'media'
+
+if AWS_STORAGE_BUCKET_NAME:
+    MEDIA_URL = f'{AWS_S3_ENDPOINT_URL}/' if AWS_S3_ENDPOINT_URL else '/media/'
+    if AWS_S3_CUSTOM_DOMAIN:
+        MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+else:
+    # Always use local URL if bucket isn't configured
+    MEDIA_URL = '/media/'
+
+STORAGES = {
+    "default": {
+        # Use S3/R2 only when a bucket name is provided, otherwise fall back to local filesystem
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage"
+        if AWS_STORAGE_BUCKET_NAME
+        else "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
+    },
+}
+
+# Data Upload Settings
+DATA_UPLOAD_MAX_NUMBER_FILES = 10000  # Increased limit for bulk chapter uploads
+STORAGE_LIMIT_MB = config('STORAGE_LIMIT_MB', default=2000, cast=int)
+DATA_UPLOAD_MAX_MEMORY_SIZE = STORAGE_LIMIT_MB * 1024 * 1024
+
+# Custom User Model
+AUTH_USER_MODEL = 'users.User'
+
+# Default primary key field type
+# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+
+# Auth Redirects
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'login'
+
+# Allauth configuration
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SITE_ID = 1
+
+ACCOUNT_EMAIL_REQUIRED = True
+SOCIALACCOUNT_QUERY_EMAIL = True
+ACCOUNT_SESSION_REMEMBER = True
+
+# Allauth user model settings (Email as Username)
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https' if not DEBUG else 'http'
+
+SOCIALACCOUNT_ADAPTER = 'users.adapter.CustomSocialAccountAdapter'
+
+# Provider specific settings
+'''SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}'''
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': config('GOOGLE_CLIENT_ID', default=''),
+            'secret': config('GOOGLE_CLIENT_SECRET', default=''),
+            'key': ''
+        },
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'}
+    }
+}
+
+
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# Session settings for Serverless (Stateless Cloud Run / Render)
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = not DEBUG  # True in prod (HTTPS), False in dev (HTTP)
+CSRF_COOKIE_SECURE = not DEBUG
+
+# Extra Security Headers
+SECURE_SSL_REDIRECT = not DEBUG  # Force HTTPS in Prod
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# Versioning for cache busting 
+STATIC_VERSION = '2.10.71'
+
+# Admin bootstrap via secret passphrase on registration
+ADMIN_BOOTSTRAP_PASSPHRASE = config('ADMIN_BOOTSTRAP_PASSPHRASE', default='Nefe')
+ADMIN_BOOTSTRAP_MAX = 5  # Max number of admin accounts that can be created this way
+
+# ==================== PAYMENT GATEWAY CONFIGURATION ====================
+# FedaPay (CFA / Afrique de l'Ouest)
+FEDAPAY_SECRET_KEY = config('FEDAPAY_SECRET_KEY', default='')
+FEDAPAY_WEBHOOK_SECRET = config('FEDAPAY_WEBHOOK_SECRET', default='')
+FEDAPAY_ENV = config('FEDAPAY_ENV', default='sandbox')  # 'sandbox' ou 'live'
+FEDAPAY_CALLBACK_URL = config('FEDAPAY_CALLBACK_URL', default='http://localhost:8000/users/payment/callback/')
+
+# Stripe (International - USD/EUR)
+STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
+STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
+
+# --- Celery Configuration ---
+CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 min hard limit per task
+CELERY_TASK_SOFT_TIME_LIMIT = 25 * 60  # 25 min soft limit (raises SoftTimeLimitExceeded)
+# Graceful fallback: if Celery/Redis unavailable, tasks run synchronously
+CELERY_TASK_ALWAYS_EAGER = config('CELERY_TASK_ALWAYS_EAGER', default='True', cast=bool)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
+
+# Firebase Configuration
+FIREBASE_CONFIG = {
+    "apiKey": "AIzaSyAW1KvY2jf4yVvD0-frmYeVBuvA23nyqYI",
+    "authDomain": "manganimeden-374d1.firebaseapp.com",
+    "projectId": "manganimeden-374d1",
+    "storageBucket": "manganimeden-374d1.firebasestorage.app",
+    "messagingSenderId": "173234261867",
+    "appId": "1:173234261867:web:18e844c8608ef67df2c62e",
+    "measurementId": "G-ZJ9WN24N76"
+}
+
+# --- Email & SMTP Configuration ---
+# Uses SMTP if EMAIL_HOST is defined, otherwise drops to console backend for local dev.
+if config('EMAIL_HOST', default=''):
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = config('EMAIL_HOST')
+    EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+    EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+    EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+    EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='MangaAnimEden <noreply@manganimeden.net>')
+# For error reporting to admins
+SERVER_EMAIL = DEFAULT_FROM_EMAIL
+
+# EMAIL CONFIGURATION (ZOHO SMTP via .env)
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtppro.zoho.eu')
+EMAIL_PORT = config('EMAIL_PORT', default=465, cast=int)
+EMAIL_USE_SSL = config('EMAIL_USE_SSL', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='MangAnimEden <noreply@manganimeden.net>')
 
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
 
 ACCOUNT_ADAPTER = 'users.adapter.CustomAccountAdapter'
+
+# PopAds Analytics
+POPADS_API_KEY = config('POPADS_API_KEY', default='41da894725527bb694598609982e10307eaf4527')
+
+# Adsterra Analytics
+ADSTERRA_API_KEY = config('ADSTERRA_API_KEY', default='66f065cc8c9364c0c24a3abec16126d2')

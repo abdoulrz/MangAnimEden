@@ -42,6 +42,76 @@
     </div>
 </div>
 
+<!-- Unified Ad Networks Dashboard -->
+<div class="admin-tabs-container mt-4 mb-4">
+    <div class="pane-header">
+        <h2><i class="fas fa-chart-line" style="color: #4ade80;"></i> Analytics Publicitaires</h2>
+        <p>Statistiques des revenus PopAds & Adsterra (Mis à jour toutes les 15 min)</p>
+    </div>
+    
+    <div class="admin-tabs-header mb-4">
+        <button class="tab-trigger ad-tab-trigger active" data-ad-tab="ad-overview">
+            <i class="fas fa-globe"></i> Vue d'ensemble
+        </button>
+        <button class="tab-trigger ad-tab-trigger" data-ad-tab="ad-popads">
+            <i class="fas fa-bolt"></i> PopAds
+        </button>
+        <button class="tab-trigger ad-tab-trigger" data-ad-tab="ad-adsterra">
+            <i class="fas fa-ad"></i> Adsterra
+        </button>
+    </div>
+
+    <!-- Ad Overview Tab -->
+    <div class="tab-pane ad-tab-pane active" id="ad-overview">
+        <div class="metrics-grid">
+            <div class="metric-card" style="border-left: 4px solid #3b82f6;">
+                <h3 class="metric-title">PopAds Balance</h3>
+                <p class="metric-value" style="color: #3b82f6;">${{ popads_data.balance|default:"0.00"|floatformat:2 }}</p>
+            </div>
+            <div class="metric-card" style="border-left: 4px solid #8b5cf6;">
+                <h3 class="metric-title">Adsterra Revenus (7j)</h3>
+                <p class="metric-value" style="color: #8b5cf6;">${{ adsterra_data.total_revenue|default:"0.00"|floatformat:2 }}</p>
+            </div>
+            <div class="metric-card" style="border-left: 4px solid #10b981;">
+                <h3 class="metric-title">Adsterra Impressions (7j)</h3>
+                <p class="metric-value" style="color: #10b981;">{{ adsterra_data.total_impressions|default:"0" }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- PopAds Tab -->
+    <div class="tab-pane ad-tab-pane" id="ad-popads">
+        <div class="metric-card mb-4" style="padding: 20px;">
+            <h3 class="metric-title mb-3">PopAds Revenus (Derniers jours)</h3>
+            <div style="position: relative; height: 300px; width: 100%;">
+                {% if popads_data and popads_data.chart_labels %}
+                <canvas id="popadsChart"></canvas>
+                {% else %}
+                <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: var(--text-muted, #888);">
+                    Aucune donnée récente générée par PopAds.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Adsterra Tab -->
+    <div class="tab-pane ad-tab-pane" id="ad-adsterra">
+        <div class="metric-card mb-4" style="padding: 20px;">
+            <h3 class="metric-title mb-3">Adsterra Revenus & Impressions (Derniers jours)</h3>
+            <div style="position: relative; height: 300px; width: 100%;">
+                {% if adsterra_data and adsterra_data.chart_labels %}
+                <canvas id="adsterraChart"></canvas>
+                {% else %}
+                <div style="display: flex; justify-content: center; align-items: center; height: 100%; color: var(--text-muted, #888);">
+                    Aucune donnée récente générée par Adsterra.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Premium Tabs System -->
 <div class="admin-tabs-container">
     <div class="admin-tabs-header">
@@ -240,12 +310,13 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const triggers = document.querySelectorAll('.tab-trigger');
-        const panes = document.querySelectorAll('.tab-pane');
+        const triggers = document.querySelectorAll('.tab-trigger[data-tab]');
+        const panes = document.querySelectorAll('.tab-pane:not(.ad-tab-pane)');
 
         triggers.forEach(trigger => {
             trigger.addEventListener('click', function() {
                 const tabId = this.getAttribute('data-tab');
+                if (!tabId) return;
                 
                 // Reset
                 triggers.forEach(t => t.classList.remove('active'));
@@ -393,4 +464,102 @@
     .metric-subtitle.danger { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
     .metric-subtitle.info { background: rgba(59, 130, 246, 0.1); color: #60a5fa; }
 </style>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab Switching Logic for Ad Networks
+    const adTabTriggers = document.querySelectorAll('.ad-tab-trigger');
+    const adTabPanes = document.querySelectorAll('.ad-tab-pane');
+    
+    adTabTriggers.forEach(trigger => {
+        trigger.addEventListener('click', () => {
+            // Remove active from all
+            adTabTriggers.forEach(t => t.classList.remove('active'));
+            adTabPanes.forEach(p => p.classList.remove('active'));
+            
+            // Add active to current
+            trigger.classList.add('active');
+            const tabId = trigger.getAttribute('data-ad-tab');
+            document.getElementById(tabId).classList.add('active');
+        });
+    });
+
+    // Chart shared options (theme agnostic greys)
+    const commonScales = {
+        y: { beginAtZero: true, grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: 'rgba(128,128,128,0.8)' } },
+        x: { grid: { display: false }, ticks: { color: 'rgba(128,128,128,0.8)' } }
+    };
+
+    // PopAds Chart
+    {% if popads_data and popads_data.chart_labels %}
+    const popCtx = document.getElementById('popadsChart');
+    if (popCtx) {
+        new Chart(popCtx, {
+            type: 'line',
+            data: {
+                labels: {{ popads_data.chart_labels|safe }},
+                datasets: [{
+                    label: 'Revenus (USD)',
+                    data: {{ popads_data.chart_data|safe }},
+                    borderColor: '#84cc16',
+                    backgroundColor: 'rgba(132, 204, 22, 0.1)',
+                    borderWidth: 2, tension: 0.3, fill: true, pointBackgroundColor: '#84cc16'
+                }]
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: commonScales }
+        });
+    }
+    {% endif %}
+
+    // Adsterra Chart
+    {% if adsterra_data and adsterra_data.chart_labels %}
+    const adsCtx = document.getElementById('adsterraChart');
+    if (adsCtx) {
+        new Chart(adsCtx, {
+            type: 'bar',
+            data: {
+                labels: {{ adsterra_data.chart_labels|safe }},
+                datasets: [
+                    {
+                        type: 'line',
+                        label: 'Revenus (USD)',
+                        data: {{ adsterra_data.chart_data_revenue|safe }},
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 2, tension: 0.3, fill: true, pointBackgroundColor: '#8b5cf6',
+                        yAxisID: 'y'
+                    },
+                    {
+                        type: 'bar',
+                        label: 'Impressions',
+                        data: {{ adsterra_data.chart_data_impressions|safe }},
+                        backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                        borderColor: '#10b981',
+                        borderWidth: 1,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false, 
+                plugins: { legend: { display: true, labels: { color: 'rgba(128,128,128,0.8)'} } }, 
+                scales: {
+                    x: commonScales.x,
+                    y: {
+                        type: 'linear', display: true, position: 'left',
+                        grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: 'rgba(128,128,128,0.8)' }
+                    },
+                    y1: {
+                        type: 'linear', display: true, position: 'right',
+                        grid: { drawOnChartArea: false }, ticks: { color: 'rgba(128,128,128,0.8)' }
+                    }
+                } 
+            }
+        });
+    }
+    {% endif %}
+});
+</script>
 {% endblock %}
