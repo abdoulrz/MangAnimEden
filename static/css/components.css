@@ -73,8 +73,8 @@
     font-weight: 900;
 }
 
-/* ==================== MICRO-MOBILE (<= 360px) ==================== */
-@media (max-width: 360px) {
+/* ==================== MICRO-MOBILE (<= 420px) ==================== */
+@media (max-width: 420px) {
     .navbar-brand-text {
         display: none !important;
     }
